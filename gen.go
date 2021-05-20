@@ -48,13 +48,14 @@ func accumulateBasicTypes(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnBytes("Bytes"))
 
 	ts.Accumulate(schema.SpawnBytes("BigInt"))
-	ts.Accumulate(schema.SpawnInt("Uint"))
+	ts.Accumulate(schema.SpawnBytes("Uint"))
 	ts.Accumulate(schema.SpawnBytes("BlockNonce"))
 	ts.Accumulate(schema.SpawnBytes("Hash"))
 	ts.Accumulate(schema.SpawnBytes("Address"))
 	ts.Accumulate(schema.SpawnBytes("Bloom"))
 	ts.Accumulate(schema.SpawnBytes("Balance"))
 	ts.Accumulate(schema.SpawnBytes("OpCode"))
+	ts.Accumulate(schema.SpawnBytes("Time"))
 }
 
 func accumulateChainTypes(ts *schema.TypeSystem) {
@@ -90,7 +91,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			schema.SpawnStructField("Number", "BigInt", false, false),
 			schema.SpawnStructField("GasLimit", "Uint", false, false),
 			schema.SpawnStructField("GasUsed", "Uint", false, false),
-			schema.SpawnStructField("Time", "Uint", false, false),
+			schema.SpawnStructField("Time", "Time", false, false),
 			schema.SpawnStructField("Extra", "Bytes", false, false),
 			schema.SpawnStructField("MixDigest", "Hash", false, false),
 			schema.SpawnStructField("Nonce", "BlockNonce", false, false),
@@ -177,7 +178,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		[]schema.StructField{
 			schema.SpawnStructField("Address", "Address", false, false),
 			schema.SpawnStructField("Topics", "Topics", false, false),
-			schema.SpawnStructField("Address", "Bytes", false, false),
+			schema.SpawnStructField("Data", "Bytes", false, false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))

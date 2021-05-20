@@ -37,8 +37,8 @@ func main() {
 	}
 
 	// generate the code
-	adjCgf := &gengo.AdjunctCfg{}
-	gengo.Generate(".", pkgName, ts, adjCfg)
+	adjCfg := &gengo.AdjunctCfg{}
+	gengo.Generate(".", pkgName, *ts, adjCfg)
 }
 
 func accumulateBasicTypes(ts *schema.TypeSystem) {
@@ -100,7 +100,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 
 	/*
 		type Uncles [Header]
-	 */
+	*/
 	ts.Accumulate(schema.SpawnList("Uncles", "Header", false))
 
 	/*
@@ -128,7 +128,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			R            BigInt
 			S            BigInt
 		}
-	 */
+	*/
 	ts.Accumulate(schema.SpawnList("StorageKeys", "Hash", false))
 	ts.Accumulate(schema.SpawnStruct("AccessElement",
 		[]schema.StructField{
@@ -137,11 +137,11 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
-	ts.Accumulate(schema.SpawnList("AccessList", "AccessElement", false, false))
+	ts.Accumulate(schema.SpawnList("AccessList", "AccessElement", false))
 	ts.Accumulate(schema.SpawnStruct("Transaction",
 		[]schema.StructField{
 			schema.SpawnStructField("ChainID", "BigInt", false, true),
-			schema.SpawnStructField("AccountNonce", "Unt", false, false),
+			schema.SpawnStructField("AccountNonce", "Uint", false, false),
 			schema.SpawnStructField("GasPrice", "BigInt", false, false),
 			schema.SpawnStructField("GasLimit", "Uint", false, false),
 			schema.SpawnStructField("Recipient", "Address", false, true),
@@ -171,7 +171,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			Bloom             Bloom
 			Logs              Logs
 		}
-	 */
+	*/
 	ts.Accumulate(schema.SpawnList("Topics", "Hash", false))
 	ts.Accumulate(schema.SpawnStruct("Log",
 		[]schema.StructField{
@@ -181,7 +181,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
-	ts.Accumulate(schema.SpawnList("Logs", "Log", false, false))
+	ts.Accumulate(schema.SpawnList("Logs", "Log", false))
 	ts.Accumulate(schema.SpawnStruct("Receipt",
 		[]schema.StructField{
 			schema.SpawnStructField("PostStateOrStatus", "Bytes", false, false),
@@ -287,10 +287,10 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 			"TrieValueNode",
 		},
 		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
-			"branch": "TrieBranchNode",
+			"branch":    "TrieBranchNode",
 			"extension": "TrieExtensionNode",
-			"leaf": "TrieLeafNode",
-			"value": "TrieValueNode",
+			"leaf":      "TrieLeafNode",
+			"value":     "TrieValueNode",
 		}),
 	))
 
@@ -317,5 +317,5 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 }
 
 func accumulateConvenienceTypes(ts *schema.TypeSystem) {
-
+	// TODO: write convenience types
 }

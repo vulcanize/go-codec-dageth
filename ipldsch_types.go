@@ -5,7 +5,6 @@ package dageth
 import (
 	ipld "github.com/ipld/go-ipld-prime"
 )
-
 var _ ipld.Node = nil // suppress errors when this dependency is not referenced
 // Type is a struct embeding a NodePrototype/Type for every Node implementation in this package.
 // One of its major uses is to start the construction of a value.
@@ -20,66 +19,66 @@ var _ ipld.Node = nil // suppress errors when this dependency is not referenced
 var Type typeSlab
 
 type typeSlab struct {
-	AccessElement           _AccessElement__Prototype
-	AccessElement__Repr     _AccessElement__ReprPrototype
-	AccessList              _AccessList__Prototype
-	AccessList__Repr        _AccessList__ReprPrototype
-	Address                 _Address__Prototype
-	Address__Repr           _Address__ReprPrototype
-	Balance                 _Balance__Prototype
-	Balance__Repr           _Balance__ReprPrototype
-	BigInt                  _BigInt__Prototype
-	BigInt__Repr            _BigInt__ReprPrototype
-	BlockNonce              _BlockNonce__Prototype
-	BlockNonce__Repr        _BlockNonce__ReprPrototype
-	Bloom                   _Bloom__Prototype
-	Bloom__Repr             _Bloom__ReprPrototype
-	ByteCode                _ByteCode__Prototype
-	ByteCode__Repr          _ByteCode__ReprPrototype
-	Bytes                   _Bytes__Prototype
-	Bytes__Repr             _Bytes__ReprPrototype
-	Hash                    _Hash__Prototype
-	Hash__Repr              _Hash__ReprPrototype
-	Header                  _Header__Prototype
-	Header__Repr            _Header__ReprPrototype
-	Int                     _Int__Prototype
-	Int__Repr               _Int__ReprPrototype
-	Link                    _Link__Prototype
-	Link__Repr              _Link__ReprPrototype
-	Log                     _Log__Prototype
-	Log__Repr               _Log__ReprPrototype
-	Logs                    _Logs__Prototype
-	Logs__Repr              _Logs__ReprPrototype
-	OpCode                  _OpCode__Prototype
-	OpCode__Repr            _OpCode__ReprPrototype
-	Receipt                 _Receipt__Prototype
-	Receipt__Repr           _Receipt__ReprPrototype
-	StateAccount            _StateAccount__Prototype
-	StateAccount__Repr      _StateAccount__ReprPrototype
-	StorageKeys             _StorageKeys__Prototype
-	StorageKeys__Repr       _StorageKeys__ReprPrototype
-	String                  _String__Prototype
-	String__Repr            _String__ReprPrototype
-	Time                    _Time__Prototype
-	Time__Repr              _Time__ReprPrototype
-	Topics                  _Topics__Prototype
-	Topics__Repr            _Topics__ReprPrototype
-	Transaction             _Transaction__Prototype
-	Transaction__Repr       _Transaction__ReprPrototype
-	TrieBranchNode          _TrieBranchNode__Prototype
-	TrieBranchNode__Repr    _TrieBranchNode__ReprPrototype
+	AccessElement       _AccessElement__Prototype
+	AccessElement__Repr _AccessElement__ReprPrototype
+	AccessList       _AccessList__Prototype
+	AccessList__Repr _AccessList__ReprPrototype
+	Address       _Address__Prototype
+	Address__Repr _Address__ReprPrototype
+	Balance       _Balance__Prototype
+	Balance__Repr _Balance__ReprPrototype
+	BigInt       _BigInt__Prototype
+	BigInt__Repr _BigInt__ReprPrototype
+	BlockNonce       _BlockNonce__Prototype
+	BlockNonce__Repr _BlockNonce__ReprPrototype
+	Bloom       _Bloom__Prototype
+	Bloom__Repr _Bloom__ReprPrototype
+	ByteCode       _ByteCode__Prototype
+	ByteCode__Repr _ByteCode__ReprPrototype
+	Bytes       _Bytes__Prototype
+	Bytes__Repr _Bytes__ReprPrototype
+	Hash       _Hash__Prototype
+	Hash__Repr _Hash__ReprPrototype
+	Header       _Header__Prototype
+	Header__Repr _Header__ReprPrototype
+	Int       _Int__Prototype
+	Int__Repr _Int__ReprPrototype
+	Link       _Link__Prototype
+	Link__Repr _Link__ReprPrototype
+	Log       _Log__Prototype
+	Log__Repr _Log__ReprPrototype
+	Logs       _Logs__Prototype
+	Logs__Repr _Logs__ReprPrototype
+	OpCode       _OpCode__Prototype
+	OpCode__Repr _OpCode__ReprPrototype
+	Receipt       _Receipt__Prototype
+	Receipt__Repr _Receipt__ReprPrototype
+	StateAccount       _StateAccount__Prototype
+	StateAccount__Repr _StateAccount__ReprPrototype
+	StorageKeys       _StorageKeys__Prototype
+	StorageKeys__Repr _StorageKeys__ReprPrototype
+	String       _String__Prototype
+	String__Repr _String__ReprPrototype
+	Time       _Time__Prototype
+	Time__Repr _Time__ReprPrototype
+	Topics       _Topics__Prototype
+	Topics__Repr _Topics__ReprPrototype
+	Transaction       _Transaction__Prototype
+	Transaction__Repr _Transaction__ReprPrototype
+	TrieBranchNode       _TrieBranchNode__Prototype
+	TrieBranchNode__Repr _TrieBranchNode__ReprPrototype
 	TrieExtensionNode       _TrieExtensionNode__Prototype
 	TrieExtensionNode__Repr _TrieExtensionNode__ReprPrototype
-	TrieLeafNode            _TrieLeafNode__Prototype
-	TrieLeafNode__Repr      _TrieLeafNode__ReprPrototype
-	TrieNode                _TrieNode__Prototype
-	TrieNode__Repr          _TrieNode__ReprPrototype
-	TrieValueNode           _TrieValueNode__Prototype
-	TrieValueNode__Repr     _TrieValueNode__ReprPrototype
-	Uint                    _Uint__Prototype
-	Uint__Repr              _Uint__ReprPrototype
-	Uncles                  _Uncles__Prototype
-	Uncles__Repr            _Uncles__ReprPrototype
+	TrieLeafNode       _TrieLeafNode__Prototype
+	TrieLeafNode__Repr _TrieLeafNode__ReprPrototype
+	TrieNode       _TrieNode__Prototype
+	TrieNode__Repr _TrieNode__ReprPrototype
+	TrieValueNode       _TrieValueNode__Prototype
+	TrieValueNode__Repr _TrieValueNode__ReprPrototype
+	Uint       _Uint__Prototype
+	Uint__Repr _Uint__ReprPrototype
+	Uncles       _Uncles__Prototype
+	Uncles__Repr _Uncles__ReprPrototype
 }
 
 // --- type definitions follow ---
@@ -87,7 +86,7 @@ type typeSlab struct {
 // AccessElement matches the IPLD Schema type "AccessElement".  It has Struct type-kind, and may be interrogated like map kind.
 type AccessElement = *_AccessElement
 type _AccessElement struct {
-	Address     _Address
+	Address _Address
 	StorageKeys _StorageKeys
 }
 
@@ -132,21 +131,21 @@ type _Hash struct{ x []byte }
 // Header matches the IPLD Schema type "Header".  It has Struct type-kind, and may be interrogated like map kind.
 type Header = *_Header
 type _Header struct {
-	ParentCID    _Link
-	UnclesCID    _Link
-	Coinbase     _Address
+	ParentCID _Link
+	UnclesCID _Link
+	Coinbase _Address
 	StateRootCID _Link
-	TxRootCID    _Link
-	RctRootCID   _Link
-	Bloom        _Bloom
-	Difficulty   _BigInt
-	Number       _BigInt
-	GasLimit     _Uint
-	GasUsed      _Uint
-	Time         _Time
-	Extra        _Bytes
-	MixDigest    _Hash
-	Nonce        _BlockNonce
+	TxRootCID _Link
+	RctRootCID _Link
+	Bloom _Bloom
+	Difficulty _BigInt
+	Number _BigInt
+	GasLimit _Uint
+	GasUsed _Uint
+	Time _Time
+	Extra _Bytes
+	MixDigest _Hash
+	Nonce _BlockNonce
 }
 
 // Int matches the IPLD Schema type "Int".  It has int kind.
@@ -161,8 +160,8 @@ type _Link struct{ x ipld.Link }
 type Log = *_Log
 type _Log struct {
 	Address _Address
-	Topics  _Topics
-	Data    _Bytes
+	Topics _Topics
+	Data _Bytes
 }
 
 // Logs matches the IPLD Schema type "Logs".  It has list kind.
@@ -180,17 +179,17 @@ type Receipt = *_Receipt
 type _Receipt struct {
 	PostStateOrStatus _Bytes
 	CumulativeGasUsed _Uint
-	Bloom             _Bloom
-	Logs              _Logs
+	Bloom _Bloom
+	Logs _Logs
 }
 
 // StateAccount matches the IPLD Schema type "StateAccount".  It has Struct type-kind, and may be interrogated like map kind.
 type StateAccount = *_StateAccount
 type _StateAccount struct {
-	Nonce          _Uint
-	Balance        _Balance
+	Nonce _Uint
+	Balance _Balance
 	StorageRootCID _Link
-	CodeCID        _Link
+	CodeCID _Link
 }
 
 // StorageKeys matches the IPLD Schema type "StorageKeys".  It has list kind.
@@ -216,17 +215,17 @@ type _Topics struct {
 // Transaction matches the IPLD Schema type "Transaction".  It has Struct type-kind, and may be interrogated like map kind.
 type Transaction = *_Transaction
 type _Transaction struct {
-	ChainID      _BigInt__Maybe
+	ChainID _BigInt__Maybe
 	AccountNonce _Uint
-	GasPrice     _BigInt
-	GasLimit     _Uint
-	Recipient    _Address__Maybe
-	Amount       _BigInt
-	Data         _Bytes
-	AccessList   _AccessList__Maybe
-	V            _BigInt
-	R            _BigInt
-	S            _BigInt
+	GasPrice _BigInt
+	GasLimit _Uint
+	Recipient _Address__Maybe
+	Amount _BigInt
+	Data _Bytes
+	AccessList _AccessList__Maybe
+	V _BigInt
+	R _BigInt
+	S _BigInt
 }
 
 // TrieBranchNode matches the IPLD Schema type "TrieBranchNode".  It has Struct type-kind, and may be interrogated like map kind.
@@ -248,21 +247,21 @@ type _TrieBranchNode struct {
 	ChildD _Link__Maybe
 	ChildE _Link__Maybe
 	ChildF _Link__Maybe
-	Value  _Bytes
+	Value _Bytes
 }
 
 // TrieExtensionNode matches the IPLD Schema type "TrieExtensionNode".  It has Struct type-kind, and may be interrogated like map kind.
 type TrieExtensionNode = *_TrieExtensionNode
 type _TrieExtensionNode struct {
 	PartialPath _Bytes
-	ChildNode   _Link
+	ChildNode _Link
 }
 
 // TrieLeafNode matches the IPLD Schema type "TrieLeafNode".  It has Struct type-kind, and may be interrogated like map kind.
 type TrieLeafNode = *_TrieLeafNode
 type _TrieLeafNode struct {
 	PartialPath _Bytes
-	Value       _Bytes
+	Value _Bytes
 }
 
 // TrieNode matches the IPLD Schema type "TrieNode".
@@ -270,19 +269,18 @@ type _TrieLeafNode struct {
 type TrieNode = *_TrieNode
 type _TrieNode struct {
 	tag uint
-	x1  _TrieBranchNode
-	x2  _TrieExtensionNode
-	x3  _TrieLeafNode
-	x4  _TrieValueNode
+	x1 _TrieBranchNode
+	x2 _TrieExtensionNode
+	x3 _TrieLeafNode
+	x4 _TrieValueNode
 }
 type _TrieNode__iface interface {
 	_TrieNode__member()
 }
-
-func (_TrieBranchNode) _TrieNode__member()    {}
+func (_TrieBranchNode) _TrieNode__member() {}
 func (_TrieExtensionNode) _TrieNode__member() {}
-func (_TrieLeafNode) _TrieNode__member()      {}
-func (_TrieValueNode) _TrieNode__member()     {}
+func (_TrieLeafNode) _TrieNode__member() {}
+func (_TrieValueNode) _TrieNode__member() {}
 
 // TrieValueNode matches the IPLD Schema type "TrieValueNode".  It has Struct type-kind, and may be interrogated like map kind.
 type TrieValueNode = *_TrieValueNode
@@ -299,3 +297,4 @@ type Uncles = *_Uncles
 type _Uncles struct {
 	x []_Header
 }
+

@@ -43,7 +43,7 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	}
 	node := builder.Build()
 	header := new(types.Header)
-	for _, pFunc := range requiredPackFuncs {
+	for _, pFunc := range RequiredPackFuncs {
 		if err := pFunc(header, node); err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Header form (%v)", err)
 		}
@@ -62,7 +62,7 @@ func (w *writeableByteSlice) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
-var requiredPackFuncs = []func(*types.Header, ipld.Node) error{
+var RequiredPackFuncs = []func(*types.Header, ipld.Node) error{
 	packParentCID,
 	packUnclesCID,
 	packCoinbase,

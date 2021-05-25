@@ -6,6 +6,8 @@ import (
 	"io"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/rlp"
+
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/ethereum/go-ethereum/core/types"
@@ -14,7 +16,7 @@ import (
 	dageth "github.com/vulcanize/go-codec-dageth"
 )
 
-// Encode provides an IPLD codec encode interface for eth header IPLDs.
+// Encode provides an IPLD codec encode interface for eth transaction IPLDs.
 // This function is registered via the go-ipld-prime link loader for multicodec
 // code 0x93 when this package is invoked via init.
 func Encode(node ipld.Node, w io.Writer) error {
@@ -44,47 +46,57 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	if err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 	}
-	var tx *types.Transaction
+	wbs := writeableByteSlice(enc)
 	switch txType {
 	case types.LegacyTxType:
-		tx, err = packLegacyTx(node)
+		tx, err := packLegacyTx(node)
 		if err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
+		if err := rlp.Encode(&wbs, tx); err != nil {
+			return enc, fmt.Errorf("invalid DAG-ETH transaction form (%v)", err)
+		}
+		return wbs, nil
 	case types.AccessListTxType:
-		tx, err = packAccessListTx(node)
+		tx, err := packAccessListTx(node)
 		if err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
+		wbs = append(wbs, txType)
+		if err := rlp.Encode(&wbs, tx); err != nil {
+			return enc, fmt.Errorf("invalid DAG-ETH transaction form (%v)", err)
+		}
+		return wbs, nil
 	default:
-		return enc, fmt.Errorf("invalid DAG-ETH Transaction form (unrecognized TxType %d)", txType)
+		return wbs, fmt.Errorf("invalid DAG-ETH Transaction form (unrecognized TxType %d)", txType)
 	}
-	encodedTx, err := tx.MarshalBinary()
-	if err != nil {
-		return enc, fmt.Errorf("invalid DAG-ETH Transaction form (unable to binary marshal transaction: %v)", err)
-	}
-	enc = encodedTx
-	return enc, nil
 }
 
-func packLegacyTx(node ipld.Node) (*types.Transaction, error) {
+type writeableByteSlice []byte
+
+func (w *writeableByteSlice) Write(b []byte) (int, error) {
+	*w = append(*w, b...)
+	return len(b), nil
+}
+
+func packLegacyTx(node ipld.Node) (*types.LegacyTx, error) {
 	lTx := &types.LegacyTx{}
 	for _, pFunc := range RequiredPackFuncs {
 		if err := pFunc(lTx, node); err != nil {
 			return nil, err
 		}
 	}
-	return types.NewTx(lTx), nil
+	return lTx, nil
 }
 
-func packAccessListTx(node ipld.Node) (*types.Transaction, error) {
+func packAccessListTx(node ipld.Node) (*types.AccessListTx, error) {
 	alTx := &types.AccessListTx{}
 	for _, pFunc := range RequiredPackFuncs {
 		if err := pFunc(alTx, node); err != nil {
 			return nil, err
 		}
 	}
-	return types.NewTx(alTx), nil
+	return alTx, nil
 }
 
 var RequiredPackFuncs = []func(interface{}, ipld.Node) error{

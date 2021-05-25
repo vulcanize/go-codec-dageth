@@ -27,7 +27,7 @@ func init() {
 }
 
 // AddSupportToChooser takes an existing node prototype chooser and subs in
-// Header for the eth header multicodec code.
+// Transaction for the eth transaction multicodec code.
 func AddSupportToChooser(existing traversal.LinkTargetNodePrototypeChooser) traversal.LinkTargetNodePrototypeChooser {
 	return func(lnk ipld.Link, lnkCtx ipld.LinkContext) (ipld.NodePrototype, error) {
 		if lnk, ok := lnk.(cidlink.Link); ok && lnk.Cid.Prefix().Codec == MultiCodecType {

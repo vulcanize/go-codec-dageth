@@ -93,46 +93,34 @@ func unpackExtra(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("Extra"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(header.Extra); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignBytes(header.Extra)
 }
 
 func unpackTime(ma ipld.MapAssembler, header types.Header) error {
-	timeBytes := make([]byte, 0, 8)
+	timeBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(timeBytes, header.Time)
 	if err := ma.AssembleKey().AssignString("Time"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(timeBytes); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignBytes(timeBytes)
 }
 
 func unpackGasUsed(ma ipld.MapAssembler, header types.Header) error {
-	gasUsedBytes := make([]byte, 0, 8)
+	gasUsedBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(gasUsedBytes, header.GasUsed)
 	if err := ma.AssembleKey().AssignString("GasUsed"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(gasUsedBytes); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignBytes(gasUsedBytes)
 }
 
 func unpackGasLimit(ma ipld.MapAssembler, header types.Header) error {
-	gasLimitBytes := make([]byte, 0, 8)
+	gasLimitBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(gasLimitBytes, header.GasLimit)
 	if err := ma.AssembleKey().AssignString("GasLimit"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(gasLimitBytes); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignBytes(gasLimitBytes)
 }
 
 func unpackNumber(ma ipld.MapAssembler, header types.Header) error {
@@ -142,10 +130,7 @@ func unpackNumber(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("Number"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(header.Number.Bytes()); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignBytes(header.Number.Bytes())
 }
 
 func unpackDifficulty(ma ipld.MapAssembler, header types.Header) error {
@@ -155,20 +140,14 @@ func unpackDifficulty(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("Difficulty"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(header.Difficulty.Bytes()); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignBytes(header.Difficulty.Bytes())
 }
 
 func unpackBloom(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("Bloom"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(header.Bloom.Bytes()); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignBytes(header.Bloom.Bytes())
 }
 
 func unpackRctRootCID(ma ipld.MapAssembler, header types.Header) error {
@@ -181,10 +160,7 @@ func unpackRctRootCID(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("RctRootCID"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignLink(rctLinkCID); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignLink(rctLinkCID)
 }
 
 func unpackTxRootCID(ma ipld.MapAssembler, header types.Header) error {
@@ -197,10 +173,7 @@ func unpackTxRootCID(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("TxRootCID"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignLink(txLinkCID); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignLink(txLinkCID)
 }
 
 func unpackStateRootCID(ma ipld.MapAssembler, header types.Header) error {
@@ -213,20 +186,14 @@ func unpackStateRootCID(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("StateRootCID"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignLink(srLinkCID); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignLink(srLinkCID)
 }
 
 func unpackCoinbase(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("Coinbase"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(header.Coinbase.Bytes()); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignBytes(header.Coinbase.Bytes())
 }
 
 func unpackUnclesCID(ma ipld.MapAssembler, header types.Header) error {
@@ -239,10 +206,7 @@ func unpackUnclesCID(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("UnclesCID"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignLink(unclesLinkCID); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignLink(unclesLinkCID)
 }
 
 func unpackParentCID(ma ipld.MapAssembler, header types.Header) error {
@@ -255,8 +219,5 @@ func unpackParentCID(ma ipld.MapAssembler, header types.Header) error {
 	if err := ma.AssembleKey().AssignString("ParentCID"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignLink(parentLinkCID); err != nil {
-		return err
-	}
-	return nil
+	return ma.AssembleValue().AssignLink(parentLinkCID)
 }

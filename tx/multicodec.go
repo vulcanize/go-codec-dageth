@@ -1,4 +1,4 @@
-package dageth_uncles
+package dageth_tx
 
 import (
 	"io"
@@ -17,7 +17,7 @@ var (
 	_ ipld.Decoder = Decode
 	_ ipld.Encoder = Encode
 
-	MultiCodecType = uint64(cid.EthBlockList) // 0x91
+	MultiCodecType = uint64(cid.EthTx) // 0x93
 	MultiHashType  = uint64(multihash.KECCAK_256)
 )
 
@@ -27,11 +27,11 @@ func init() {
 }
 
 // AddSupportToChooser takes an existing node prototype chooser and subs in
-// Uncles for the eth header list multicodec code.
+// Transaction for the eth transaction multicodec code.
 func AddSupportToChooser(existing traversal.LinkTargetNodePrototypeChooser) traversal.LinkTargetNodePrototypeChooser {
 	return func(lnk ipld.Link, lnkCtx ipld.LinkContext) (ipld.NodePrototype, error) {
 		if lnk, ok := lnk.(cidlink.Link); ok && lnk.Cid.Prefix().Codec == MultiCodecType {
-			return dageth.Type.Uncles, nil
+			return dageth.Type.Transaction, nil
 		}
 		return existing(lnk, lnkCtx)
 	}

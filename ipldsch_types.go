@@ -76,6 +76,8 @@ type typeSlab struct {
 	TrieNode__Repr          _TrieNode__ReprPrototype
 	TrieValueNode           _TrieValueNode__Prototype
 	TrieValueNode__Repr     _TrieValueNode__ReprPrototype
+	TxType                  _TxType__Prototype
+	TxType__Repr            _TxType__ReprPrototype
 	Uint                    _Uint__Prototype
 	Uint__Repr              _Uint__ReprPrototype
 	Uncles                  _Uncles__Prototype
@@ -216,6 +218,7 @@ type _Topics struct {
 // Transaction matches the IPLD Schema type "Transaction".  It has Struct type-kind, and may be interrogated like map kind.
 type Transaction = *_Transaction
 type _Transaction struct {
+	Type         _TxType
 	ChainID      _BigInt__Maybe
 	AccountNonce _Uint
 	GasPrice     _BigInt
@@ -289,6 +292,10 @@ type TrieValueNode = *_TrieValueNode
 type _TrieValueNode struct {
 	Value _Bytes
 }
+
+// TxType matches the IPLD Schema type "TxType".  It has bytes kind.
+type TxType = *_TxType
+type _TxType struct{ x []byte }
 
 // Uint matches the IPLD Schema type "Uint".  It has bytes kind.
 type Uint = *_Uint

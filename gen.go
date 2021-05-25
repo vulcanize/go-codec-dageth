@@ -56,6 +56,7 @@ func accumulateBasicTypes(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnBytes("Balance"))
 	ts.Accumulate(schema.SpawnBytes("OpCode"))
 	ts.Accumulate(schema.SpawnBytes("Time"))
+	ts.Accumulate(schema.SpawnBytes("TxType"))
 }
 
 func accumulateChainTypes(ts *schema.TypeSystem) {
@@ -72,7 +73,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		    Number BigInt
 		    GasLimit Uint
 		    GasUsed Uint
-		    Time Uint
+		    Time Time
 		    Extra Bytes
 		    MixDigest Hash
 		    Nonce BlockNonce
@@ -115,6 +116,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type AccessList [AccessElement]
 
 		type Transaction struct {
+			Type         TxType
 			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 transaction
 			AccountNonce Uint
 			GasPrice     BigInt
@@ -141,6 +143,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnList("AccessList", "AccessElement", false))
 	ts.Accumulate(schema.SpawnStruct("Transaction",
 		[]schema.StructField{
+			schema.SpawnStructField("Type", "TxType", false, false),
 			schema.SpawnStructField("ChainID", "BigInt", false, true),
 			schema.SpawnStructField("AccountNonce", "Uint", false, false),
 			schema.SpawnStructField("GasPrice", "BigInt", false, false),

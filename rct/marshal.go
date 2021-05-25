@@ -1,6 +1,7 @@
 package dageth_rct
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -34,21 +35,10 @@ func Encode(node ipld.Node, w io.Writer) error {
 // This means less copying of bytes, and if the destination has enough capacity,
 // fewer allocations.
 func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
-	// Wrap in a typed node for some basic schema form checking
-	builder := dageth.Type.Receipt.NewBuilder()
-	if err := builder.AssignNode(inNode); err != nil {
-		return enc, err
-	}
-	node := builder.Build()
-	txType, err := shared.GetTxType(node)
-	if err != nil {
-		return enc, fmt.Errorf("invalid DAG-ETH Receipt form (%v)", err)
-	}
 	rct := new(receiptRLP)
-	for _, pFunc := range RequiredPackFuncs {
-		if err := pFunc(rct, node); err != nil {
-			return nil, err
-		}
+	txType, err := packReceiptRLP(rct, inNode)
+	if err != nil {
+		return enc, fmt.Errorf("unable to encode receiptRLP (%v)", err)
 	}
 	wbs := shared.WriteableByteSlice(enc)
 	switch txType {
@@ -68,9 +58,56 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	}
 }
 
+var (
+	receiptStatusFailedRLP     = []byte{}
+	receiptStatusSuccessfulRLP = []byte{0x01}
+)
+
+// EncodeReceipt packs the node into the go-ethereum Receipt
+func EncodeReceipt(receipt *types.Receipt, inNode ipld.Node) error {
+	rct := new(receiptRLP)
+	txType, err := packReceiptRLP(rct, inNode)
+	if err != nil {
+		return err
+	}
+	receipt.Type = txType
+	receipt.Bloom = rct.Bloom
+	receipt.CumulativeGasUsed = rct.CumulativeGasUsed
+	receipt.Logs = rct.Logs
+	switch {
+	case bytes.Equal(rct.PostStateOrStatus, receiptStatusSuccessfulRLP):
+		receipt.Status = types.ReceiptStatusSuccessful
+	case bytes.Equal(rct.PostStateOrStatus, receiptStatusFailedRLP):
+		receipt.Status = types.ReceiptStatusFailed
+	case len(rct.PostStateOrStatus) == len(common.Hash{}):
+		receipt.PostState = rct.PostStateOrStatus
+	default:
+		return fmt.Errorf("invalid DAG-ETH Receipt PostStateOrStatus %x", rct.PostStateOrStatus)
+	}
+	return nil
+}
+
+func packReceiptRLP(rct *receiptRLP, inNode ipld.Node) (uint8, error) {
+	// Wrap in a typed node for some basic schema form checking
+	builder := dageth.Type.Receipt.NewBuilder()
+	if err := builder.AssignNode(inNode); err != nil {
+		return 0, err
+	}
+	node := builder.Build()
+	txType, err := shared.GetTxType(node)
+	if err != nil {
+		return 0, fmt.Errorf("invalid DAG-ETH Receipt form (%v)", err)
+	}
+	for _, pFunc := range requiredPackFuncs {
+		if err := pFunc(rct, node); err != nil {
+			return 0, fmt.Errorf("invalid DAG-ETH Receipt form (%v)", err)
+		}
+	}
+	return txType, nil
+}
+
 // the consensus struct for a receipt is not an exported type from go-ethereum
 // so until types.Receipt has a MarshalBinary method we will pack and RLP encode a custom struct
-// we could pack and RLP encode an []interface{}{} but this provides more type safety/hints
 type receiptRLP struct {
 	PostStateOrStatus []byte
 	CumulativeGasUsed uint64
@@ -78,7 +115,7 @@ type receiptRLP struct {
 	Logs              []*types.Log
 }
 
-var RequiredPackFuncs = []func(*receiptRLP, ipld.Node) error{
+var requiredPackFuncs = []func(*receiptRLP, ipld.Node) error{
 	packPostStateOrStatus,
 	packCumulativeGasUsed,
 	packBloom,
@@ -86,15 +123,31 @@ var RequiredPackFuncs = []func(*receiptRLP, ipld.Node) error{
 }
 
 func packPostStateOrStatus(rct *receiptRLP, node ipld.Node) error {
-	psosNode, err := node.LookupByString("PostStateOrStatus")
+	psNode, err := node.LookupByString("PostState")
 	if err != nil {
 		return err
 	}
-	psosBytes, err := psosNode.AsBytes()
+	if !psNode.IsNull() {
+		psBytes, err := psNode.AsBytes()
+		if err != nil {
+			return err
+		}
+		rct.PostStateOrStatus = psBytes
+		return nil
+	}
+
+	sNode, err := node.LookupByString("Status")
 	if err != nil {
 		return err
 	}
-	rct.PostStateOrStatus = psosBytes
+	if sNode.IsNull() {
+		return fmt.Errorf("receipt Node must have either PostState or Status")
+	}
+	sBytes, err := sNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	rct.PostStateOrStatus = sBytes
 	return nil
 }
 

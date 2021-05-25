@@ -31,163 +31,136 @@ func Decode(na ipld.NodeAssembler, in io.Reader) error {
 // Decode will grab or read all the bytes from an io.Reader anyway, so this can
 // save having to copy the bytes or create a bytes.Buffer.
 func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
-	var tx types.Transaction
-	if err := tx.UnmarshalBinary(src); err != nil {
+	var rct types.Receipt
+	if err := rct.UnmarshalBinary(src); err != nil {
 		return err
 	}
-	ma, err := na.BeginMap(12)
+	return DecodeReceipt(na, rct)
+}
+
+// DecodeReceipt unpacks a go-ethereum Receipt into the NodeAssembler
+func DecodeReceipt(na ipld.NodeAssembler, receipt types.Receipt) error {
+	ma, err := na.BeginMap(5)
 	if err != nil {
 		return err
 	}
-	for _, upFunc := range RequiredUnpackFuncs {
-		if err := upFunc(ma, tx); err != nil {
-			return fmt.Errorf("invalid DAG-ETH Header binary (%v)", err)
+	for _, upFunc := range requiredUnpackFuncs {
+		if err := upFunc(ma, receipt); err != nil {
+			return fmt.Errorf("invalid DAG-ETH Receipt binary (%v)", err)
 		}
 	}
 	return ma.Finish()
 }
 
-var RequiredUnpackFuncs = []func(ma ipld.MapAssembler, tx types.Transaction) error{
+var requiredUnpackFuncs = []func(ipld.MapAssembler, types.Receipt) error{
 	unpackTxType,
-	unpackChainID,
-	unpackAccountNonce,
-	unpackGasPrice,
-	unpackGasLimit,
-	unpackRecipient,
-	unpackAmount,
-	unpackData,
-	unpackAccessList,
-	unpackSignatureValues,
+	unpackPostStateOrStatus,
+	unpackCumulativeGasUsed,
+	unpackBloom,
+	unpackLogs,
 }
 
-func unpackTxType(ma ipld.MapAssembler, tx types.Transaction) error {
+func unpackTxType(ma ipld.MapAssembler, rct types.Receipt) error {
 	if err := ma.AssembleKey().AssignString("Type"); err != nil {
 		return err
 	}
-	return ma.AssembleValue().AssignBytes([]byte{tx.Type()})
+	return ma.AssembleValue().AssignBytes([]byte{rct.Type})
 }
 
-func unpackChainID(ma ipld.MapAssembler, tx types.Transaction) error {
-	// We could make ChainID a required field in the schema even though legacy txs dont include it in the consensus encoding
-	if err := ma.AssembleKey().AssignString("ChainID"); err != nil {
-		return err
-	}
-	if tx.Type() == types.LegacyTxType {
+func unpackPostStateOrStatus(ma ipld.MapAssembler, rct types.Receipt) error {
+	if len(rct.PostState) > 0 {
+		if err := ma.AssembleKey().AssignString("PostState"); err != nil {
+			return err
+		}
+		if err := ma.AssembleValue().AssignBytes(rct.PostState); err != nil {
+			return err
+		}
+		if err := ma.AssembleKey().AssignString("Status"); err != nil {
+			return err
+		}
 		return ma.AssembleValue().AssignNull()
 	}
-	return ma.AssembleValue().AssignBytes(tx.ChainId().Bytes())
-}
 
-func unpackAccountNonce(ma ipld.MapAssembler, tx types.Transaction) error {
-	if err := ma.AssembleKey().AssignString("AccountNonce"); err != nil {
+	if err := ma.AssembleKey().AssignString("Status"); err != nil {
 		return err
 	}
-	nonceBytes := make([]byte, 8)
-	binary.BigEndian.PutUint64(nonceBytes, tx.Nonce())
-	return ma.AssembleValue().AssignBytes(nonceBytes)
-}
-
-func unpackGasPrice(ma ipld.MapAssembler, tx types.Transaction) error {
-	if err := ma.AssembleKey().AssignString("GasPrice"); err != nil {
+	switch rct.Status {
+	case types.ReceiptStatusFailed:
+		if err := ma.AssembleValue().AssignBytes(receiptStatusFailedRLP); err != nil {
+			return err
+		}
+	case types.ReceiptStatusSuccessful:
+		if err := ma.AssembleValue().AssignBytes(receiptStatusSuccessfulRLP); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("unrecognized Receipt Status")
+	}
+	if err := ma.AssembleKey().AssignString("PostState"); err != nil {
 		return err
 	}
-	return ma.AssembleValue().AssignBytes(tx.GasPrice().Bytes())
+	return ma.AssembleValue().AssignNull()
 }
 
-func unpackGasLimit(ma ipld.MapAssembler, tx types.Transaction) error {
-	if err := ma.AssembleKey().AssignString("GasLimit"); err != nil {
+func unpackCumulativeGasUsed(ma ipld.MapAssembler, rct types.Receipt) error {
+	cguBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(cguBytes, rct.CumulativeGasUsed)
+	if err := ma.AssembleKey().AssignString("CumulativeGasUsed"); err != nil {
 		return err
 	}
-	gasBytes := make([]byte, 8)
-	binary.BigEndian.PutUint64(gasBytes, tx.Gas())
-	return ma.AssembleValue().AssignBytes(gasBytes)
+	return ma.AssembleValue().AssignBytes(cguBytes)
 }
 
-func unpackRecipient(ma ipld.MapAssembler, tx types.Transaction) error {
-	if err := ma.AssembleKey().AssignString("Recipient"); err != nil {
+func unpackBloom(ma ipld.MapAssembler, rct types.Receipt) error {
+	if err := ma.AssembleKey().AssignString("Bloom"); err != nil {
 		return err
 	}
-	if tx.To() == nil {
-		return ma.AssembleValue().AssignNull()
-	}
-	return ma.AssembleValue().AssignBytes(tx.To().Bytes())
+	return ma.AssembleValue().AssignBytes(rct.Bloom.Bytes())
 }
 
-func unpackAmount(ma ipld.MapAssembler, tx types.Transaction) error {
-	if err := ma.AssembleKey().AssignString("Amount"); err != nil {
+func unpackLogs(ma ipld.MapAssembler, rct types.Receipt) error {
+	if err := ma.AssembleKey().AssignString("Logs"); err != nil {
 		return err
 	}
-	return ma.AssembleValue().AssignBytes(tx.Value().Bytes())
-}
-
-func unpackData(ma ipld.MapAssembler, tx types.Transaction) error {
-	if err := ma.AssembleKey().AssignString("Data"); err != nil {
-		return err
-	}
-	return ma.AssembleValue().AssignBytes(tx.Data())
-}
-
-func unpackAccessList(ma ipld.MapAssembler, tx types.Transaction) error {
-	if err := ma.AssembleKey().AssignString("AccessList"); err != nil {
-		return err
-	}
-	if tx.Type() == types.LegacyTxType {
-		return ma.AssembleValue().AssignNull()
-	}
-	accessList, err := ma.AssembleValue().BeginList(int64(len(tx.AccessList())))
+	la, err := ma.AssembleValue().BeginList(int64(len(rct.Logs)))
 	if err != nil {
 		return err
 	}
-	for _, accessElement := range tx.AccessList() {
-		// node := dageth.Type.AccessElement.NewBuilder()
-		accessElementMap, err := accessList.AssembleValue().BeginMap(2)
+	for _, log := range rct.Logs {
+		logMa, err := la.AssembleValue().BeginMap(3)
 		if err != nil {
 			return err
 		}
-		if err := accessElementMap.AssembleKey().AssignString("Address"); err != nil {
+		if err := logMa.AssembleKey().AssignString("Address"); err != nil {
 			return err
 		}
-		if err := accessElementMap.AssembleValue().AssignBytes(accessElement.Address.Bytes()); err != nil {
+		if err := logMa.AssembleValue().AssignBytes(log.Address.Bytes()); err != nil {
 			return err
 		}
-		if err := accessElementMap.AssembleKey().AssignString("StorageKeys"); err != nil {
+		if err := logMa.AssembleKey().AssignString("Data"); err != nil {
 			return err
 		}
-		storageKeyList, err := accessElementMap.AssembleValue().BeginList(int64(len(accessElement.StorageKeys)))
+		if err := logMa.AssembleValue().AssignBytes(log.Data); err != nil {
+			return err
+		}
+		if err := logMa.AssembleKey().AssignString("Topics"); err != nil {
+			return err
+		}
+		topicsLa, err := logMa.AssembleValue().BeginList(int64(len(log.Topics)))
 		if err != nil {
 			return err
 		}
-		for _, storageKey := range accessElement.StorageKeys {
-			if err := storageKeyList.AssembleValue().AssignBytes(storageKey.Bytes()); err != nil {
+		for _, topic := range log.Topics {
+			if err := topicsLa.AssembleValue().AssignBytes(topic.Bytes()); err != nil {
 				return err
 			}
 		}
-		if err := storageKeyList.Finish(); err != nil {
+		if err := topicsLa.Finish(); err != nil {
 			return err
 		}
-		if err := accessElementMap.Finish(); err != nil {
+		if err := logMa.Finish(); err != nil {
 			return err
 		}
 	}
-	return accessList.Finish()
-}
-
-func unpackSignatureValues(ma ipld.MapAssembler, tx types.Transaction) error {
-	v, r, s := tx.RawSignatureValues()
-	if err := ma.AssembleKey().AssignString("R"); err != nil {
-		return err
-	}
-	if err := ma.AssembleValue().AssignBytes(r.Bytes()); err != nil {
-		return err
-	}
-	if err := ma.AssembleKey().AssignString("S"); err != nil {
-		return err
-	}
-	if err := ma.AssembleValue().AssignBytes(s.Bytes()); err != nil {
-		return err
-	}
-	if err := ma.AssembleKey().AssignString("V"); err != nil {
-		return err
-	}
-	return ma.AssembleValue().AssignBytes(v.Bytes())
+	return la.Finish()
 }

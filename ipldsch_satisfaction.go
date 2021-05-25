@@ -7569,6 +7569,9 @@ var _ ipld.Node = &_OpCode__Repr{}
 type _OpCode__ReprPrototype = _OpCode__Prototype
 type _OpCode__ReprAssembler = _OpCode__Assembler
 
+func (n _Receipt) FieldType() TxType {
+	return &n.Type
+}
 func (n _Receipt) FieldPostStateOrStatus() Bytes {
 	return &n.PostStateOrStatus
 }
@@ -7617,6 +7620,7 @@ func (m MaybeReceipt) Must() Receipt {
 }
 
 var (
+	fieldName__Receipt_Type              = _String{"Type"}
 	fieldName__Receipt_PostStateOrStatus = _String{"PostStateOrStatus"}
 	fieldName__Receipt_CumulativeGasUsed = _String{"CumulativeGasUsed"}
 	fieldName__Receipt_Bloom             = _String{"Bloom"}
@@ -7630,6 +7634,8 @@ func (Receipt) Kind() ipld.Kind {
 }
 func (n Receipt) LookupByString(key string) (ipld.Node, error) {
 	switch key {
+	case "Type":
+		return &n.Type, nil
 	case "PostStateOrStatus":
 		return &n.PostStateOrStatus, nil
 	case "CumulativeGasUsed":
@@ -7665,20 +7671,23 @@ type _Receipt__MapItr struct {
 }
 
 func (itr *_Receipt__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
-	if itr.idx >= 4 {
+	if itr.idx >= 5 {
 		return nil, nil, ipld.ErrIteratorOverread{}
 	}
 	switch itr.idx {
 	case 0:
+		k = &fieldName__Receipt_Type
+		v = &itr.n.Type
+	case 1:
 		k = &fieldName__Receipt_PostStateOrStatus
 		v = &itr.n.PostStateOrStatus
-	case 1:
+	case 2:
 		k = &fieldName__Receipt_CumulativeGasUsed
 		v = &itr.n.CumulativeGasUsed
-	case 2:
+	case 3:
 		k = &fieldName__Receipt_Bloom
 		v = &itr.n.Bloom
-	case 3:
+	case 4:
 		k = &fieldName__Receipt_Logs
 		v = &itr.n.Logs
 	default:
@@ -7688,14 +7697,14 @@ func (itr *_Receipt__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	return
 }
 func (itr *_Receipt__MapItr) Done() bool {
-	return itr.idx >= 4
+	return itr.idx >= 5
 }
 
 func (Receipt) ListIterator() ipld.ListIterator {
 	return nil
 }
 func (Receipt) Length() int64 {
-	return 4
+	return 5
 }
 func (Receipt) IsAbsent() bool {
 	return false
@@ -7757,6 +7766,7 @@ type _Receipt__Assembler struct {
 	f     int
 
 	cm                   schema.Maybe
+	ca_Type              _TxType__Assembler
 	ca_PostStateOrStatus _Bytes__Assembler
 	ca_CumulativeGasUsed _Uint__Assembler
 	ca_Bloom             _Bloom__Assembler
@@ -7766,6 +7776,7 @@ type _Receipt__Assembler struct {
 func (na *_Receipt__Assembler) reset() {
 	na.state = maState_initial
 	na.s = 0
+	na.ca_Type.reset()
 	na.ca_PostStateOrStatus.reset()
 	na.ca_CumulativeGasUsed.reset()
 	na.ca_Bloom.reset()
@@ -7773,11 +7784,12 @@ func (na *_Receipt__Assembler) reset() {
 }
 
 var (
-	fieldBit__Receipt_PostStateOrStatus = 1 << 0
-	fieldBit__Receipt_CumulativeGasUsed = 1 << 1
-	fieldBit__Receipt_Bloom             = 1 << 2
-	fieldBit__Receipt_Logs              = 1 << 3
-	fieldBits__Receipt_sufficient       = 0 + 1<<0 + 1<<1 + 1<<2 + 1<<3
+	fieldBit__Receipt_Type              = 1 << 0
+	fieldBit__Receipt_PostStateOrStatus = 1 << 1
+	fieldBit__Receipt_CumulativeGasUsed = 1 << 2
+	fieldBit__Receipt_Bloom             = 1 << 3
+	fieldBit__Receipt_Logs              = 1 << 4
+	fieldBits__Receipt_sufficient       = 0 + 1<<0 + 1<<1 + 1<<2 + 1<<3 + 1<<4
 )
 
 func (na *_Receipt__Assembler) BeginMap(int64) (ipld.MapAssembler, error) {
@@ -7874,7 +7886,7 @@ func (ma *_Receipt__Assembler) valueFinishTidy() bool {
 	case 0:
 		switch ma.cm {
 		case schema.Maybe_Value:
-			ma.ca_PostStateOrStatus.w = nil
+			ma.ca_Type.w = nil
 			ma.cm = schema.Maybe_Absent
 			ma.state = maState_initial
 			return true
@@ -7884,7 +7896,7 @@ func (ma *_Receipt__Assembler) valueFinishTidy() bool {
 	case 1:
 		switch ma.cm {
 		case schema.Maybe_Value:
-			ma.ca_CumulativeGasUsed.w = nil
+			ma.ca_PostStateOrStatus.w = nil
 			ma.cm = schema.Maybe_Absent
 			ma.state = maState_initial
 			return true
@@ -7894,7 +7906,7 @@ func (ma *_Receipt__Assembler) valueFinishTidy() bool {
 	case 2:
 		switch ma.cm {
 		case schema.Maybe_Value:
-			ma.ca_Bloom.w = nil
+			ma.ca_CumulativeGasUsed.w = nil
 			ma.cm = schema.Maybe_Absent
 			ma.state = maState_initial
 			return true
@@ -7902,6 +7914,16 @@ func (ma *_Receipt__Assembler) valueFinishTidy() bool {
 			return false
 		}
 	case 3:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.ca_Bloom.w = nil
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
+	case 4:
 		switch ma.cm {
 		case schema.Maybe_Value:
 			ma.ca_Logs.w = nil
@@ -7931,13 +7953,23 @@ func (ma *_Receipt__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, erro
 		panic("invalid state: AssembleEntry cannot be called on an assembler that's already finished")
 	}
 	switch k {
+	case "Type":
+		if ma.s&fieldBit__Receipt_Type != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Type}
+		}
+		ma.s += fieldBit__Receipt_Type
+		ma.state = maState_midValue
+		ma.f = 0
+		ma.ca_Type.w = &ma.w.Type
+		ma.ca_Type.m = &ma.cm
+		return &ma.ca_Type, nil
 	case "PostStateOrStatus":
 		if ma.s&fieldBit__Receipt_PostStateOrStatus != 0 {
 			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_PostStateOrStatus}
 		}
 		ma.s += fieldBit__Receipt_PostStateOrStatus
 		ma.state = maState_midValue
-		ma.f = 0
+		ma.f = 1
 		ma.ca_PostStateOrStatus.w = &ma.w.PostStateOrStatus
 		ma.ca_PostStateOrStatus.m = &ma.cm
 		return &ma.ca_PostStateOrStatus, nil
@@ -7947,7 +7979,7 @@ func (ma *_Receipt__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, erro
 		}
 		ma.s += fieldBit__Receipt_CumulativeGasUsed
 		ma.state = maState_midValue
-		ma.f = 1
+		ma.f = 2
 		ma.ca_CumulativeGasUsed.w = &ma.w.CumulativeGasUsed
 		ma.ca_CumulativeGasUsed.m = &ma.cm
 		return &ma.ca_CumulativeGasUsed, nil
@@ -7957,7 +7989,7 @@ func (ma *_Receipt__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, erro
 		}
 		ma.s += fieldBit__Receipt_Bloom
 		ma.state = maState_midValue
-		ma.f = 2
+		ma.f = 3
 		ma.ca_Bloom.w = &ma.w.Bloom
 		ma.ca_Bloom.m = &ma.cm
 		return &ma.ca_Bloom, nil
@@ -7967,7 +7999,7 @@ func (ma *_Receipt__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, erro
 		}
 		ma.s += fieldBit__Receipt_Logs
 		ma.state = maState_midValue
-		ma.f = 3
+		ma.f = 4
 		ma.ca_Logs.w = &ma.w.Logs
 		ma.ca_Logs.m = &ma.cm
 		return &ma.ca_Logs, nil
@@ -8008,18 +8040,22 @@ func (ma *_Receipt__Assembler) AssembleValue() ipld.NodeAssembler {
 	ma.state = maState_midValue
 	switch ma.f {
 	case 0:
+		ma.ca_Type.w = &ma.w.Type
+		ma.ca_Type.m = &ma.cm
+		return &ma.ca_Type
+	case 1:
 		ma.ca_PostStateOrStatus.w = &ma.w.PostStateOrStatus
 		ma.ca_PostStateOrStatus.m = &ma.cm
 		return &ma.ca_PostStateOrStatus
-	case 1:
+	case 2:
 		ma.ca_CumulativeGasUsed.w = &ma.w.CumulativeGasUsed
 		ma.ca_CumulativeGasUsed.m = &ma.cm
 		return &ma.ca_CumulativeGasUsed
-	case 2:
+	case 3:
 		ma.ca_Bloom.w = &ma.w.Bloom
 		ma.ca_Bloom.m = &ma.cm
 		return &ma.ca_Bloom
-	case 3:
+	case 4:
 		ma.ca_Logs.w = &ma.w.Logs
 		ma.ca_Logs.m = &ma.cm
 		return &ma.ca_Logs
@@ -8044,6 +8080,9 @@ func (ma *_Receipt__Assembler) Finish() error {
 	}
 	if ma.s&fieldBits__Receipt_sufficient != fieldBits__Receipt_sufficient {
 		err := ipld.ErrMissingRequiredField{Missing: make([]string, 0)}
+		if ma.s&fieldBit__Receipt_Type == 0 {
+			err.Missing = append(err.Missing, "Type")
+		}
 		if ma.s&fieldBit__Receipt_PostStateOrStatus == 0 {
 			err.Missing = append(err.Missing, "PostStateOrStatus")
 		}
@@ -8094,34 +8133,41 @@ func (ka *_Receipt__KeyAssembler) AssignString(k string) error {
 		panic("misuse: KeyAssembler held beyond its valid lifetime")
 	}
 	switch k {
+	case "Type":
+		if ka.s&fieldBit__Receipt_Type != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Type}
+		}
+		ka.s += fieldBit__Receipt_Type
+		ka.state = maState_expectValue
+		ka.f = 0
 	case "PostStateOrStatus":
 		if ka.s&fieldBit__Receipt_PostStateOrStatus != 0 {
 			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_PostStateOrStatus}
 		}
 		ka.s += fieldBit__Receipt_PostStateOrStatus
 		ka.state = maState_expectValue
-		ka.f = 0
+		ka.f = 1
 	case "CumulativeGasUsed":
 		if ka.s&fieldBit__Receipt_CumulativeGasUsed != 0 {
 			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_CumulativeGasUsed}
 		}
 		ka.s += fieldBit__Receipt_CumulativeGasUsed
 		ka.state = maState_expectValue
-		ka.f = 1
+		ka.f = 2
 	case "Bloom":
 		if ka.s&fieldBit__Receipt_Bloom != 0 {
 			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Bloom}
 		}
 		ka.s += fieldBit__Receipt_Bloom
 		ka.state = maState_expectValue
-		ka.f = 2
+		ka.f = 3
 	case "Logs":
 		if ka.s&fieldBit__Receipt_Logs != 0 {
 			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Logs}
 		}
 		ka.s += fieldBit__Receipt_Logs
 		ka.state = maState_expectValue
-		ka.f = 3
+		ka.f = 4
 	default:
 		return ipld.ErrInvalidKey{TypeName: "dageth.Receipt", Key: &_String{k}}
 	}
@@ -8153,6 +8199,7 @@ func (n Receipt) Representation() ipld.Node {
 type _Receipt__Repr _Receipt
 
 var (
+	fieldName__Receipt_Type_serial              = _String{"Type"}
 	fieldName__Receipt_PostStateOrStatus_serial = _String{"PostStateOrStatus"}
 	fieldName__Receipt_CumulativeGasUsed_serial = _String{"CumulativeGasUsed"}
 	fieldName__Receipt_Bloom_serial             = _String{"Bloom"}
@@ -8165,6 +8212,8 @@ func (_Receipt__Repr) Kind() ipld.Kind {
 }
 func (n *_Receipt__Repr) LookupByString(key string) (ipld.Node, error) {
 	switch key {
+	case "Type":
+		return n.Type.Representation(), nil
 	case "PostStateOrStatus":
 		return n.PostStateOrStatus.Representation(), nil
 	case "CumulativeGasUsed":
@@ -8200,20 +8249,23 @@ type _Receipt__ReprMapItr struct {
 }
 
 func (itr *_Receipt__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
-	if itr.idx >= 4 {
+	if itr.idx >= 5 {
 		return nil, nil, ipld.ErrIteratorOverread{}
 	}
 	switch itr.idx {
 	case 0:
+		k = &fieldName__Receipt_Type_serial
+		v = itr.n.Type.Representation()
+	case 1:
 		k = &fieldName__Receipt_PostStateOrStatus_serial
 		v = itr.n.PostStateOrStatus.Representation()
-	case 1:
+	case 2:
 		k = &fieldName__Receipt_CumulativeGasUsed_serial
 		v = itr.n.CumulativeGasUsed.Representation()
-	case 2:
+	case 3:
 		k = &fieldName__Receipt_Bloom_serial
 		v = itr.n.Bloom.Representation()
-	case 3:
+	case 4:
 		k = &fieldName__Receipt_Logs_serial
 		v = itr.n.Logs.Representation()
 	default:
@@ -8223,13 +8275,13 @@ func (itr *_Receipt__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	return
 }
 func (itr *_Receipt__ReprMapItr) Done() bool {
-	return itr.idx >= 4
+	return itr.idx >= 5
 }
 func (_Receipt__Repr) ListIterator() ipld.ListIterator {
 	return nil
 }
 func (rn *_Receipt__Repr) Length() int64 {
-	l := 4
+	l := 5
 	return int64(l)
 }
 func (_Receipt__Repr) IsAbsent() bool {
@@ -8292,6 +8344,7 @@ type _Receipt__ReprAssembler struct {
 	f     int
 
 	cm                   schema.Maybe
+	ca_Type              _TxType__ReprAssembler
 	ca_PostStateOrStatus _Bytes__ReprAssembler
 	ca_CumulativeGasUsed _Uint__ReprAssembler
 	ca_Bloom             _Bloom__ReprAssembler
@@ -8301,6 +8354,7 @@ type _Receipt__ReprAssembler struct {
 func (na *_Receipt__ReprAssembler) reset() {
 	na.state = maState_initial
 	na.s = 0
+	na.ca_Type.reset()
 	na.ca_PostStateOrStatus.reset()
 	na.ca_CumulativeGasUsed.reset()
 	na.ca_Bloom.reset()
@@ -8433,6 +8487,15 @@ func (ma *_Receipt__ReprAssembler) valueFinishTidy() bool {
 		default:
 			return false
 		}
+	case 4:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
 	default:
 		panic("unreachable")
 	}
@@ -8453,13 +8516,23 @@ func (ma *_Receipt__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler, 
 		panic("invalid state: AssembleEntry cannot be called on an assembler that's already finished")
 	}
 	switch k {
+	case "Type":
+		if ma.s&fieldBit__Receipt_Type != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Type_serial}
+		}
+		ma.s += fieldBit__Receipt_Type
+		ma.state = maState_midValue
+		ma.f = 0
+		ma.ca_Type.w = &ma.w.Type
+		ma.ca_Type.m = &ma.cm
+		return &ma.ca_Type, nil
 	case "PostStateOrStatus":
 		if ma.s&fieldBit__Receipt_PostStateOrStatus != 0 {
 			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_PostStateOrStatus_serial}
 		}
 		ma.s += fieldBit__Receipt_PostStateOrStatus
 		ma.state = maState_midValue
-		ma.f = 0
+		ma.f = 1
 		ma.ca_PostStateOrStatus.w = &ma.w.PostStateOrStatus
 		ma.ca_PostStateOrStatus.m = &ma.cm
 		return &ma.ca_PostStateOrStatus, nil
@@ -8469,7 +8542,7 @@ func (ma *_Receipt__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler, 
 		}
 		ma.s += fieldBit__Receipt_CumulativeGasUsed
 		ma.state = maState_midValue
-		ma.f = 1
+		ma.f = 2
 		ma.ca_CumulativeGasUsed.w = &ma.w.CumulativeGasUsed
 		ma.ca_CumulativeGasUsed.m = &ma.cm
 		return &ma.ca_CumulativeGasUsed, nil
@@ -8479,7 +8552,7 @@ func (ma *_Receipt__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler, 
 		}
 		ma.s += fieldBit__Receipt_Bloom
 		ma.state = maState_midValue
-		ma.f = 2
+		ma.f = 3
 		ma.ca_Bloom.w = &ma.w.Bloom
 		ma.ca_Bloom.m = &ma.cm
 		return &ma.ca_Bloom, nil
@@ -8489,7 +8562,7 @@ func (ma *_Receipt__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler, 
 		}
 		ma.s += fieldBit__Receipt_Logs
 		ma.state = maState_midValue
-		ma.f = 3
+		ma.f = 4
 		ma.ca_Logs.w = &ma.w.Logs
 		ma.ca_Logs.m = &ma.cm
 		return &ma.ca_Logs, nil
@@ -8531,18 +8604,22 @@ func (ma *_Receipt__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 	ma.state = maState_midValue
 	switch ma.f {
 	case 0:
+		ma.ca_Type.w = &ma.w.Type
+		ma.ca_Type.m = &ma.cm
+		return &ma.ca_Type
+	case 1:
 		ma.ca_PostStateOrStatus.w = &ma.w.PostStateOrStatus
 		ma.ca_PostStateOrStatus.m = &ma.cm
 		return &ma.ca_PostStateOrStatus
-	case 1:
+	case 2:
 		ma.ca_CumulativeGasUsed.w = &ma.w.CumulativeGasUsed
 		ma.ca_CumulativeGasUsed.m = &ma.cm
 		return &ma.ca_CumulativeGasUsed
-	case 2:
+	case 3:
 		ma.ca_Bloom.w = &ma.w.Bloom
 		ma.ca_Bloom.m = &ma.cm
 		return &ma.ca_Bloom
-	case 3:
+	case 4:
 		ma.ca_Logs.w = &ma.w.Logs
 		ma.ca_Logs.m = &ma.cm
 		return &ma.ca_Logs
@@ -8567,6 +8644,9 @@ func (ma *_Receipt__ReprAssembler) Finish() error {
 	}
 	if ma.s&fieldBits__Receipt_sufficient != fieldBits__Receipt_sufficient {
 		err := ipld.ErrMissingRequiredField{Missing: make([]string, 0)}
+		if ma.s&fieldBit__Receipt_Type == 0 {
+			err.Missing = append(err.Missing, "Type")
+		}
 		if ma.s&fieldBit__Receipt_PostStateOrStatus == 0 {
 			err.Missing = append(err.Missing, "PostStateOrStatus")
 		}
@@ -8617,13 +8697,21 @@ func (ka *_Receipt__ReprKeyAssembler) AssignString(k string) error {
 		panic("misuse: KeyAssembler held beyond its valid lifetime")
 	}
 	switch k {
+	case "Type":
+		if ka.s&fieldBit__Receipt_Type != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Type_serial}
+		}
+		ka.s += fieldBit__Receipt_Type
+		ka.state = maState_expectValue
+		ka.f = 0
+		return nil
 	case "PostStateOrStatus":
 		if ka.s&fieldBit__Receipt_PostStateOrStatus != 0 {
 			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_PostStateOrStatus_serial}
 		}
 		ka.s += fieldBit__Receipt_PostStateOrStatus
 		ka.state = maState_expectValue
-		ka.f = 0
+		ka.f = 1
 		return nil
 	case "CumulativeGasUsed":
 		if ka.s&fieldBit__Receipt_CumulativeGasUsed != 0 {
@@ -8631,7 +8719,7 @@ func (ka *_Receipt__ReprKeyAssembler) AssignString(k string) error {
 		}
 		ka.s += fieldBit__Receipt_CumulativeGasUsed
 		ka.state = maState_expectValue
-		ka.f = 1
+		ka.f = 2
 		return nil
 	case "Bloom":
 		if ka.s&fieldBit__Receipt_Bloom != 0 {
@@ -8639,7 +8727,7 @@ func (ka *_Receipt__ReprKeyAssembler) AssignString(k string) error {
 		}
 		ka.s += fieldBit__Receipt_Bloom
 		ka.state = maState_expectValue
-		ka.f = 2
+		ka.f = 3
 		return nil
 	case "Logs":
 		if ka.s&fieldBit__Receipt_Logs != 0 {
@@ -8647,7 +8735,7 @@ func (ka *_Receipt__ReprKeyAssembler) AssignString(k string) error {
 		}
 		ka.s += fieldBit__Receipt_Logs
 		ka.state = maState_expectValue
-		ka.f = 3
+		ka.f = 4
 		return nil
 	}
 	return ipld.ErrInvalidKey{TypeName: "dageth.Receipt.Repr", Key: &_String{k}}

@@ -6,6 +6,8 @@ import (
 	"io"
 	"math/big"
 
+	"github.com/vulcanize/go-codec-dageth/shared"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -48,18 +50,11 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 			return enc, fmt.Errorf("invalid DAG-ETH Header form (%v)", err)
 		}
 	}
-	wbs := writeableByteSlice(enc)
+	wbs := shared.WriteableByteSlice(enc)
 	if err := rlp.Encode(&wbs, header); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Header form (unable to RLP encode header: %v)", err)
 	}
 	return enc, nil
-}
-
-type writeableByteSlice []byte
-
-func (w *writeableByteSlice) Write(b []byte) (int, error) {
-	*w = append(*w, b...)
-	return len(b), nil
 }
 
 var RequiredPackFuncs = []func(*types.Header, ipld.Node) error{

@@ -7,8 +7,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
+
 	dageth "github.com/vulcanize/go-codec-dageth"
 	dageth_header "github.com/vulcanize/go-codec-dageth/header"
+	"github.com/vulcanize/go-codec-dageth/shared"
 )
 
 // Encode provides an IPLD codec encode interface for eth uncles IPLDs (header list).
@@ -52,16 +54,9 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 		}
 		uncles[index] = uncle
 	}
-	wbs := writeableByteSlice(enc)
+	wbs := shared.WriteableByteSlice(enc)
 	if err := rlp.Encode(&wbs, uncles); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Uncles form (unable to RLP encode uncles: %v)", err)
 	}
 	return enc, nil
-}
-
-type writeableByteSlice []byte
-
-func (w *writeableByteSlice) Write(b []byte) (int, error) {
-	*w = append(*w, b...)
-	return len(b), nil
 }

@@ -6,14 +6,13 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/rlp"
-
 	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
 
 	dageth "github.com/vulcanize/go-codec-dageth"
+	"github.com/vulcanize/go-codec-dageth/shared"
 )
 
 // Encode provides an IPLD codec encode interface for eth transaction IPLDs.
@@ -42,11 +41,11 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 		return enc, err
 	}
 	node := builder.Build()
-	txType, err := getType(node)
+	txType, err := shared.GetTxType(node)
 	if err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 	}
-	wbs := writeableByteSlice(enc)
+	wbs := shared.WriteableByteSlice(enc)
 	switch txType {
 	case types.LegacyTxType:
 		tx, err := packLegacyTx(node)
@@ -54,7 +53,7 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
 		if err := rlp.Encode(&wbs, tx); err != nil {
-			return enc, fmt.Errorf("invalid DAG-ETH transaction form (%v)", err)
+			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
 		return wbs, nil
 	case types.AccessListTxType:
@@ -64,19 +63,12 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 		}
 		wbs = append(wbs, txType)
 		if err := rlp.Encode(&wbs, tx); err != nil {
-			return enc, fmt.Errorf("invalid DAG-ETH transaction form (%v)", err)
+			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
 		return wbs, nil
 	default:
 		return wbs, fmt.Errorf("invalid DAG-ETH Transaction form (unrecognized TxType %d)", txType)
 	}
-}
-
-type writeableByteSlice []byte
-
-func (w *writeableByteSlice) Write(b []byte) (int, error) {
-	*w = append(*w, b...)
-	return len(b), nil
 }
 
 func packLegacyTx(node ipld.Node) (*types.LegacyTx, error) {
@@ -109,21 +101,6 @@ var RequiredPackFuncs = []func(interface{}, ipld.Node) error{
 	packData,
 	packAccessList,
 	packSignatureValues,
-}
-
-func getType(node ipld.Node) (uint8, error) {
-	tyNode, err := node.LookupByString("TxType")
-	if err != nil {
-		return 0, err
-	}
-	tyBytes, err := tyNode.AsBytes()
-	if err != nil {
-		return 0, err
-	}
-	if len(tyBytes) != 1 {
-		return 0, fmt.Errorf("tx type should be a single byte")
-	}
-	return tyBytes[0], nil
 }
 
 func packChainID(tx interface{}, node ipld.Node) error {

@@ -170,6 +170,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type Logs [Log]
 
 		type Receipt struct {
+			Type			  TxType
 			PostStateOrStatus Bytes
 			CumulativeGasUsed Uint
 			Bloom             Bloom
@@ -188,6 +189,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnList("Logs", "Log", false))
 	ts.Accumulate(schema.SpawnStruct("Receipt",
 		[]schema.StructField{
+			schema.SpawnStructField("Type", "TxType", false, false),
 			schema.SpawnStructField("PostStateOrStatus", "Bytes", false, false),
 			schema.SpawnStructField("CumulativeGasUsed", "Uint", false, false),
 			schema.SpawnStructField("Bloom", "Bloom", false, false),

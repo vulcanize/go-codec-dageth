@@ -1,4 +1,4 @@
-package dageth_tx
+package dageth_rct
 
 import (
 	"encoding/binary"
@@ -10,9 +10,9 @@ import (
 	"github.com/ipld/go-ipld-prime"
 )
 
-// Decode provides an IPLD codec decode interface for ETH transaction IPLDs.
+// Decode provides an IPLD codec decode interface for ETH receipt IPLDs.
 // This function is registered via the go-ipld-prime link loader for multicodec
-// code 0x93 when this package is invoked via init.
+// code 0x95 when this package is invoked via init.
 func Decode(na ipld.NodeAssembler, in io.Reader) error {
 	var src []byte
 	if buf, ok := in.(interface{ Bytes() []byte }); ok {

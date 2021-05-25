@@ -117,6 +117,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 
 		type Transaction struct {
 			Type         TxType
+			// We could make ChainID a required field in the IPLD schema
 			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 transaction
 			AccountNonce Uint
 			GasPrice     BigInt
@@ -171,7 +172,9 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 
 		type Receipt struct {
 			Type			  TxType
-			PostStateOrStatus Bytes
+			// We could make Status an enum
+			Status	          Uint // nullable
+			PostState		  Hash   // nullable
 			CumulativeGasUsed Uint
 			Bloom             Bloom
 			Logs              Logs
@@ -190,7 +193,8 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnStruct("Receipt",
 		[]schema.StructField{
 			schema.SpawnStructField("Type", "TxType", false, false),
-			schema.SpawnStructField("PostStateOrStatus", "Bytes", false, false),
+			schema.SpawnStructField("PostState", "Bytes", false, true),
+			schema.SpawnStructField("Status", "Uint", false, true),
 			schema.SpawnStructField("CumulativeGasUsed", "Uint", false, false),
 			schema.SpawnStructField("Bloom", "Bloom", false, false),
 			schema.SpawnStructField("Logs", "Logs", false, false),

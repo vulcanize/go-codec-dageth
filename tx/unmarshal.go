@@ -35,19 +35,24 @@ func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
 	if err := tx.UnmarshalBinary(src); err != nil {
 		return err
 	}
+	return DecodeTx(na, tx)
+}
+
+// DecodeTx unpacks a go-ethereum Transaction into a NodeAssembler
+func DecodeTx(na ipld.NodeAssembler, tx types.Transaction) error {
 	ma, err := na.BeginMap(12)
 	if err != nil {
 		return err
 	}
 	for _, upFunc := range RequiredUnpackFuncs {
 		if err := upFunc(ma, tx); err != nil {
-			return fmt.Errorf("invalid DAG-ETH Header binary (%v)", err)
+			return fmt.Errorf("invalid DAG-ETH Transaction binary (%v)", err)
 		}
 	}
 	return ma.Finish()
 }
 
-var RequiredUnpackFuncs = []func(ma ipld.MapAssembler, tx types.Transaction) error{
+var RequiredUnpackFuncs = []func(ipld.MapAssembler, types.Transaction) error{
 	unpackTxType,
 	unpackChainID,
 	unpackAccountNonce,

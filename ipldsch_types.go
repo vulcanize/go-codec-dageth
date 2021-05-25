@@ -181,7 +181,8 @@ type _OpCode struct{ x []byte }
 type Receipt = *_Receipt
 type _Receipt struct {
 	Type              _TxType
-	PostStateOrStatus _Bytes
+	PostState         _Bytes__Maybe
+	Status            _Uint__Maybe
 	CumulativeGasUsed _Uint
 	Bloom             _Bloom
 	Logs              _Logs

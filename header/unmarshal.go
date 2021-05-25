@@ -39,11 +39,16 @@ func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
 	if err := rlp.DecodeBytes(src, &header); err != nil {
 		return err
 	}
+	return DecodeHeader(na, header)
+}
+
+// DecodeHeader unpacks a go-ethereum Header into a NodeAssembler
+func DecodeHeader(na ipld.NodeAssembler, header types.Header) error {
 	ma, err := na.BeginMap(15)
 	if err != nil {
 		return err
 	}
-	for _, upFunc := range RequiredUnpackFuncs {
+	for _, upFunc := range requiredUnpackFuncs {
 		if err := upFunc(ma, header); err != nil {
 			return fmt.Errorf("invalid DAG-ETH Header binary (%v)", err)
 		}
@@ -51,7 +56,7 @@ func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
 	return ma.Finish()
 }
 
-var RequiredUnpackFuncs = []func(ma ipld.MapAssembler, header types.Header) error{
+var requiredUnpackFuncs = []func(ipld.MapAssembler, types.Header) error{
 	unpackParentCID,
 	unpackUnclesCID,
 	unpackCoinbase,

@@ -37,6 +37,12 @@ func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
 	if err := rlp.DecodeBytes(src, &uncles); err != nil {
 		return err
 	}
+
+	return DecodeUncles(na, uncles)
+}
+
+// DecodeUncles unpacks a list of go-ethereum headers into the NodeAssembler
+func DecodeUncles(na ipld.NodeAssembler, uncles []*types.Header) error {
 	la, err := na.BeginList(int64(len(uncles)))
 	if err != nil {
 		return err
@@ -44,24 +50,10 @@ func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
 	for i, uncle := range uncles {
 		// node := dageth.Type.Header.NewBuilder()
 		node := la.ValuePrototype(int64(i)).NewBuilder()
-		if err := decodeHeader(node, *uncle); err != nil {
+		if err := dageth_header.DecodeHeader(node, *uncle); err != nil {
 			return fmt.Errorf("invalid DAG-ETH Uncles binary (%v)", err)
 		}
 		la.AssembleValue().AssignNode(node.Build())
 	}
-
 	return la.Finish()
-}
-
-func decodeHeader(na ipld.NodeAssembler, header types.Header) error {
-	ma, err := na.BeginMap(15)
-	if err != nil {
-		return err
-	}
-	for _, upFunc := range dageth_header.RequiredUnpackFuncs {
-		if err := upFunc(ma, header); err != nil {
-			return fmt.Errorf("invalid DAG-ETH Header binary (%v)", err)
-		}
-	}
-	return ma.Finish()
 }

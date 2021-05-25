@@ -1,6 +1,7 @@
 package dageth_tx
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -71,9 +72,18 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	}
 }
 
+// EncodeTx packs the node into a go-ethereum Transaction
+func EncodeTx(tx *types.Transaction, inNode ipld.Node) error {
+	buf := new(bytes.Buffer)
+	if err := Encode(inNode, buf); err != nil {
+		return err
+	}
+	return tx.UnmarshalBinary(buf.Bytes())
+}
+
 func packLegacyTx(node ipld.Node) (*types.LegacyTx, error) {
 	lTx := &types.LegacyTx{}
-	for _, pFunc := range RequiredPackFuncs {
+	for _, pFunc := range requiredPackFuncs {
 		if err := pFunc(lTx, node); err != nil {
 			return nil, err
 		}
@@ -83,7 +93,7 @@ func packLegacyTx(node ipld.Node) (*types.LegacyTx, error) {
 
 func packAccessListTx(node ipld.Node) (*types.AccessListTx, error) {
 	alTx := &types.AccessListTx{}
-	for _, pFunc := range RequiredPackFuncs {
+	for _, pFunc := range requiredPackFuncs {
 		if err := pFunc(alTx, node); err != nil {
 			return nil, err
 		}
@@ -91,7 +101,7 @@ func packAccessListTx(node ipld.Node) (*types.AccessListTx, error) {
 	return alTx, nil
 }
 
-var RequiredPackFuncs = []func(interface{}, ipld.Node) error{
+var requiredPackFuncs = []func(interface{}, ipld.Node) error{
 	packChainID,
 	packAccountNonce,
 	packGasPrice,

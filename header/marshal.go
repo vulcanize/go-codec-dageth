@@ -6,8 +6,6 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/vulcanize/go-codec-dageth/shared"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -16,6 +14,7 @@ import (
 	"github.com/multiformats/go-multihash"
 
 	dageth "github.com/vulcanize/go-codec-dageth"
+	"github.com/vulcanize/go-codec-dageth/shared"
 )
 
 // Encode provides an IPLD codec encode interface for eth header IPLDs.
@@ -38,17 +37,9 @@ func Encode(node ipld.Node, w io.Writer) error {
 // This means less copying of bytes, and if the destination has enough capacity,
 // fewer allocations.
 func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
-	// Wrap in a typed node for some basic schema form checking
-	builder := dageth.Type.Header.NewBuilder()
-	if err := builder.AssignNode(inNode); err != nil {
-		return enc, err
-	}
-	node := builder.Build()
 	header := new(types.Header)
-	for _, pFunc := range RequiredPackFuncs {
-		if err := pFunc(header, node); err != nil {
-			return enc, fmt.Errorf("invalid DAG-ETH Header form (%v)", err)
-		}
+	if err := EncodeHeader(header, inNode); err != nil {
+		return enc, err
 	}
 	wbs := shared.WriteableByteSlice(enc)
 	if err := rlp.Encode(&wbs, header); err != nil {
@@ -57,7 +48,23 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	return enc, nil
 }
 
-var RequiredPackFuncs = []func(*types.Header, ipld.Node) error{
+// EncodeHeader packs the node into the provided go-ethereum Header
+func EncodeHeader(header *types.Header, inNode ipld.Node) error {
+	// Wrap in a typed node for some basic schema form checking
+	builder := dageth.Type.Header.NewBuilder()
+	if err := builder.AssignNode(inNode); err != nil {
+		return err
+	}
+	node := builder.Build()
+	for _, pFunc := range requiredPackFuncs {
+		if err := pFunc(header, node); err != nil {
+			return fmt.Errorf("invalid DAG-ETH Header form (%v)", err)
+		}
+	}
+	return nil
+}
+
+var requiredPackFuncs = []func(*types.Header, ipld.Node) error{
 	packParentCID,
 	packUnclesCID,
 	packCoinbase,

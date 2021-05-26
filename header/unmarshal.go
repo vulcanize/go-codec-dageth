@@ -160,7 +160,7 @@ func unpackRctRootCID(ma ipld.MapAssembler, header types.Header) error {
 	if err != nil {
 		return err
 	}
-	rctCID := cid.NewCidV1(cid.EthTxReceipt, rctMh)
+	rctCID := cid.NewCidV1(cid.EthTxReceiptTrie, rctMh)
 	rctLinkCID := cidlink.Link{Cid: rctCID}
 	if err := ma.AssembleKey().AssignString("RctRootCID"); err != nil {
 		return err
@@ -173,7 +173,7 @@ func unpackTxRootCID(ma ipld.MapAssembler, header types.Header) error {
 	if err != nil {
 		return err
 	}
-	txCID := cid.NewCidV1(cid.EthTx, txMh)
+	txCID := cid.NewCidV1(cid.EthTxTrie, txMh)
 	txLinkCID := cidlink.Link{Cid: txCID}
 	if err := ma.AssembleKey().AssignString("TxRootCID"); err != nil {
 		return err

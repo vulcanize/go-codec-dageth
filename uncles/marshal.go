@@ -7,8 +7,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
+
 	dageth "github.com/vulcanize/go-codec-dageth"
 	dageth_header "github.com/vulcanize/go-codec-dageth/header"
+	"github.com/vulcanize/go-codec-dageth/shared"
 )
 
 // Encode provides an IPLD codec encode interface for eth uncles IPLDs (header list).
@@ -31,37 +33,36 @@ func Encode(node ipld.Node, w io.Writer) error {
 // This means less copying of bytes, and if the destination has enough capacity,
 // fewer allocations.
 func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
-	// Wrap in a typed node for some basic schema form checking
-	builder := dageth.Type.Uncles.NewBuilder()
-	if err := builder.AssignNode(inNode); err != nil {
+	uncles := make([]*types.Header, 0, inNode.Length())
+	if err := EncodeUncles(&uncles, inNode); err != nil {
 		return enc, err
 	}
-	node := builder.Build()
-	uncles := make([]*types.Header, node.Length())
-	unclesIt := node.ListIterator()
-	for !unclesIt.Done() {
-		index, uncleNode, err := unclesIt.Next()
-		if err != nil {
-			return enc, err
-		}
-		uncle := new(types.Header)
-		for _, pFunc := range dageth_header.RequiredPackFuncs {
-			if err := pFunc(uncle, uncleNode); err != nil {
-				return enc, fmt.Errorf("invalid DAG-ETH Uncles form (%v)", err)
-			}
-		}
-		uncles[index] = uncle
-	}
-	wbs := writeableByteSlice(enc)
+	wbs := shared.WriteableByteSlice(enc)
 	if err := rlp.Encode(&wbs, uncles); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Uncles form (unable to RLP encode uncles: %v)", err)
 	}
 	return enc, nil
 }
 
-type writeableByteSlice []byte
-
-func (w *writeableByteSlice) Write(b []byte) (int, error) {
-	*w = append(*w, b...)
-	return len(b), nil
+// EncodeUncles packs the node into a list of go-ethereum headers
+func EncodeUncles(uncles *[]*types.Header, inNode ipld.Node) error {
+	// Wrap in a typed node for some basic schema form checking
+	builder := dageth.Type.Uncles.NewBuilder()
+	if err := builder.AssignNode(inNode); err != nil {
+		return err
+	}
+	node := builder.Build()
+	unclesIt := node.ListIterator()
+	for !unclesIt.Done() {
+		_, uncleNode, err := unclesIt.Next()
+		if err != nil {
+			return err
+		}
+		uncle := new(types.Header)
+		if err := dageth_header.EncodeHeader(uncle, uncleNode); err != nil {
+			return fmt.Errorf("invalid DAG-ETH Uncles form (%v)", err)
+		}
+		*uncles = append(*uncles, uncle)
+	}
+	return nil
 }

@@ -180,7 +180,9 @@ type _OpCode struct{ x []byte }
 // Receipt matches the IPLD Schema type "Receipt".  It has Struct type-kind, and may be interrogated like map kind.
 type Receipt = *_Receipt
 type _Receipt struct {
-	PostStateOrStatus _Bytes
+	Type              _TxType
+	PostState         _Bytes__Maybe
+	Status            _Uint__Maybe
 	CumulativeGasUsed _Uint
 	Bloom             _Bloom
 	Logs              _Logs

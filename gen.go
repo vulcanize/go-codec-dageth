@@ -133,6 +133,8 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			R            BigInt
 			S            BigInt
 		}
+
+		type Transactions [Transaction]
 	*/
 	ts.Accumulate(schema.SpawnList("StorageKeys", "Hash", false))
 	ts.Accumulate(schema.SpawnStruct("AccessElement",
@@ -160,6 +162,8 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
+	ts.Accumulate(schema.SpawnList("Transactions", "Transaction", false))
+
 	/*
 		type Topics [Hash]
 
@@ -180,6 +184,8 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			Bloom             Bloom
 			Logs              Logs
 		}
+
+		type Receipts [Receipt]
 	*/
 	ts.Accumulate(schema.SpawnList("Topics", "Hash", false))
 	ts.Accumulate(schema.SpawnStruct("Log",
@@ -202,6 +208,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
+	ts.Accumulate(schema.SpawnList("Receipts", "Receipt", false))
 }
 
 func accumulateStateDataStructures(ts *schema.TypeSystem) {

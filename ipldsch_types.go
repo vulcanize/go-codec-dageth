@@ -54,6 +54,8 @@ type typeSlab struct {
 	OpCode__Repr            _OpCode__ReprPrototype
 	Receipt                 _Receipt__Prototype
 	Receipt__Repr           _Receipt__ReprPrototype
+	Receipts                _Receipts__Prototype
+	Receipts__Repr          _Receipts__ReprPrototype
 	StateAccount            _StateAccount__Prototype
 	StateAccount__Repr      _StateAccount__ReprPrototype
 	StorageKeys             _StorageKeys__Prototype
@@ -66,6 +68,8 @@ type typeSlab struct {
 	Topics__Repr            _Topics__ReprPrototype
 	Transaction             _Transaction__Prototype
 	Transaction__Repr       _Transaction__ReprPrototype
+	Transactions            _Transactions__Prototype
+	Transactions__Repr      _Transactions__ReprPrototype
 	TrieBranchNode          _TrieBranchNode__Prototype
 	TrieBranchNode__Repr    _TrieBranchNode__ReprPrototype
 	TrieExtensionNode       _TrieExtensionNode__Prototype
@@ -188,6 +192,12 @@ type _Receipt struct {
 	Logs              _Logs
 }
 
+// Receipts matches the IPLD Schema type "Receipts".  It has list kind.
+type Receipts = *_Receipts
+type _Receipts struct {
+	x []_Receipt
+}
+
 // StateAccount matches the IPLD Schema type "StateAccount".  It has Struct type-kind, and may be interrogated like map kind.
 type StateAccount = *_StateAccount
 type _StateAccount struct {
@@ -232,6 +242,12 @@ type _Transaction struct {
 	V            _BigInt
 	R            _BigInt
 	S            _BigInt
+}
+
+// Transactions matches the IPLD Schema type "Transactions".  It has list kind.
+type Transactions = *_Transactions
+type _Transactions struct {
+	x []_Transaction
 }
 
 // TrieBranchNode matches the IPLD Schema type "TrieBranchNode".  It has Struct type-kind, and may be interrogated like map kind.

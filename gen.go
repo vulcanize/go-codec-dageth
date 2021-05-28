@@ -42,8 +42,6 @@ func main() {
 }
 
 func accumulateBasicTypes(ts *schema.TypeSystem) {
-	ts.Accumulate(schema.SpawnString("String"))
-	ts.Accumulate(schema.SpawnInt("Int"))
 	// we could more explicitly type our links with SpawnLinkReference
 	ts.Accumulate(schema.SpawnLink("Link"))
 	ts.Accumulate(schema.SpawnBytes("Bytes"))

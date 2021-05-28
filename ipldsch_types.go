@@ -42,8 +42,6 @@ type typeSlab struct {
 	Hash__Repr              _Hash__ReprPrototype
 	Header                  _Header__Prototype
 	Header__Repr            _Header__ReprPrototype
-	Int                     _Int__Prototype
-	Int__Repr               _Int__ReprPrototype
 	Link                    _Link__Prototype
 	Link__Repr              _Link__ReprPrototype
 	Log                     _Log__Prototype
@@ -60,8 +58,6 @@ type typeSlab struct {
 	StateAccount__Repr      _StateAccount__ReprPrototype
 	StorageKeys             _StorageKeys__Prototype
 	StorageKeys__Repr       _StorageKeys__ReprPrototype
-	String                  _String__Prototype
-	String__Repr            _String__ReprPrototype
 	Time                    _Time__Prototype
 	Time__Repr              _Time__ReprPrototype
 	Topics                  _Topics__Prototype
@@ -155,10 +151,6 @@ type _Header struct {
 	Nonce        _BlockNonce
 }
 
-// Int matches the IPLD Schema type "Int".  It has int kind.
-type Int = *_Int
-type _Int struct{ x int64 }
-
 // Link matches the IPLD Schema type "Link".  It has link kind.
 type Link = *_Link
 type _Link struct{ x ipld.Link }
@@ -212,10 +204,6 @@ type StorageKeys = *_StorageKeys
 type _StorageKeys struct {
 	x []_Hash
 }
-
-// String matches the IPLD Schema type "String".  It has string kind.
-type String = *_String
-type _String struct{ x string }
 
 // Time matches the IPLD Schema type "Time".  It has bytes kind.
 type Time = *_Time

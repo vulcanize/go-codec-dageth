@@ -8879,6 +8879,613 @@ func (_Receipt__ReprKeyAssembler) Prototype() ipld.NodePrototype {
 	return _String__Prototype{}
 }
 
+func (n *_Receipts) Lookup(idx int64) Receipt {
+	if n.Length() <= idx {
+		return nil
+	}
+	v := &n.x[idx]
+	return v
+}
+func (n *_Receipts) LookupMaybe(idx int64) MaybeReceipt {
+	if n.Length() <= idx {
+		return nil
+	}
+	v := &n.x[idx]
+	return &_Receipt__Maybe{
+		m: schema.Maybe_Value,
+		v: v,
+	}
+}
+
+var _Receipts__valueAbsent = _Receipt__Maybe{m: schema.Maybe_Absent}
+
+func (n Receipts) Iterator() *Receipts__Itr {
+	return &Receipts__Itr{n, 0}
+}
+
+type Receipts__Itr struct {
+	n   Receipts
+	idx int
+}
+
+func (itr *Receipts__Itr) Next() (idx int64, v Receipt) {
+	if itr.idx >= len(itr.n.x) {
+		return -1, nil
+	}
+	idx = int64(itr.idx)
+	v = &itr.n.x[itr.idx]
+	itr.idx++
+	return
+}
+func (itr *Receipts__Itr) Done() bool {
+	return itr.idx >= len(itr.n.x)
+}
+
+type _Receipts__Maybe struct {
+	m schema.Maybe
+	v Receipts
+}
+type MaybeReceipts = *_Receipts__Maybe
+
+func (m MaybeReceipts) IsNull() bool {
+	return m.m == schema.Maybe_Null
+}
+func (m MaybeReceipts) IsAbsent() bool {
+	return m.m == schema.Maybe_Absent
+}
+func (m MaybeReceipts) Exists() bool {
+	return m.m == schema.Maybe_Value
+}
+func (m MaybeReceipts) AsNode() ipld.Node {
+	switch m.m {
+	case schema.Maybe_Absent:
+		return ipld.Absent
+	case schema.Maybe_Null:
+		return ipld.Null
+	case schema.Maybe_Value:
+		return m.v
+	default:
+		panic("unreachable")
+	}
+}
+func (m MaybeReceipts) Must() Receipts {
+	if !m.Exists() {
+		panic("unbox of a maybe rejected")
+	}
+	return m.v
+}
+
+var _ ipld.Node = (Receipts)(&_Receipts{})
+var _ schema.TypedNode = (Receipts)(&_Receipts{})
+
+func (Receipts) Kind() ipld.Kind {
+	return ipld.Kind_List
+}
+func (Receipts) LookupByString(string) (ipld.Node, error) {
+	return mixins.List{"dageth.Receipts"}.LookupByString("")
+}
+func (n Receipts) LookupByNode(k ipld.Node) (ipld.Node, error) {
+	idx, err := k.AsInt()
+	if err != nil {
+		return nil, err
+	}
+	return n.LookupByIndex(idx)
+}
+func (n Receipts) LookupByIndex(idx int64) (ipld.Node, error) {
+	if n.Length() <= idx {
+		return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfInt(idx)}
+	}
+	v := &n.x[idx]
+	return v, nil
+}
+func (n Receipts) LookupBySegment(seg ipld.PathSegment) (ipld.Node, error) {
+	i, err := seg.Index()
+	if err != nil {
+		return nil, ipld.ErrInvalidSegmentForList{TypeName: "dageth.Receipts", TroubleSegment: seg, Reason: err}
+	}
+	return n.LookupByIndex(i)
+}
+func (Receipts) MapIterator() ipld.MapIterator {
+	return nil
+}
+func (n Receipts) ListIterator() ipld.ListIterator {
+	return &_Receipts__ListItr{n, 0}
+}
+
+type _Receipts__ListItr struct {
+	n   Receipts
+	idx int
+}
+
+func (itr *_Receipts__ListItr) Next() (idx int64, v ipld.Node, _ error) {
+	if itr.idx >= len(itr.n.x) {
+		return -1, nil, ipld.ErrIteratorOverread{}
+	}
+	idx = int64(itr.idx)
+	x := &itr.n.x[itr.idx]
+	v = x
+	itr.idx++
+	return
+}
+func (itr *_Receipts__ListItr) Done() bool {
+	return itr.idx >= len(itr.n.x)
+}
+
+func (n Receipts) Length() int64 {
+	return int64(len(n.x))
+}
+func (Receipts) IsAbsent() bool {
+	return false
+}
+func (Receipts) IsNull() bool {
+	return false
+}
+func (Receipts) AsBool() (bool, error) {
+	return mixins.List{"dageth.Receipts"}.AsBool()
+}
+func (Receipts) AsInt() (int64, error) {
+	return mixins.List{"dageth.Receipts"}.AsInt()
+}
+func (Receipts) AsFloat() (float64, error) {
+	return mixins.List{"dageth.Receipts"}.AsFloat()
+}
+func (Receipts) AsString() (string, error) {
+	return mixins.List{"dageth.Receipts"}.AsString()
+}
+func (Receipts) AsBytes() ([]byte, error) {
+	return mixins.List{"dageth.Receipts"}.AsBytes()
+}
+func (Receipts) AsLink() (ipld.Link, error) {
+	return mixins.List{"dageth.Receipts"}.AsLink()
+}
+func (Receipts) Prototype() ipld.NodePrototype {
+	return _Receipts__Prototype{}
+}
+
+type _Receipts__Prototype struct{}
+
+func (_Receipts__Prototype) NewBuilder() ipld.NodeBuilder {
+	var nb _Receipts__Builder
+	nb.Reset()
+	return &nb
+}
+
+type _Receipts__Builder struct {
+	_Receipts__Assembler
+}
+
+func (nb *_Receipts__Builder) Build() ipld.Node {
+	if *nb.m != schema.Maybe_Value {
+		panic("invalid state: cannot call Build on an assembler that's not finished")
+	}
+	return nb.w
+}
+func (nb *_Receipts__Builder) Reset() {
+	var w _Receipts
+	var m schema.Maybe
+	*nb = _Receipts__Builder{_Receipts__Assembler{w: &w, m: &m}}
+}
+
+type _Receipts__Assembler struct {
+	w     *_Receipts
+	m     *schema.Maybe
+	state laState
+
+	cm schema.Maybe
+	va _Receipt__Assembler
+}
+
+func (na *_Receipts__Assembler) reset() {
+	na.state = laState_initial
+	na.va.reset()
+}
+func (_Receipts__Assembler) BeginMap(sizeHint int64) (ipld.MapAssembler, error) {
+	return mixins.ListAssembler{"dageth.Receipts"}.BeginMap(0)
+}
+func (na *_Receipts__Assembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	switch *na.m {
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: it makes no sense to 'begin' twice on the same assembler!")
+	}
+	*na.m = midvalue
+	if sizeHint < 0 {
+		sizeHint = 0
+	}
+	if na.w == nil {
+		na.w = &_Receipts{}
+	}
+	if sizeHint > 0 {
+		na.w.x = make([]_Receipt, 0, sizeHint)
+	}
+	return na, nil
+}
+func (na *_Receipts__Assembler) AssignNull() error {
+	switch *na.m {
+	case allowNull:
+		*na.m = schema.Maybe_Null
+		return nil
+	case schema.Maybe_Absent:
+		return mixins.ListAssembler{"dageth.Receipts"}.AssignNull()
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+	}
+	panic("unreachable")
+}
+func (_Receipts__Assembler) AssignBool(bool) error {
+	return mixins.ListAssembler{"dageth.Receipts"}.AssignBool(false)
+}
+func (_Receipts__Assembler) AssignInt(int64) error {
+	return mixins.ListAssembler{"dageth.Receipts"}.AssignInt(0)
+}
+func (_Receipts__Assembler) AssignFloat(float64) error {
+	return mixins.ListAssembler{"dageth.Receipts"}.AssignFloat(0)
+}
+func (_Receipts__Assembler) AssignString(string) error {
+	return mixins.ListAssembler{"dageth.Receipts"}.AssignString("")
+}
+func (_Receipts__Assembler) AssignBytes([]byte) error {
+	return mixins.ListAssembler{"dageth.Receipts"}.AssignBytes(nil)
+}
+func (_Receipts__Assembler) AssignLink(ipld.Link) error {
+	return mixins.ListAssembler{"dageth.Receipts"}.AssignLink(nil)
+}
+func (na *_Receipts__Assembler) AssignNode(v ipld.Node) error {
+	if v.IsNull() {
+		return na.AssignNull()
+	}
+	if v2, ok := v.(*_Receipts); ok {
+		switch *na.m {
+		case schema.Maybe_Value, schema.Maybe_Null:
+			panic("invalid state: cannot assign into assembler that's already finished")
+		case midvalue:
+			panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+		}
+		if na.w == nil {
+			na.w = v2
+			*na.m = schema.Maybe_Value
+			return nil
+		}
+		*na.w = *v2
+		*na.m = schema.Maybe_Value
+		return nil
+	}
+	if v.Kind() != ipld.Kind_List {
+		return ipld.ErrWrongKind{TypeName: "dageth.Receipts", MethodName: "AssignNode", AppropriateKind: ipld.KindSet_JustList, ActualKind: v.Kind()}
+	}
+	itr := v.ListIterator()
+	for !itr.Done() {
+		_, v, err := itr.Next()
+		if err != nil {
+			return err
+		}
+		if err := na.AssembleValue().AssignNode(v); err != nil {
+			return err
+		}
+	}
+	return na.Finish()
+}
+func (_Receipts__Assembler) Prototype() ipld.NodePrototype {
+	return _Receipts__Prototype{}
+}
+func (la *_Receipts__Assembler) valueFinishTidy() bool {
+	switch la.cm {
+	case schema.Maybe_Value:
+		la.va.w = nil
+		la.cm = schema.Maybe_Absent
+		la.state = laState_initial
+		la.va.reset()
+		return true
+	default:
+		return false
+	}
+}
+func (la *_Receipts__Assembler) AssembleValue() ipld.NodeAssembler {
+	switch la.state {
+	case laState_initial:
+		// carry on
+	case laState_midValue:
+		if !la.valueFinishTidy() {
+			panic("invalid state: AssembleValue cannot be called when still in the middle of assembling the previous value")
+		} // if tidy success: carry on
+	case laState_finished:
+		panic("invalid state: AssembleValue cannot be called on an assembler that's already finished")
+	}
+	la.w.x = append(la.w.x, _Receipt{})
+	la.state = laState_midValue
+	row := &la.w.x[len(la.w.x)-1]
+	la.va.w = row
+	la.va.m = &la.cm
+	return &la.va
+}
+func (la *_Receipts__Assembler) Finish() error {
+	switch la.state {
+	case laState_initial:
+		// carry on
+	case laState_midValue:
+		if !la.valueFinishTidy() {
+			panic("invalid state: Finish cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case laState_finished:
+		panic("invalid state: Finish cannot be called on an assembler that's already finished")
+	}
+	la.state = laState_finished
+	*la.m = schema.Maybe_Value
+	return nil
+}
+func (la *_Receipts__Assembler) ValuePrototype(_ int64) ipld.NodePrototype {
+	return _Receipt__Prototype{}
+}
+func (Receipts) Type() schema.Type {
+	return nil /*TODO:typelit*/
+}
+func (n Receipts) Representation() ipld.Node {
+	return (*_Receipts__Repr)(n)
+}
+
+type _Receipts__Repr _Receipts
+
+var _ ipld.Node = &_Receipts__Repr{}
+
+func (_Receipts__Repr) Kind() ipld.Kind {
+	return ipld.Kind_List
+}
+func (_Receipts__Repr) LookupByString(string) (ipld.Node, error) {
+	return mixins.List{"dageth.Receipts.Repr"}.LookupByString("")
+}
+func (nr *_Receipts__Repr) LookupByNode(k ipld.Node) (ipld.Node, error) {
+	v, err := (Receipts)(nr).LookupByNode(k)
+	if err != nil || v == ipld.Null {
+		return v, err
+	}
+	return v.(Receipt).Representation(), nil
+}
+func (nr *_Receipts__Repr) LookupByIndex(idx int64) (ipld.Node, error) {
+	v, err := (Receipts)(nr).LookupByIndex(idx)
+	if err != nil || v == ipld.Null {
+		return v, err
+	}
+	return v.(Receipt).Representation(), nil
+}
+func (n _Receipts__Repr) LookupBySegment(seg ipld.PathSegment) (ipld.Node, error) {
+	i, err := seg.Index()
+	if err != nil {
+		return nil, ipld.ErrInvalidSegmentForList{TypeName: "dageth.Receipts.Repr", TroubleSegment: seg, Reason: err}
+	}
+	return n.LookupByIndex(i)
+}
+func (_Receipts__Repr) MapIterator() ipld.MapIterator {
+	return nil
+}
+func (nr *_Receipts__Repr) ListIterator() ipld.ListIterator {
+	return &_Receipts__ReprListItr{(Receipts)(nr), 0}
+}
+
+type _Receipts__ReprListItr _Receipts__ListItr
+
+func (itr *_Receipts__ReprListItr) Next() (idx int64, v ipld.Node, err error) {
+	idx, v, err = (*_Receipts__ListItr)(itr).Next()
+	if err != nil || v == ipld.Null {
+		return
+	}
+	return idx, v.(Receipt).Representation(), nil
+}
+func (itr *_Receipts__ReprListItr) Done() bool {
+	return (*_Receipts__ListItr)(itr).Done()
+}
+
+func (rn *_Receipts__Repr) Length() int64 {
+	return int64(len(rn.x))
+}
+func (_Receipts__Repr) IsAbsent() bool {
+	return false
+}
+func (_Receipts__Repr) IsNull() bool {
+	return false
+}
+func (_Receipts__Repr) AsBool() (bool, error) {
+	return mixins.List{"dageth.Receipts.Repr"}.AsBool()
+}
+func (_Receipts__Repr) AsInt() (int64, error) {
+	return mixins.List{"dageth.Receipts.Repr"}.AsInt()
+}
+func (_Receipts__Repr) AsFloat() (float64, error) {
+	return mixins.List{"dageth.Receipts.Repr"}.AsFloat()
+}
+func (_Receipts__Repr) AsString() (string, error) {
+	return mixins.List{"dageth.Receipts.Repr"}.AsString()
+}
+func (_Receipts__Repr) AsBytes() ([]byte, error) {
+	return mixins.List{"dageth.Receipts.Repr"}.AsBytes()
+}
+func (_Receipts__Repr) AsLink() (ipld.Link, error) {
+	return mixins.List{"dageth.Receipts.Repr"}.AsLink()
+}
+func (_Receipts__Repr) Prototype() ipld.NodePrototype {
+	return _Receipts__ReprPrototype{}
+}
+
+type _Receipts__ReprPrototype struct{}
+
+func (_Receipts__ReprPrototype) NewBuilder() ipld.NodeBuilder {
+	var nb _Receipts__ReprBuilder
+	nb.Reset()
+	return &nb
+}
+
+type _Receipts__ReprBuilder struct {
+	_Receipts__ReprAssembler
+}
+
+func (nb *_Receipts__ReprBuilder) Build() ipld.Node {
+	if *nb.m != schema.Maybe_Value {
+		panic("invalid state: cannot call Build on an assembler that's not finished")
+	}
+	return nb.w
+}
+func (nb *_Receipts__ReprBuilder) Reset() {
+	var w _Receipts
+	var m schema.Maybe
+	*nb = _Receipts__ReprBuilder{_Receipts__ReprAssembler{w: &w, m: &m}}
+}
+
+type _Receipts__ReprAssembler struct {
+	w     *_Receipts
+	m     *schema.Maybe
+	state laState
+
+	cm schema.Maybe
+	va _Receipt__ReprAssembler
+}
+
+func (na *_Receipts__ReprAssembler) reset() {
+	na.state = laState_initial
+	na.va.reset()
+}
+func (_Receipts__ReprAssembler) BeginMap(sizeHint int64) (ipld.MapAssembler, error) {
+	return mixins.ListAssembler{"dageth.Receipts.Repr"}.BeginMap(0)
+}
+func (na *_Receipts__ReprAssembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	switch *na.m {
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: it makes no sense to 'begin' twice on the same assembler!")
+	}
+	*na.m = midvalue
+	if sizeHint < 0 {
+		sizeHint = 0
+	}
+	if na.w == nil {
+		na.w = &_Receipts{}
+	}
+	if sizeHint > 0 {
+		na.w.x = make([]_Receipt, 0, sizeHint)
+	}
+	return na, nil
+}
+func (na *_Receipts__ReprAssembler) AssignNull() error {
+	switch *na.m {
+	case allowNull:
+		*na.m = schema.Maybe_Null
+		return nil
+	case schema.Maybe_Absent:
+		return mixins.ListAssembler{"dageth.Receipts.Repr.Repr"}.AssignNull()
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+	}
+	panic("unreachable")
+}
+func (_Receipts__ReprAssembler) AssignBool(bool) error {
+	return mixins.ListAssembler{"dageth.Receipts.Repr"}.AssignBool(false)
+}
+func (_Receipts__ReprAssembler) AssignInt(int64) error {
+	return mixins.ListAssembler{"dageth.Receipts.Repr"}.AssignInt(0)
+}
+func (_Receipts__ReprAssembler) AssignFloat(float64) error {
+	return mixins.ListAssembler{"dageth.Receipts.Repr"}.AssignFloat(0)
+}
+func (_Receipts__ReprAssembler) AssignString(string) error {
+	return mixins.ListAssembler{"dageth.Receipts.Repr"}.AssignString("")
+}
+func (_Receipts__ReprAssembler) AssignBytes([]byte) error {
+	return mixins.ListAssembler{"dageth.Receipts.Repr"}.AssignBytes(nil)
+}
+func (_Receipts__ReprAssembler) AssignLink(ipld.Link) error {
+	return mixins.ListAssembler{"dageth.Receipts.Repr"}.AssignLink(nil)
+}
+func (na *_Receipts__ReprAssembler) AssignNode(v ipld.Node) error {
+	if v.IsNull() {
+		return na.AssignNull()
+	}
+	if v2, ok := v.(*_Receipts); ok {
+		switch *na.m {
+		case schema.Maybe_Value, schema.Maybe_Null:
+			panic("invalid state: cannot assign into assembler that's already finished")
+		case midvalue:
+			panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+		}
+		if na.w == nil {
+			na.w = v2
+			*na.m = schema.Maybe_Value
+			return nil
+		}
+		*na.w = *v2
+		*na.m = schema.Maybe_Value
+		return nil
+	}
+	if v.Kind() != ipld.Kind_List {
+		return ipld.ErrWrongKind{TypeName: "dageth.Receipts.Repr", MethodName: "AssignNode", AppropriateKind: ipld.KindSet_JustList, ActualKind: v.Kind()}
+	}
+	itr := v.ListIterator()
+	for !itr.Done() {
+		_, v, err := itr.Next()
+		if err != nil {
+			return err
+		}
+		if err := na.AssembleValue().AssignNode(v); err != nil {
+			return err
+		}
+	}
+	return na.Finish()
+}
+func (_Receipts__ReprAssembler) Prototype() ipld.NodePrototype {
+	return _Receipts__ReprPrototype{}
+}
+func (la *_Receipts__ReprAssembler) valueFinishTidy() bool {
+	switch la.cm {
+	case schema.Maybe_Value:
+		la.va.w = nil
+		la.cm = schema.Maybe_Absent
+		la.state = laState_initial
+		la.va.reset()
+		return true
+	default:
+		return false
+	}
+}
+func (la *_Receipts__ReprAssembler) AssembleValue() ipld.NodeAssembler {
+	switch la.state {
+	case laState_initial:
+		// carry on
+	case laState_midValue:
+		if !la.valueFinishTidy() {
+			panic("invalid state: AssembleValue cannot be called when still in the middle of assembling the previous value")
+		} // if tidy success: carry on
+	case laState_finished:
+		panic("invalid state: AssembleValue cannot be called on an assembler that's already finished")
+	}
+	la.w.x = append(la.w.x, _Receipt{})
+	la.state = laState_midValue
+	row := &la.w.x[len(la.w.x)-1]
+	la.va.w = row
+	la.va.m = &la.cm
+	return &la.va
+}
+func (la *_Receipts__ReprAssembler) Finish() error {
+	switch la.state {
+	case laState_initial:
+		// carry on
+	case laState_midValue:
+		if !la.valueFinishTidy() {
+			panic("invalid state: Finish cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case laState_finished:
+		panic("invalid state: Finish cannot be called on an assembler that's already finished")
+	}
+	la.state = laState_finished
+	*la.m = schema.Maybe_Value
+	return nil
+}
+func (la *_Receipts__ReprAssembler) ValuePrototype(_ int64) ipld.NodePrototype {
+	return _Receipt__ReprPrototype{}
+}
+
 func (n _StateAccount) FieldNonce() Uint {
 	return &n.Nonce
 }
@@ -13476,6 +14083,613 @@ func (ka *_Transaction__ReprKeyAssembler) AssignNode(v ipld.Node) error {
 }
 func (_Transaction__ReprKeyAssembler) Prototype() ipld.NodePrototype {
 	return _String__Prototype{}
+}
+
+func (n *_Transactions) Lookup(idx int64) Transaction {
+	if n.Length() <= idx {
+		return nil
+	}
+	v := &n.x[idx]
+	return v
+}
+func (n *_Transactions) LookupMaybe(idx int64) MaybeTransaction {
+	if n.Length() <= idx {
+		return nil
+	}
+	v := &n.x[idx]
+	return &_Transaction__Maybe{
+		m: schema.Maybe_Value,
+		v: v,
+	}
+}
+
+var _Transactions__valueAbsent = _Transaction__Maybe{m: schema.Maybe_Absent}
+
+func (n Transactions) Iterator() *Transactions__Itr {
+	return &Transactions__Itr{n, 0}
+}
+
+type Transactions__Itr struct {
+	n   Transactions
+	idx int
+}
+
+func (itr *Transactions__Itr) Next() (idx int64, v Transaction) {
+	if itr.idx >= len(itr.n.x) {
+		return -1, nil
+	}
+	idx = int64(itr.idx)
+	v = &itr.n.x[itr.idx]
+	itr.idx++
+	return
+}
+func (itr *Transactions__Itr) Done() bool {
+	return itr.idx >= len(itr.n.x)
+}
+
+type _Transactions__Maybe struct {
+	m schema.Maybe
+	v Transactions
+}
+type MaybeTransactions = *_Transactions__Maybe
+
+func (m MaybeTransactions) IsNull() bool {
+	return m.m == schema.Maybe_Null
+}
+func (m MaybeTransactions) IsAbsent() bool {
+	return m.m == schema.Maybe_Absent
+}
+func (m MaybeTransactions) Exists() bool {
+	return m.m == schema.Maybe_Value
+}
+func (m MaybeTransactions) AsNode() ipld.Node {
+	switch m.m {
+	case schema.Maybe_Absent:
+		return ipld.Absent
+	case schema.Maybe_Null:
+		return ipld.Null
+	case schema.Maybe_Value:
+		return m.v
+	default:
+		panic("unreachable")
+	}
+}
+func (m MaybeTransactions) Must() Transactions {
+	if !m.Exists() {
+		panic("unbox of a maybe rejected")
+	}
+	return m.v
+}
+
+var _ ipld.Node = (Transactions)(&_Transactions{})
+var _ schema.TypedNode = (Transactions)(&_Transactions{})
+
+func (Transactions) Kind() ipld.Kind {
+	return ipld.Kind_List
+}
+func (Transactions) LookupByString(string) (ipld.Node, error) {
+	return mixins.List{"dageth.Transactions"}.LookupByString("")
+}
+func (n Transactions) LookupByNode(k ipld.Node) (ipld.Node, error) {
+	idx, err := k.AsInt()
+	if err != nil {
+		return nil, err
+	}
+	return n.LookupByIndex(idx)
+}
+func (n Transactions) LookupByIndex(idx int64) (ipld.Node, error) {
+	if n.Length() <= idx {
+		return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfInt(idx)}
+	}
+	v := &n.x[idx]
+	return v, nil
+}
+func (n Transactions) LookupBySegment(seg ipld.PathSegment) (ipld.Node, error) {
+	i, err := seg.Index()
+	if err != nil {
+		return nil, ipld.ErrInvalidSegmentForList{TypeName: "dageth.Transactions", TroubleSegment: seg, Reason: err}
+	}
+	return n.LookupByIndex(i)
+}
+func (Transactions) MapIterator() ipld.MapIterator {
+	return nil
+}
+func (n Transactions) ListIterator() ipld.ListIterator {
+	return &_Transactions__ListItr{n, 0}
+}
+
+type _Transactions__ListItr struct {
+	n   Transactions
+	idx int
+}
+
+func (itr *_Transactions__ListItr) Next() (idx int64, v ipld.Node, _ error) {
+	if itr.idx >= len(itr.n.x) {
+		return -1, nil, ipld.ErrIteratorOverread{}
+	}
+	idx = int64(itr.idx)
+	x := &itr.n.x[itr.idx]
+	v = x
+	itr.idx++
+	return
+}
+func (itr *_Transactions__ListItr) Done() bool {
+	return itr.idx >= len(itr.n.x)
+}
+
+func (n Transactions) Length() int64 {
+	return int64(len(n.x))
+}
+func (Transactions) IsAbsent() bool {
+	return false
+}
+func (Transactions) IsNull() bool {
+	return false
+}
+func (Transactions) AsBool() (bool, error) {
+	return mixins.List{"dageth.Transactions"}.AsBool()
+}
+func (Transactions) AsInt() (int64, error) {
+	return mixins.List{"dageth.Transactions"}.AsInt()
+}
+func (Transactions) AsFloat() (float64, error) {
+	return mixins.List{"dageth.Transactions"}.AsFloat()
+}
+func (Transactions) AsString() (string, error) {
+	return mixins.List{"dageth.Transactions"}.AsString()
+}
+func (Transactions) AsBytes() ([]byte, error) {
+	return mixins.List{"dageth.Transactions"}.AsBytes()
+}
+func (Transactions) AsLink() (ipld.Link, error) {
+	return mixins.List{"dageth.Transactions"}.AsLink()
+}
+func (Transactions) Prototype() ipld.NodePrototype {
+	return _Transactions__Prototype{}
+}
+
+type _Transactions__Prototype struct{}
+
+func (_Transactions__Prototype) NewBuilder() ipld.NodeBuilder {
+	var nb _Transactions__Builder
+	nb.Reset()
+	return &nb
+}
+
+type _Transactions__Builder struct {
+	_Transactions__Assembler
+}
+
+func (nb *_Transactions__Builder) Build() ipld.Node {
+	if *nb.m != schema.Maybe_Value {
+		panic("invalid state: cannot call Build on an assembler that's not finished")
+	}
+	return nb.w
+}
+func (nb *_Transactions__Builder) Reset() {
+	var w _Transactions
+	var m schema.Maybe
+	*nb = _Transactions__Builder{_Transactions__Assembler{w: &w, m: &m}}
+}
+
+type _Transactions__Assembler struct {
+	w     *_Transactions
+	m     *schema.Maybe
+	state laState
+
+	cm schema.Maybe
+	va _Transaction__Assembler
+}
+
+func (na *_Transactions__Assembler) reset() {
+	na.state = laState_initial
+	na.va.reset()
+}
+func (_Transactions__Assembler) BeginMap(sizeHint int64) (ipld.MapAssembler, error) {
+	return mixins.ListAssembler{"dageth.Transactions"}.BeginMap(0)
+}
+func (na *_Transactions__Assembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	switch *na.m {
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: it makes no sense to 'begin' twice on the same assembler!")
+	}
+	*na.m = midvalue
+	if sizeHint < 0 {
+		sizeHint = 0
+	}
+	if na.w == nil {
+		na.w = &_Transactions{}
+	}
+	if sizeHint > 0 {
+		na.w.x = make([]_Transaction, 0, sizeHint)
+	}
+	return na, nil
+}
+func (na *_Transactions__Assembler) AssignNull() error {
+	switch *na.m {
+	case allowNull:
+		*na.m = schema.Maybe_Null
+		return nil
+	case schema.Maybe_Absent:
+		return mixins.ListAssembler{"dageth.Transactions"}.AssignNull()
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+	}
+	panic("unreachable")
+}
+func (_Transactions__Assembler) AssignBool(bool) error {
+	return mixins.ListAssembler{"dageth.Transactions"}.AssignBool(false)
+}
+func (_Transactions__Assembler) AssignInt(int64) error {
+	return mixins.ListAssembler{"dageth.Transactions"}.AssignInt(0)
+}
+func (_Transactions__Assembler) AssignFloat(float64) error {
+	return mixins.ListAssembler{"dageth.Transactions"}.AssignFloat(0)
+}
+func (_Transactions__Assembler) AssignString(string) error {
+	return mixins.ListAssembler{"dageth.Transactions"}.AssignString("")
+}
+func (_Transactions__Assembler) AssignBytes([]byte) error {
+	return mixins.ListAssembler{"dageth.Transactions"}.AssignBytes(nil)
+}
+func (_Transactions__Assembler) AssignLink(ipld.Link) error {
+	return mixins.ListAssembler{"dageth.Transactions"}.AssignLink(nil)
+}
+func (na *_Transactions__Assembler) AssignNode(v ipld.Node) error {
+	if v.IsNull() {
+		return na.AssignNull()
+	}
+	if v2, ok := v.(*_Transactions); ok {
+		switch *na.m {
+		case schema.Maybe_Value, schema.Maybe_Null:
+			panic("invalid state: cannot assign into assembler that's already finished")
+		case midvalue:
+			panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+		}
+		if na.w == nil {
+			na.w = v2
+			*na.m = schema.Maybe_Value
+			return nil
+		}
+		*na.w = *v2
+		*na.m = schema.Maybe_Value
+		return nil
+	}
+	if v.Kind() != ipld.Kind_List {
+		return ipld.ErrWrongKind{TypeName: "dageth.Transactions", MethodName: "AssignNode", AppropriateKind: ipld.KindSet_JustList, ActualKind: v.Kind()}
+	}
+	itr := v.ListIterator()
+	for !itr.Done() {
+		_, v, err := itr.Next()
+		if err != nil {
+			return err
+		}
+		if err := na.AssembleValue().AssignNode(v); err != nil {
+			return err
+		}
+	}
+	return na.Finish()
+}
+func (_Transactions__Assembler) Prototype() ipld.NodePrototype {
+	return _Transactions__Prototype{}
+}
+func (la *_Transactions__Assembler) valueFinishTidy() bool {
+	switch la.cm {
+	case schema.Maybe_Value:
+		la.va.w = nil
+		la.cm = schema.Maybe_Absent
+		la.state = laState_initial
+		la.va.reset()
+		return true
+	default:
+		return false
+	}
+}
+func (la *_Transactions__Assembler) AssembleValue() ipld.NodeAssembler {
+	switch la.state {
+	case laState_initial:
+		// carry on
+	case laState_midValue:
+		if !la.valueFinishTidy() {
+			panic("invalid state: AssembleValue cannot be called when still in the middle of assembling the previous value")
+		} // if tidy success: carry on
+	case laState_finished:
+		panic("invalid state: AssembleValue cannot be called on an assembler that's already finished")
+	}
+	la.w.x = append(la.w.x, _Transaction{})
+	la.state = laState_midValue
+	row := &la.w.x[len(la.w.x)-1]
+	la.va.w = row
+	la.va.m = &la.cm
+	return &la.va
+}
+func (la *_Transactions__Assembler) Finish() error {
+	switch la.state {
+	case laState_initial:
+		// carry on
+	case laState_midValue:
+		if !la.valueFinishTidy() {
+			panic("invalid state: Finish cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case laState_finished:
+		panic("invalid state: Finish cannot be called on an assembler that's already finished")
+	}
+	la.state = laState_finished
+	*la.m = schema.Maybe_Value
+	return nil
+}
+func (la *_Transactions__Assembler) ValuePrototype(_ int64) ipld.NodePrototype {
+	return _Transaction__Prototype{}
+}
+func (Transactions) Type() schema.Type {
+	return nil /*TODO:typelit*/
+}
+func (n Transactions) Representation() ipld.Node {
+	return (*_Transactions__Repr)(n)
+}
+
+type _Transactions__Repr _Transactions
+
+var _ ipld.Node = &_Transactions__Repr{}
+
+func (_Transactions__Repr) Kind() ipld.Kind {
+	return ipld.Kind_List
+}
+func (_Transactions__Repr) LookupByString(string) (ipld.Node, error) {
+	return mixins.List{"dageth.Transactions.Repr"}.LookupByString("")
+}
+func (nr *_Transactions__Repr) LookupByNode(k ipld.Node) (ipld.Node, error) {
+	v, err := (Transactions)(nr).LookupByNode(k)
+	if err != nil || v == ipld.Null {
+		return v, err
+	}
+	return v.(Transaction).Representation(), nil
+}
+func (nr *_Transactions__Repr) LookupByIndex(idx int64) (ipld.Node, error) {
+	v, err := (Transactions)(nr).LookupByIndex(idx)
+	if err != nil || v == ipld.Null {
+		return v, err
+	}
+	return v.(Transaction).Representation(), nil
+}
+func (n _Transactions__Repr) LookupBySegment(seg ipld.PathSegment) (ipld.Node, error) {
+	i, err := seg.Index()
+	if err != nil {
+		return nil, ipld.ErrInvalidSegmentForList{TypeName: "dageth.Transactions.Repr", TroubleSegment: seg, Reason: err}
+	}
+	return n.LookupByIndex(i)
+}
+func (_Transactions__Repr) MapIterator() ipld.MapIterator {
+	return nil
+}
+func (nr *_Transactions__Repr) ListIterator() ipld.ListIterator {
+	return &_Transactions__ReprListItr{(Transactions)(nr), 0}
+}
+
+type _Transactions__ReprListItr _Transactions__ListItr
+
+func (itr *_Transactions__ReprListItr) Next() (idx int64, v ipld.Node, err error) {
+	idx, v, err = (*_Transactions__ListItr)(itr).Next()
+	if err != nil || v == ipld.Null {
+		return
+	}
+	return idx, v.(Transaction).Representation(), nil
+}
+func (itr *_Transactions__ReprListItr) Done() bool {
+	return (*_Transactions__ListItr)(itr).Done()
+}
+
+func (rn *_Transactions__Repr) Length() int64 {
+	return int64(len(rn.x))
+}
+func (_Transactions__Repr) IsAbsent() bool {
+	return false
+}
+func (_Transactions__Repr) IsNull() bool {
+	return false
+}
+func (_Transactions__Repr) AsBool() (bool, error) {
+	return mixins.List{"dageth.Transactions.Repr"}.AsBool()
+}
+func (_Transactions__Repr) AsInt() (int64, error) {
+	return mixins.List{"dageth.Transactions.Repr"}.AsInt()
+}
+func (_Transactions__Repr) AsFloat() (float64, error) {
+	return mixins.List{"dageth.Transactions.Repr"}.AsFloat()
+}
+func (_Transactions__Repr) AsString() (string, error) {
+	return mixins.List{"dageth.Transactions.Repr"}.AsString()
+}
+func (_Transactions__Repr) AsBytes() ([]byte, error) {
+	return mixins.List{"dageth.Transactions.Repr"}.AsBytes()
+}
+func (_Transactions__Repr) AsLink() (ipld.Link, error) {
+	return mixins.List{"dageth.Transactions.Repr"}.AsLink()
+}
+func (_Transactions__Repr) Prototype() ipld.NodePrototype {
+	return _Transactions__ReprPrototype{}
+}
+
+type _Transactions__ReprPrototype struct{}
+
+func (_Transactions__ReprPrototype) NewBuilder() ipld.NodeBuilder {
+	var nb _Transactions__ReprBuilder
+	nb.Reset()
+	return &nb
+}
+
+type _Transactions__ReprBuilder struct {
+	_Transactions__ReprAssembler
+}
+
+func (nb *_Transactions__ReprBuilder) Build() ipld.Node {
+	if *nb.m != schema.Maybe_Value {
+		panic("invalid state: cannot call Build on an assembler that's not finished")
+	}
+	return nb.w
+}
+func (nb *_Transactions__ReprBuilder) Reset() {
+	var w _Transactions
+	var m schema.Maybe
+	*nb = _Transactions__ReprBuilder{_Transactions__ReprAssembler{w: &w, m: &m}}
+}
+
+type _Transactions__ReprAssembler struct {
+	w     *_Transactions
+	m     *schema.Maybe
+	state laState
+
+	cm schema.Maybe
+	va _Transaction__ReprAssembler
+}
+
+func (na *_Transactions__ReprAssembler) reset() {
+	na.state = laState_initial
+	na.va.reset()
+}
+func (_Transactions__ReprAssembler) BeginMap(sizeHint int64) (ipld.MapAssembler, error) {
+	return mixins.ListAssembler{"dageth.Transactions.Repr"}.BeginMap(0)
+}
+func (na *_Transactions__ReprAssembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	switch *na.m {
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: it makes no sense to 'begin' twice on the same assembler!")
+	}
+	*na.m = midvalue
+	if sizeHint < 0 {
+		sizeHint = 0
+	}
+	if na.w == nil {
+		na.w = &_Transactions{}
+	}
+	if sizeHint > 0 {
+		na.w.x = make([]_Transaction, 0, sizeHint)
+	}
+	return na, nil
+}
+func (na *_Transactions__ReprAssembler) AssignNull() error {
+	switch *na.m {
+	case allowNull:
+		*na.m = schema.Maybe_Null
+		return nil
+	case schema.Maybe_Absent:
+		return mixins.ListAssembler{"dageth.Transactions.Repr.Repr"}.AssignNull()
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+	}
+	panic("unreachable")
+}
+func (_Transactions__ReprAssembler) AssignBool(bool) error {
+	return mixins.ListAssembler{"dageth.Transactions.Repr"}.AssignBool(false)
+}
+func (_Transactions__ReprAssembler) AssignInt(int64) error {
+	return mixins.ListAssembler{"dageth.Transactions.Repr"}.AssignInt(0)
+}
+func (_Transactions__ReprAssembler) AssignFloat(float64) error {
+	return mixins.ListAssembler{"dageth.Transactions.Repr"}.AssignFloat(0)
+}
+func (_Transactions__ReprAssembler) AssignString(string) error {
+	return mixins.ListAssembler{"dageth.Transactions.Repr"}.AssignString("")
+}
+func (_Transactions__ReprAssembler) AssignBytes([]byte) error {
+	return mixins.ListAssembler{"dageth.Transactions.Repr"}.AssignBytes(nil)
+}
+func (_Transactions__ReprAssembler) AssignLink(ipld.Link) error {
+	return mixins.ListAssembler{"dageth.Transactions.Repr"}.AssignLink(nil)
+}
+func (na *_Transactions__ReprAssembler) AssignNode(v ipld.Node) error {
+	if v.IsNull() {
+		return na.AssignNull()
+	}
+	if v2, ok := v.(*_Transactions); ok {
+		switch *na.m {
+		case schema.Maybe_Value, schema.Maybe_Null:
+			panic("invalid state: cannot assign into assembler that's already finished")
+		case midvalue:
+			panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+		}
+		if na.w == nil {
+			na.w = v2
+			*na.m = schema.Maybe_Value
+			return nil
+		}
+		*na.w = *v2
+		*na.m = schema.Maybe_Value
+		return nil
+	}
+	if v.Kind() != ipld.Kind_List {
+		return ipld.ErrWrongKind{TypeName: "dageth.Transactions.Repr", MethodName: "AssignNode", AppropriateKind: ipld.KindSet_JustList, ActualKind: v.Kind()}
+	}
+	itr := v.ListIterator()
+	for !itr.Done() {
+		_, v, err := itr.Next()
+		if err != nil {
+			return err
+		}
+		if err := na.AssembleValue().AssignNode(v); err != nil {
+			return err
+		}
+	}
+	return na.Finish()
+}
+func (_Transactions__ReprAssembler) Prototype() ipld.NodePrototype {
+	return _Transactions__ReprPrototype{}
+}
+func (la *_Transactions__ReprAssembler) valueFinishTidy() bool {
+	switch la.cm {
+	case schema.Maybe_Value:
+		la.va.w = nil
+		la.cm = schema.Maybe_Absent
+		la.state = laState_initial
+		la.va.reset()
+		return true
+	default:
+		return false
+	}
+}
+func (la *_Transactions__ReprAssembler) AssembleValue() ipld.NodeAssembler {
+	switch la.state {
+	case laState_initial:
+		// carry on
+	case laState_midValue:
+		if !la.valueFinishTidy() {
+			panic("invalid state: AssembleValue cannot be called when still in the middle of assembling the previous value")
+		} // if tidy success: carry on
+	case laState_finished:
+		panic("invalid state: AssembleValue cannot be called on an assembler that's already finished")
+	}
+	la.w.x = append(la.w.x, _Transaction{})
+	la.state = laState_midValue
+	row := &la.w.x[len(la.w.x)-1]
+	la.va.w = row
+	la.va.m = &la.cm
+	return &la.va
+}
+func (la *_Transactions__ReprAssembler) Finish() error {
+	switch la.state {
+	case laState_initial:
+		// carry on
+	case laState_midValue:
+		if !la.valueFinishTidy() {
+			panic("invalid state: Finish cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case laState_finished:
+		panic("invalid state: Finish cannot be called on an assembler that's already finished")
+	}
+	la.state = laState_finished
+	*la.m = schema.Maybe_Value
+	return nil
+}
+func (la *_Transactions__ReprAssembler) ValuePrototype(_ int64) ipld.NodePrototype {
+	return _Transaction__ReprPrototype{}
 }
 
 func (n _TrieBranchNode) FieldChild0() MaybeLink {

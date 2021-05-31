@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ipld/go-ipld-prime"
+
 	"github.com/ipld/go-ipld-prime/schema"
 	gengo "github.com/ipld/go-ipld-prime/schema/gen/go"
 )
@@ -35,7 +37,6 @@ func main() {
 		}
 		os.Exit(1)
 	}
-
 	// generate the code
 	adjCfg := &gengo.AdjunctCfg{}
 	gengo.Generate(".", pkgName, *ts, adjCfg)
@@ -61,21 +62,21 @@ func accumulateBasicTypes(ts *schema.TypeSystem) {
 func accumulateChainTypes(ts *schema.TypeSystem) {
 	/*
 		type Header struct {
-		    ParentCID &Header
-		    UnclesCID &Uncles
-		    Coinbase Address
-		    StateRootCID &StateTrieNode
+			ParentCID &Header
+			UnclesCID &Uncles
+			Coinbase Address
+			StateRootCID &StateTrieNode
 			TxRootCID &TxTrieNode
 			RctRootCID &RctTrieNode
-		    Bloom Bloom
-		    Difficulty BigInt
-		    Number BigInt
-		    GasLimit Uint
-		    GasUsed Uint
-		    Time Time
-		    Extra Bytes
-		    MixDigest Hash
-		    Nonce BlockNonce
+			Bloom Bloom
+			Difficulty BigInt
+			Number BigInt
+			GasLimit Uint
+			GasUsed Uint
+			Time Time
+			Extra Bytes
+			MixDigest Hash
+			Nonce BlockNonce
 		}
 	*/
 	ts.Accumulate(schema.SpawnStruct("Header",
@@ -211,74 +212,89 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 
 func accumulateStateDataStructures(ts *schema.TypeSystem) {
 	/*
+		# TrieNode IPLD
+		# Node IPLD values are RLP encoded; node IPLD multihashes are always the KECCAK_256 hash of the RLP encoded node bytes and the codec is dependent on the type of the trie
+		type TrieNode union {
+			| TrieBranchNode "branch"
+			| TrieExtensionNode "extension"
+			| TrieLeafNode "leaf"
+		} representation keyed
+
+
+		# The below are the expanded representations for the different types of TrieNodes: branch, extension, and leaf
 		type TrieBranchNode struct {
-			Child0 nullable &TrieNode
-			Child1 nullable &TrieNode
-			Child2 nullable &TrieNode
-			Child3 nullable &TrieNode
-			Child4 nullable &TrieNode
-			Child5 nullable &TrieNode
-			Child6 nullable &TrieNode
-			Child7 nullable &TrieNode
-			Child8 nullable &TrieNode
-			Child9 nullable &TrieNode
-			ChildA nullable &TrieNode
-			ChildB nullable &TrieNode
-			ChildC nullable &TrieNode
-			ChildD nullable &TrieNode
-			ChildE nullable &TrieNode
-			ChildF nullable &TrieNode
-			Value  Bytes
+			Child0 nullable Child
+			Child1 nullable Child
+			Child2 nullable Child
+			Child3 nullable Child
+			Child4 nullable Child
+			Child5 nullable Child
+			Child6 nullable Child
+			Child7 nullable Child
+			Child8 nullable Child
+			Child9 nullable Child
+			ChildA nullable Child
+			ChildB nullable Child
+			ChildC nullable Child
+			ChildD nullable Child
+			ChildE nullable Child
+			ChildF nullable Child
+			Value  nullable Bytes
 		}
+
+		# Child union type used to handle the case where the node is stored directly in the parent node because it is smaller
+		# than the hash that would otherwise reference the node
+		type Child union {
+			| Link &TrieNode
+			| TrieNode TrieNode
+		} representation kinded
 
 		type TrieExtensionNode struct {
 			PartialPath Bytes
-			ChildNode   &TrieNode
+			Child Child
 		}
 
 		type TrieLeafNode struct {
 			PartialPath Bytes
 			Value       Bytes
 		}
-
-		type TrieValueNode struct {
-			Value Bytes
-		}
-
-		type TrieNode union {
-			| TrieBranchNode "branch"
-			| TrieExtensionNode "extension"
-			| TrieLeafNode "leaf"
-			| TrieValueNode "value"
-		} representation keyed
 	*/
-	// This would probably be better represented using the the inline Union but we need a new SpawnUnionRepresentationInline function
+	ts.Accumulate(schema.SpawnUnion("Child",
+		[]schema.TypeName{
+			"Link",
+			"TrieNode",
+		},
+		schema.SpawnUnionRepresentationKinded(map[ipld.Kind]schema.TypeName{
+			ipld.Kind_Link: "Link",
+			ipld.Kind_Map:  "TrieNode",
+		}),
+	))
 	ts.Accumulate(schema.SpawnStruct("TrieBranchNode",
 		[]schema.StructField{
-			schema.SpawnStructField("Child0", "Link", false, true),
-			schema.SpawnStructField("Child1", "Link", false, true),
-			schema.SpawnStructField("Child2", "Link", false, true),
-			schema.SpawnStructField("Child3", "Link", false, true),
-			schema.SpawnStructField("Child4", "Link", false, true),
-			schema.SpawnStructField("Child5", "Link", false, true),
-			schema.SpawnStructField("Child6", "Link", false, true),
-			schema.SpawnStructField("Child7", "Link", false, true),
-			schema.SpawnStructField("Child8", "Link", false, true),
-			schema.SpawnStructField("Child9", "Link", false, true),
-			schema.SpawnStructField("ChildA", "Link", false, true),
-			schema.SpawnStructField("ChildB", "Link", false, true),
-			schema.SpawnStructField("ChildC", "Link", false, true),
-			schema.SpawnStructField("ChildD", "Link", false, true),
-			schema.SpawnStructField("ChildE", "Link", false, true),
-			schema.SpawnStructField("ChildF", "Link", false, true),
-			schema.SpawnStructField("Value", "Bytes", false, false),
+			schema.SpawnStructField("Child0", "Child", false, true),
+			schema.SpawnStructField("Child1", "Child", false, true),
+			schema.SpawnStructField("Child2", "Child", false, true),
+			schema.SpawnStructField("Child3", "Child", false, true),
+			schema.SpawnStructField("Child4", "Child", false, true),
+			schema.SpawnStructField("Child5", "Child", false, true),
+			schema.SpawnStructField("Child6", "Child", false, true),
+			schema.SpawnStructField("Child7", "Child", false, true),
+			schema.SpawnStructField("Child8", "Child", false, true),
+			schema.SpawnStructField("Child9", "Child", false, true),
+			schema.SpawnStructField("ChildA", "Child", false, true),
+			schema.SpawnStructField("ChildB", "Child", false, true),
+			schema.SpawnStructField("ChildC", "Child", false, true),
+			schema.SpawnStructField("ChildD", "Child", false, true),
+			schema.SpawnStructField("ChildE", "Child", false, true),
+			schema.SpawnStructField("ChildF", "Child", false, true),
+			schema.SpawnStructField("Value", "Bytes", false, true),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
 	ts.Accumulate(schema.SpawnStruct("TrieExtensionNode",
 		[]schema.StructField{
 			schema.SpawnStructField("PartialPath", "Bytes", false, false),
-			schema.SpawnStructField("ChildNode", "Link", false, false),
+			schema.SpawnStructField("Child", "Child", false, false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
@@ -289,27 +305,70 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
-	ts.Accumulate(schema.SpawnStruct("TrieValueNode",
-		[]schema.StructField{
-			schema.SpawnStructField("Value", "Bytes", false, false),
-		},
-		schema.SpawnStructRepresentationMap(nil),
-	))
 	ts.Accumulate(schema.SpawnUnion("TrieNode",
 		[]schema.TypeName{
 			"TrieBranchNode",
 			"TrieExtensionNode",
 			"TrieLeafNode",
-			"TrieValueNode",
 		},
 		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
 			"branch":    "TrieBranchNode",
 			"extension": "TrieExtensionNode",
 			"leaf":      "TrieLeafNode",
-			"value":     "TrieValueNode",
 		}),
 	))
 
+	ts.Accumulate(schema.SpawnUnion("TxTrieNode",
+		[]schema.TypeName{
+			"TrieBranchNode",
+			"TrieExtensionNode",
+			"TrieLeafNode",
+		},
+		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
+			"branch":    "TrieBranchNode",
+			"extension": "TrieExtensionNode",
+			"leaf":      "TrieLeafNode",
+		}),
+	))
+
+	ts.Accumulate(schema.SpawnUnion("RctTrieNode",
+		[]schema.TypeName{
+			"TrieBranchNode",
+			"TrieExtensionNode",
+			"TrieLeafNode",
+		},
+		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
+			"branch":    "TrieBranchNode",
+			"extension": "TrieExtensionNode",
+			"leaf":      "TrieLeafNode",
+		}),
+	))
+
+	ts.Accumulate(schema.SpawnUnion("StateTrieNode",
+		[]schema.TypeName{
+			"TrieBranchNode",
+			"TrieExtensionNode",
+			"TrieLeafNode",
+		},
+		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
+			"branch":    "TrieBranchNode",
+			"extension": "TrieExtensionNode",
+			"leaf":      "TrieLeafNode",
+		}),
+	))
+
+	ts.Accumulate(schema.SpawnUnion("StorageTrieNode",
+		[]schema.TypeName{
+			"TrieBranchNode",
+			"TrieExtensionNode",
+			"TrieLeafNode",
+		},
+		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
+			"branch":    "TrieBranchNode",
+			"extension": "TrieExtensionNode",
+			"leaf":      "TrieLeafNode",
+		}),
+	))
 	/*
 		type ByteCode bytes
 

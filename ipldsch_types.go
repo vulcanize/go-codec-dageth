@@ -38,6 +38,8 @@ type typeSlab struct {
 	ByteCode__Repr          _ByteCode__ReprPrototype
 	Bytes                   _Bytes__Prototype
 	Bytes__Repr             _Bytes__ReprPrototype
+	Child                   _Child__Prototype
+	Child__Repr             _Child__ReprPrototype
 	Hash                    _Hash__Prototype
 	Hash__Repr              _Hash__ReprPrototype
 	Header                  _Header__Prototype
@@ -50,14 +52,20 @@ type typeSlab struct {
 	Logs__Repr              _Logs__ReprPrototype
 	OpCode                  _OpCode__Prototype
 	OpCode__Repr            _OpCode__ReprPrototype
+	RctTrieNode             _RctTrieNode__Prototype
+	RctTrieNode__Repr       _RctTrieNode__ReprPrototype
 	Receipt                 _Receipt__Prototype
 	Receipt__Repr           _Receipt__ReprPrototype
 	Receipts                _Receipts__Prototype
 	Receipts__Repr          _Receipts__ReprPrototype
 	StateAccount            _StateAccount__Prototype
 	StateAccount__Repr      _StateAccount__ReprPrototype
+	StateTrieNode           _StateTrieNode__Prototype
+	StateTrieNode__Repr     _StateTrieNode__ReprPrototype
 	StorageKeys             _StorageKeys__Prototype
 	StorageKeys__Repr       _StorageKeys__ReprPrototype
+	StorageTrieNode         _StorageTrieNode__Prototype
+	StorageTrieNode__Repr   _StorageTrieNode__ReprPrototype
 	Time                    _Time__Prototype
 	Time__Repr              _Time__ReprPrototype
 	Topics                  _Topics__Prototype
@@ -74,8 +82,8 @@ type typeSlab struct {
 	TrieLeafNode__Repr      _TrieLeafNode__ReprPrototype
 	TrieNode                _TrieNode__Prototype
 	TrieNode__Repr          _TrieNode__ReprPrototype
-	TrieValueNode           _TrieValueNode__Prototype
-	TrieValueNode__Repr     _TrieValueNode__ReprPrototype
+	TxTrieNode              _TxTrieNode__Prototype
+	TxTrieNode__Repr        _TxTrieNode__ReprPrototype
 	TxType                  _TxType__Prototype
 	TxType__Repr            _TxType__ReprPrototype
 	Uint                    _Uint__Prototype
@@ -127,6 +135,21 @@ type _ByteCode struct{ x []byte }
 type Bytes = *_Bytes
 type _Bytes struct{ x []byte }
 
+// Child matches the IPLD Schema type "Child".
+// Child has Union typekind, which means its data model behaviors are that of a map kind.
+type Child = *_Child
+type _Child struct {
+	tag uint
+	x1  _Link
+	x2  _TrieNode
+}
+type _Child__iface interface {
+	_Child__member()
+}
+
+func (_Link) _Child__member()     {}
+func (_TrieNode) _Child__member() {}
+
 // Hash matches the IPLD Schema type "Hash".  It has bytes kind.
 type Hash = *_Hash
 type _Hash struct{ x []byte }
@@ -173,6 +196,23 @@ type _Logs struct {
 type OpCode = *_OpCode
 type _OpCode struct{ x []byte }
 
+// RctTrieNode matches the IPLD Schema type "RctTrieNode".
+// RctTrieNode has Union typekind, which means its data model behaviors are that of a map kind.
+type RctTrieNode = *_RctTrieNode
+type _RctTrieNode struct {
+	tag uint
+	x1  _TrieBranchNode
+	x2  _TrieExtensionNode
+	x3  _TrieLeafNode
+}
+type _RctTrieNode__iface interface {
+	_RctTrieNode__member()
+}
+
+func (_TrieBranchNode) _RctTrieNode__member()    {}
+func (_TrieExtensionNode) _RctTrieNode__member() {}
+func (_TrieLeafNode) _RctTrieNode__member()      {}
+
 // Receipt matches the IPLD Schema type "Receipt".  It has Struct type-kind, and may be interrogated like map kind.
 type Receipt = *_Receipt
 type _Receipt struct {
@@ -199,11 +239,45 @@ type _StateAccount struct {
 	CodeCID        _Link
 }
 
+// StateTrieNode matches the IPLD Schema type "StateTrieNode".
+// StateTrieNode has Union typekind, which means its data model behaviors are that of a map kind.
+type StateTrieNode = *_StateTrieNode
+type _StateTrieNode struct {
+	tag uint
+	x1  _TrieBranchNode
+	x2  _TrieExtensionNode
+	x3  _TrieLeafNode
+}
+type _StateTrieNode__iface interface {
+	_StateTrieNode__member()
+}
+
+func (_TrieBranchNode) _StateTrieNode__member()    {}
+func (_TrieExtensionNode) _StateTrieNode__member() {}
+func (_TrieLeafNode) _StateTrieNode__member()      {}
+
 // StorageKeys matches the IPLD Schema type "StorageKeys".  It has list kind.
 type StorageKeys = *_StorageKeys
 type _StorageKeys struct {
 	x []_Hash
 }
+
+// StorageTrieNode matches the IPLD Schema type "StorageTrieNode".
+// StorageTrieNode has Union typekind, which means its data model behaviors are that of a map kind.
+type StorageTrieNode = *_StorageTrieNode
+type _StorageTrieNode struct {
+	tag uint
+	x1  _TrieBranchNode
+	x2  _TrieExtensionNode
+	x3  _TrieLeafNode
+}
+type _StorageTrieNode__iface interface {
+	_StorageTrieNode__member()
+}
+
+func (_TrieBranchNode) _StorageTrieNode__member()    {}
+func (_TrieExtensionNode) _StorageTrieNode__member() {}
+func (_TrieLeafNode) _StorageTrieNode__member()      {}
 
 // Time matches the IPLD Schema type "Time".  It has bytes kind.
 type Time = *_Time
@@ -241,30 +315,30 @@ type _Transactions struct {
 // TrieBranchNode matches the IPLD Schema type "TrieBranchNode".  It has Struct type-kind, and may be interrogated like map kind.
 type TrieBranchNode = *_TrieBranchNode
 type _TrieBranchNode struct {
-	Child0 _Link__Maybe
-	Child1 _Link__Maybe
-	Child2 _Link__Maybe
-	Child3 _Link__Maybe
-	Child4 _Link__Maybe
-	Child5 _Link__Maybe
-	Child6 _Link__Maybe
-	Child7 _Link__Maybe
-	Child8 _Link__Maybe
-	Child9 _Link__Maybe
-	ChildA _Link__Maybe
-	ChildB _Link__Maybe
-	ChildC _Link__Maybe
-	ChildD _Link__Maybe
-	ChildE _Link__Maybe
-	ChildF _Link__Maybe
-	Value  _Bytes
+	Child0 _Child__Maybe
+	Child1 _Child__Maybe
+	Child2 _Child__Maybe
+	Child3 _Child__Maybe
+	Child4 _Child__Maybe
+	Child5 _Child__Maybe
+	Child6 _Child__Maybe
+	Child7 _Child__Maybe
+	Child8 _Child__Maybe
+	Child9 _Child__Maybe
+	ChildA _Child__Maybe
+	ChildB _Child__Maybe
+	ChildC _Child__Maybe
+	ChildD _Child__Maybe
+	ChildE _Child__Maybe
+	ChildF _Child__Maybe
+	Value  _Bytes__Maybe
 }
 
 // TrieExtensionNode matches the IPLD Schema type "TrieExtensionNode".  It has Struct type-kind, and may be interrogated like map kind.
 type TrieExtensionNode = *_TrieExtensionNode
 type _TrieExtensionNode struct {
 	PartialPath _Bytes
-	ChildNode   _Link
+	Child       _Child
 }
 
 // TrieLeafNode matches the IPLD Schema type "TrieLeafNode".  It has Struct type-kind, and may be interrogated like map kind.
@@ -282,7 +356,6 @@ type _TrieNode struct {
 	x1  _TrieBranchNode
 	x2  _TrieExtensionNode
 	x3  _TrieLeafNode
-	x4  _TrieValueNode
 }
 type _TrieNode__iface interface {
 	_TrieNode__member()
@@ -291,13 +364,23 @@ type _TrieNode__iface interface {
 func (_TrieBranchNode) _TrieNode__member()    {}
 func (_TrieExtensionNode) _TrieNode__member() {}
 func (_TrieLeafNode) _TrieNode__member()      {}
-func (_TrieValueNode) _TrieNode__member()     {}
 
-// TrieValueNode matches the IPLD Schema type "TrieValueNode".  It has Struct type-kind, and may be interrogated like map kind.
-type TrieValueNode = *_TrieValueNode
-type _TrieValueNode struct {
-	Value _Bytes
+// TxTrieNode matches the IPLD Schema type "TxTrieNode".
+// TxTrieNode has Union typekind, which means its data model behaviors are that of a map kind.
+type TxTrieNode = *_TxTrieNode
+type _TxTrieNode struct {
+	tag uint
+	x1  _TrieBranchNode
+	x2  _TrieExtensionNode
+	x3  _TrieLeafNode
 }
+type _TxTrieNode__iface interface {
+	_TxTrieNode__member()
+}
+
+func (_TrieBranchNode) _TxTrieNode__member()    {}
+func (_TrieExtensionNode) _TxTrieNode__member() {}
+func (_TrieLeafNode) _TxTrieNode__member()      {}
 
 // TxType matches the IPLD Schema type "TxType".  It has bytes kind.
 type TxType = *_TxType

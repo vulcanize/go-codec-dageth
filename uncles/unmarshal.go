@@ -12,7 +12,7 @@ import (
 	dageth_header "github.com/vulcanize/go-codec-dageth/header"
 )
 
-// Decode provides an IPLD codec decode interface for ETH uncles IPLDs (header list).
+// Decode provides an IPLD codec decode interface for eth uncles IPLDs (header list).
 // This function is registered via the go-ipld-prime link loader for multicodec
 // code 0x91 when this package is invoked via init.
 func Decode(na ipld.NodeAssembler, in io.Reader) error {

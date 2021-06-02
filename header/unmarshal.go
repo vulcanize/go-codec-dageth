@@ -14,7 +14,7 @@ import (
 	"github.com/multiformats/go-multihash"
 )
 
-// Decode provides an IPLD codec decode interface for ETH header IPLDs.
+// Decode provides an IPLD codec decode interface for eth header IPLDs.
 // This function is registered via the go-ipld-prime link loader for multicodec
 // code 0x90 when this package is invoked via init.
 func Decode(na ipld.NodeAssembler, in io.Reader) error {

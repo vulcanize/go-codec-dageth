@@ -4,17 +4,19 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-
-	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
-	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
-	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
+	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/multiformats/go-multihash"
 
+	dageth "github.com/vulcanize/go-codec-dageth"
+	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
 	"github.com/vulcanize/go-codec-dageth/shared"
+	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
+	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
 )
 
 type NodeKind string
@@ -41,7 +43,7 @@ func (v ValueKind) String() string {
 	return string(v)
 }
 
-// Encode provides an IPLD codec encode interface for eth trie IPLDs.
+// Encode provides an IPLD codec encode interface for eth merkle patricia trie node IPLDs.
 // This function is registered via the go-ipld-prime link loader for multicodec
 // code XXXX when this package is invoked via init.
 func Encode(node ipld.Node, w io.Writer) error {
@@ -61,7 +63,13 @@ func Encode(node ipld.Node, w io.Writer) error {
 // This means less copying of bytes, and if the destination has enough capacity,
 // fewer allocations.
 func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
-	node, kind, err := NodeAndKind(inNode)
+	// Wrap in a typed node for some basic schema form checking
+	builder := dageth.Type.TrieNode.NewBuilder()
+	if err := builder.AssignNode(inNode); err != nil {
+		return nil, err
+	}
+	n := builder.Build()
+	node, kind, err := NodeAndKind(n)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +103,7 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 func packBranchNode(node ipld.Node) ([]interface{}, error) {
 	nodeFields := make([]interface{}, 17)
 	for i := 0; i < 16; i++ {
-		key := fmt.Sprintf("Child%d", i)
+		key := fmt.Sprintf("Child%s", strings.ToUpper(strconv.FormatInt(int64(i), 16)))
 		childNode, err := node.LookupByString(key)
 		if err != nil {
 			return nil, err
@@ -176,7 +184,7 @@ func packExtensionNode(node ipld.Node) ([]interface{}, error) {
 			return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
 		}
 		nodeFields[1] = decodedChildMh.Digest
-	case ipld.Kind_Map:
+	case ipld.Kind_Map: // is this possible? Will an extension node ever link to a leaf? In that case it could just be a leaf itself...?
 		// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
 		childLeafNode, err := childNode.LookupByString(LEAF_NODE.String())
 		if err != nil {

@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-
-	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
-	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
-	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
+	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/multiformats/go-multihash"
+
+	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
+	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
+	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
 )
 
-// DecodeTrieNode provides an IPLD codec decode interface for merkle patricia trie nodes
+// DecodeTrieNode provides an IPLD codec decode interface for eth merkle patricia trie nodes
 // It's not possible to meet the Decode(na ipld.NodeAssembler, in io.Reader) interface
 // for a function that supports all trie types (multicodec types), unlike with encoding.
 // this is used by Decode functions for each trie type, which are the ones registered to their
@@ -155,7 +157,7 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 
 func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint64) error {
 	for i := 0; i < 16; i++ {
-		key := fmt.Sprintf("Child%d", i)
+		key := fmt.Sprintf("Child%s", strings.ToUpper(strconv.FormatInt(int64(i), 16)))
 		if err := ma.AssembleKey().AssignString(key); err != nil {
 			return err
 		}
@@ -177,6 +179,8 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 			}
 			continue
 		}
+		// the child node is included directly
+		// it must be a leaf node, branch and extension will never be less than 32 bytes
 		childLeaf, ok := nodeFields[i].([]interface{})
 		if !ok {
 			return fmt.Errorf("unable to decode branch node entry into []byte or []interface{}")

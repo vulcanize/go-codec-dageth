@@ -12,7 +12,7 @@ import (
 	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
 )
 
-// Decode provides an IPLD codec decode interface for ETH transaction list IPLDs.
+// Decode provides an IPLD codec decode interface for eth transaction list IPLDs.
 // This function is registered via the go-ipld-prime link loader for multicodec
 // code tbd when this package is invoked via init.
 func Decode(na ipld.NodeAssembler, in io.Reader) error {

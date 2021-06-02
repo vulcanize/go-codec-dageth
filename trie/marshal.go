@@ -1,8 +1,13 @@
 package dageth_trie
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+
+	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
+	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
+	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
@@ -13,16 +18,27 @@ import (
 )
 
 type NodeKind string
+type ValueKind string
 
 const (
-	UNKNOWN_NODE   NodeKind = "Unknown"
-	BRANCH_NODE    NodeKind = "TrieBranchNode"
-	EXTENSION_NODE NodeKind = "TrieExtensionNode"
-	LEAF_NODE      NodeKind = "TrieLeafNode"
+	UNKNOWN_NODE   NodeKind = "unknown"
+	BRANCH_NODE    NodeKind = "branch"
+	EXTENSION_NODE NodeKind = "extension"
+	LEAF_NODE      NodeKind = "leaf"
+
+	UNKNOWN_VALUE ValueKind = "unknown"
+	TX_VALUE      ValueKind = "tx"
+	RCT_VALUE     ValueKind = "rct"
+	STATE_VALUE   ValueKind = "state"
+	STORAGE_VALUE ValueKind = "storage"
 )
 
 func (n NodeKind) String() string {
 	return string(n)
+}
+
+func (v ValueKind) String() string {
+	return string(v)
 }
 
 // Encode provides an IPLD codec encode interface for eth trie IPLDs.
@@ -102,25 +118,26 @@ func packBranchNode(node ipld.Node) ([]interface{}, error) {
 				return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
 			}
 			nodeFields[i] = decodedChildMh.Digest
-		case ipld.Kind_Map: // TODO:
-			childBytes, err := childNode.AsBytes()
+		case ipld.Kind_Map:
+			// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
+			childLeafNode, err := childNode.LookupByString(LEAF_NODE.String())
+			if err != nil {
+				return nil, fmt.Errorf("only leaf nodes can be less than 32 bytes and stored direclty in a parent node")
+			}
+			childLeafNodeFields, err := packLeafNode(childLeafNode)
 			if err != nil {
 				return nil, err
 			}
-			nodeFields[i] = childBytes
+			childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
+			if err != nil {
+				return nil, err
+			}
+			nodeFields[i] = childLeafNodeRLP
 		default:
 			return nil, fmt.Errorf("branch node child needs to be of kind bytes, link, or null")
 		}
 	}
-	valueNode, err := node.LookupByString("Value")
-	if err != nil {
-		return nil, err
-	}
-	if valueNode.IsNull() {
-		nodeFields[16] = []byte{}
-		return nil, err
-	}
-	valueBytes, err := valueNode.AsBytes()
+	valueBytes, err := packValue(node)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +155,7 @@ func packExtensionNode(node ipld.Node) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	nodeFields[0] = pp
+	nodeFields[0] = pp // TODO: need to compact the key
 	childNode, err := node.LookupByString("Child")
 	if err != nil {
 		return nil, err
@@ -159,12 +176,21 @@ func packExtensionNode(node ipld.Node) ([]interface{}, error) {
 			return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
 		}
 		nodeFields[1] = decodedChildMh.Digest
-	case ipld.Kind_Map: // TODO:
-		childBytes, err := childNode.AsBytes()
+	case ipld.Kind_Map:
+		// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
+		childLeafNode, err := childNode.LookupByString(LEAF_NODE.String())
+		if err != nil {
+			return nil, fmt.Errorf("only leaf nodes can be less than 32 bytes and stored direclty in a parent node")
+		}
+		childLeafNodeFields, err := packLeafNode(childLeafNode)
 		if err != nil {
 			return nil, err
 		}
-		nodeFields[1] = childBytes
+		childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
+		if err != nil {
+			return nil, err
+		}
+		nodeFields[1] = childLeafNodeRLP
 	default:
 		return nil, fmt.Errorf("extension node child needs to be of kind bytes or link")
 	}
@@ -181,21 +207,79 @@ func packLeafNode(node ipld.Node) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	nodeFields[0] = pp
-	valNode, err := node.LookupByString("Value")
+	nodeFields[0] = pp // TODO: need to compact the key
+	valueBytes, err := packValue(node)
 	if err != nil {
 		return nil, err
 	}
-	val, err := valNode.AsBytes()
-	if err != nil {
-		return nil, err
-	}
-	nodeFields[1] = val
+	nodeFields[1] = valueBytes
 	return nodeFields, nil
 }
 
+func packValue(node ipld.Node) ([]byte, error) {
+	valUnionNode, err := node.LookupByString("Value")
+	if err != nil {
+		return nil, err
+	}
+	if valUnionNode.IsNull() {
+		return []byte{}, nil
+	}
+	valNode, valKind, err := ValueAndKind(valUnionNode)
+	if err != nil {
+		return nil, err
+	}
+	switch valKind {
+	case TX_VALUE:
+		buf := new(bytes.Buffer)
+		if err := dageth_tx.Encode(valNode, buf); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
+	case RCT_VALUE:
+		buf := new(bytes.Buffer)
+		if err := dageth_rct.Encode(valNode, buf); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
+	case STATE_VALUE:
+		buf := new(bytes.Buffer)
+		if err := dageth_account.Encode(valNode, buf); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
+	case STORAGE_VALUE:
+		return valNode.AsBytes()
+	default:
+		return nil, fmt.Errorf("eth trie value of unexpected kind %s", valKind.String())
+	}
+}
+
+func ValueAndKind(node ipld.Node) (ipld.Node, ValueKind, error) {
+	n, err := node.LookupByString(TX_VALUE.String())
+	if err == nil {
+		return n, TX_VALUE, nil
+	}
+	n, err = node.LookupByString(RCT_VALUE.String())
+	if err == nil {
+		return n, RCT_VALUE, nil
+	}
+	n, err = node.LookupByString(STATE_VALUE.String())
+	if err == nil {
+		return n, STATE_VALUE, nil
+	}
+	n, err = node.LookupByString(STORAGE_VALUE.String())
+	if err == nil {
+		return n, STORAGE_VALUE, nil
+	}
+	return nil, "", fmt.Errorf("eth trie value IPLD node is missing the expected keyed Union keys")
+}
+
 func NodeAndKind(node ipld.Node) (ipld.Node, NodeKind, error) {
-	n, err := node.LookupByString(BRANCH_NODE.String())
+	n, err := node.LookupByString(LEAF_NODE.String())
+	if err == nil {
+		return n, LEAF_NODE, nil
+	}
+	n, err = node.LookupByString(BRANCH_NODE.String())
 	if err == nil {
 		return n, BRANCH_NODE, nil
 	}
@@ -203,9 +287,5 @@ func NodeAndKind(node ipld.Node) (ipld.Node, NodeKind, error) {
 	if err == nil {
 		return n, EXTENSION_NODE, nil
 	}
-	n, err = node.LookupByString(LEAF_NODE.String())
-	if err == nil {
-		return n, LEAF_NODE, nil
-	}
-	return nil, "", fmt.Errorf("IPLD node is missing the expected keyed Union keys")
+	return nil, "", fmt.Errorf("eth trie node IPLD node is missing the expected keyed Union keys")
 }

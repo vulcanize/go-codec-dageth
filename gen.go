@@ -238,8 +238,16 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 			ChildD nullable Child
 			ChildE nullable Child
 			ChildF nullable Child
-			Value  nullable Bytes
+			Value  nullable Value
 		}
+
+		# Value union type used to handle the different values stored in leaf nodes in the different tries
+		type Value union {
+			| Transaction "tx"
+			| Receipt "rct"
+			| Account "state"
+			| Bytes "storage"
+		} representation keyed
 
 		# Child union type used to handle the case where the node is stored directly in the parent node because it is smaller
 		# than the hash that would otherwise reference the node
@@ -255,9 +263,23 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 
 		type TrieLeafNode struct {
 			PartialPath Bytes
-			Value       Bytes
+			Value       Value
 		}
 	*/
+	ts.Accumulate(schema.SpawnUnion("Value",
+		[]schema.TypeName{
+			"Transaction",
+			"Receipt",
+			"Account",
+			"Bytes",
+		},
+		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
+			"tx":      "Transaction",
+			"rct":     "Receipt",
+			"state":   "Account",
+			"storage": "Bytes",
+		}),
+	))
 	ts.Accumulate(schema.SpawnUnion("Child",
 		[]schema.TypeName{
 			"Link",
@@ -286,7 +308,7 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 			schema.SpawnStructField("ChildD", "Child", false, true),
 			schema.SpawnStructField("ChildE", "Child", false, true),
 			schema.SpawnStructField("ChildF", "Child", false, true),
-			schema.SpawnStructField("Value", "Bytes", false, true),
+			schema.SpawnStructField("Value", "Value", false, true),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
@@ -300,7 +322,7 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnStruct("TrieLeafNode",
 		[]schema.StructField{
 			schema.SpawnStructField("PartialPath", "Bytes", false, false),
-			schema.SpawnStructField("Value", "Bytes", false, false),
+			schema.SpawnStructField("Value", "Value", false, false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
@@ -316,62 +338,10 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 			"leaf":      "TrieLeafNode",
 		}),
 	))
-
-	ts.Accumulate(schema.SpawnUnion("TxTrieNode",
-		[]schema.TypeName{
-			"TrieBranchNode",
-			"TrieExtensionNode",
-			"TrieLeafNode",
-		},
-		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
-			"branch":    "TrieBranchNode",
-			"extension": "TrieExtensionNode",
-			"leaf":      "TrieLeafNode",
-		}),
-	))
-
-	ts.Accumulate(schema.SpawnUnion("RctTrieNode",
-		[]schema.TypeName{
-			"TrieBranchNode",
-			"TrieExtensionNode",
-			"TrieLeafNode",
-		},
-		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
-			"branch":    "TrieBranchNode",
-			"extension": "TrieExtensionNode",
-			"leaf":      "TrieLeafNode",
-		}),
-	))
-
-	ts.Accumulate(schema.SpawnUnion("StateTrieNode",
-		[]schema.TypeName{
-			"TrieBranchNode",
-			"TrieExtensionNode",
-			"TrieLeafNode",
-		},
-		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
-			"branch":    "TrieBranchNode",
-			"extension": "TrieExtensionNode",
-			"leaf":      "TrieLeafNode",
-		}),
-	))
-
-	ts.Accumulate(schema.SpawnUnion("StorageTrieNode",
-		[]schema.TypeName{
-			"TrieBranchNode",
-			"TrieExtensionNode",
-			"TrieLeafNode",
-		},
-		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
-			"branch":    "TrieBranchNode",
-			"extension": "TrieExtensionNode",
-			"leaf":      "TrieLeafNode",
-		}),
-	))
 	/*
 		type ByteCode bytes
 
-		type StateAccount struct {
+		type Account struct {
 			Nonce    Uint
 			Balance  Balance
 			StorageRootCID &StorageTrieNode
@@ -379,7 +349,7 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 		}
 	*/
 	ts.Accumulate(schema.SpawnBytes("ByteCode"))
-	ts.Accumulate(schema.SpawnStruct("StateAccount",
+	ts.Accumulate(schema.SpawnStruct("Account",
 		[]schema.StructField{
 			schema.SpawnStructField("Nonce", "Uint", false, false),
 			schema.SpawnStructField("Balance", "Balance", false, false),

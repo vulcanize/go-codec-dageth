@@ -50,7 +50,7 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 // EncodeAccount packs the node into the provided go-ethereum Account
 func EncodeAccount(header *state.Account, inNode ipld.Node) error {
 	// Wrap in a typed node for some basic schema form checking
-	builder := dageth.Type.Header.NewBuilder()
+	builder := dageth.Type.Account.NewBuilder()
 	if err := builder.AssignNode(inNode); err != nil {
 		return err
 	}

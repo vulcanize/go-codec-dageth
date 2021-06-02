@@ -5,14 +5,14 @@ import (
 	"io"
 	"io/ioutil"
 
-	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
-
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
+
+	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
 )
 
-// Decode provides an IPLD codec decode interface for ETH receipt list IPLDs.
+// Decode provides an IPLD codec decode interface for eth receipt list IPLDs.
 // This function is registered via the go-ipld-prime link loader for multicodec
 // code tbd when this package is invoked via init.
 func Decode(na ipld.NodeAssembler, in io.Reader) error {

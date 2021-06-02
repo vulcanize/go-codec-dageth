@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"io"
 
-	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
-
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
 
 	dageth "github.com/vulcanize/go-codec-dageth"
+	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
 	"github.com/vulcanize/go-codec-dageth/shared"
 )
 

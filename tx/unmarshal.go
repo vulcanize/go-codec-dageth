@@ -10,7 +10,7 @@ import (
 	"github.com/ipld/go-ipld-prime"
 )
 
-// Decode provides an IPLD codec decode interface for ETH transaction IPLDs.
+// Decode provides an IPLD codec decode interface for eth transaction IPLDs.
 // This function is registered via the go-ipld-prime link loader for multicodec
 // code 0x93 when this package is invoked via init.
 func Decode(na ipld.NodeAssembler, in io.Reader) error {

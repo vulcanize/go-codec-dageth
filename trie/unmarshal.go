@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipfs/go-cid"
@@ -155,7 +157,7 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 
 func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint64) error {
 	for i := 0; i < 16; i++ {
-		key := fmt.Sprintf("Child%d", i)
+		key := fmt.Sprintf("Child%s", strings.ToUpper(strconv.FormatInt(int64(i), 16)))
 		if err := ma.AssembleKey().AssignString(key); err != nil {
 			return err
 		}

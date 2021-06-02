@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
@@ -101,7 +103,7 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 func packBranchNode(node ipld.Node) ([]interface{}, error) {
 	nodeFields := make([]interface{}, 17)
 	for i := 0; i < 16; i++ {
-		key := fmt.Sprintf("Child%d", i)
+		key := fmt.Sprintf("Child%s", strings.ToUpper(strconv.FormatInt(int64(i), 16)))
 		childNode, err := node.LookupByString(key)
 		if err != nil {
 			return nil, err

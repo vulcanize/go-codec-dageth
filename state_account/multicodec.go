@@ -31,7 +31,7 @@ func init() {
 func AddSupportToChooser(existing traversal.LinkTargetNodePrototypeChooser) traversal.LinkTargetNodePrototypeChooser {
 	return func(lnk ipld.Link, lnkCtx ipld.LinkContext) (ipld.NodePrototype, error) {
 		if lnk, ok := lnk.(cidlink.Link); ok && lnk.Cid.Prefix().Codec == MultiCodecType {
-			return dageth.Type.StateAccount, nil
+			return dageth.Type.Account, nil
 		}
 		return existing(lnk, lnkCtx)
 	}

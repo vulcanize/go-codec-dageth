@@ -10,7 +10,6 @@ import (
 	"os"
 
 	"github.com/ipld/go-ipld-prime"
-
 	"github.com/ipld/go-ipld-prime/schema"
 	gengo "github.com/ipld/go-ipld-prime/schema/gen/go"
 )

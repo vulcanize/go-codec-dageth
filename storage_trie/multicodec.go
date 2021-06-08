@@ -1,4 +1,4 @@
-package dageth_storagetrie
+package storage_trie
 
 import (
 	"io"

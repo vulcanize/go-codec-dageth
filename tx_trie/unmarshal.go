@@ -1,4 +1,4 @@
-package dageth_txtrie
+package tx_trie
 
 import (
 	"io"

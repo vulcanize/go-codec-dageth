@@ -1,4 +1,4 @@
-package dageth_tx
+package tx
 
 import (
 	"encoding/binary"

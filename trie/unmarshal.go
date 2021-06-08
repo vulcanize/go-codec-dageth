@@ -1,4 +1,4 @@
-package dageth_trie
+package trie
 
 import (
 	"fmt"

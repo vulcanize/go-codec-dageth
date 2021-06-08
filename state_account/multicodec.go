@@ -1,4 +1,4 @@
-package dageth_account
+package account
 
 import (
 	"io"

@@ -1,4 +1,4 @@
-package dageth_uncles
+package uncles
 
 import (
 	"fmt"

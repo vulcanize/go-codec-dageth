@@ -1,4 +1,4 @@
-package dageth_rct
+package rct
 
 import (
 	"bytes"

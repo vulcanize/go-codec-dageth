@@ -4095,7 +4095,7 @@ type _Child__Assembler struct {
 	cm  schema.Maybe
 	ca1 _Link__Assembler
 
-	ca2 _TrieNode__Assembler
+	ca2 *_TrieNode__Assembler
 	ca  uint
 }
 
@@ -4245,7 +4245,7 @@ func (ma *_Child__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, error)
 		ma.w.tag = 2
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
-		return &ma.ca2, nil
+		return ma.ca2, nil
 	}
 	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Child", Key: &_String{k}}
 }
@@ -4289,7 +4289,7 @@ func (ma *_Child__Assembler) AssembleValue() ipld.NodeAssembler {
 	case 1:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
-		return &ma.ca2
+		return ma.ca2
 	default:
 		panic("unreachable")
 	}
@@ -4515,7 +4515,7 @@ type _Child__ReprAssembler struct {
 	w   *_Child
 	m   *schema.Maybe
 	ca1 _Link__ReprAssembler
-	ca2 _TrieNode__ReprAssembler
+	ca2 *_TrieNode__ReprAssembler
 	ca  uint
 }
 
@@ -19442,9 +19442,9 @@ func (_TrieLeafNode__ReprKeyAssembler) Prototype() ipld.NodePrototype {
 func (n _TrieNode) AsInterface() _TrieNode__iface {
 	switch n.tag {
 	case 1:
-		return &n.x1
+		return n.x1
 	case 2:
-		return &n.x2
+		return n.x2
 	case 3:
 		return &n.x3
 	default:
@@ -19503,12 +19503,12 @@ func (n TrieNode) LookupByString(key string) (ipld.Node, error) {
 		if n.tag != 1 {
 			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
 		}
-		return &n.x1, nil
+		return n.x1, nil
 	case "TrieExtensionNode":
 		if n.tag != 2 {
 			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
 		}
-		return &n.x2, nil
+		return n.x2, nil
 	case "TrieLeafNode":
 		if n.tag != 3 {
 			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
@@ -19546,9 +19546,9 @@ func (itr *_TrieNode__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	}
 	switch itr.n.tag {
 	case 1:
-		k, v = &memberName__TrieNode_TrieBranchNode, &itr.n.x1
+		k, v = &memberName__TrieNode_TrieBranchNode, itr.n.x1
 	case 2:
-		k, v = &memberName__TrieNode_TrieExtensionNode, &itr.n.x2
+		k, v = &memberName__TrieNode_TrieExtensionNode, itr.n.x2
 	case 3:
 		k, v = &memberName__TrieNode_TrieLeafNode, &itr.n.x3
 	default:
@@ -19773,14 +19773,14 @@ func (ma *_TrieNode__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, err
 		ma.state = maState_midValue
 		ma.ca = 1
 		ma.w.tag = 1
-		ma.ca1.w = &ma.w.x1
+		ma.ca1.w = ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1, nil
 	case "TrieExtensionNode":
 		ma.state = maState_midValue
 		ma.ca = 2
 		ma.w.tag = 2
-		ma.ca2.w = &ma.w.x2
+		ma.ca2.w = ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2, nil
 	case "TrieLeafNode":
@@ -19827,11 +19827,11 @@ func (ma *_TrieNode__Assembler) AssembleValue() ipld.NodeAssembler {
 	ma.state = maState_midValue
 	switch ma.ca {
 	case 0:
-		ma.ca1.w = &ma.w.x1
+		ma.ca1.w = ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
 	case 1:
-		ma.ca2.w = &ma.w.x2
+		ma.ca2.w = ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
 	case 2:
@@ -20237,14 +20237,14 @@ func (ma *_TrieNode__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler,
 		ma.state = maState_midValue
 		ma.ca = 1
 		ma.w.tag = 1
-		ma.ca1.w = &ma.w.x1
+		ma.ca1.w = ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1, nil
 	case "extension":
 		ma.state = maState_midValue
 		ma.ca = 2
 		ma.w.tag = 2
-		ma.ca2.w = &ma.w.x2
+		ma.ca2.w = ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2, nil
 	case "leaf":
@@ -20291,11 +20291,11 @@ func (ma *_TrieNode__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 	ma.state = maState_midValue
 	switch ma.ca {
 	case 0:
-		ma.ca1.w = &ma.w.x1
+		ma.ca1.w = ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
 	case 1:
-		ma.ca2.w = &ma.w.x2
+		ma.ca2.w = ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
 	case 2:

@@ -296,8 +296,8 @@ type _TrieLeafNode struct {
 type TrieNode = *_TrieNode
 type _TrieNode struct {
 	tag uint
-	x1  _TrieBranchNode
-	x2  _TrieExtensionNode
+	x1  *_TrieBranchNode
+	x2  *_TrieExtensionNode
 	x3  _TrieLeafNode
 }
 type _TrieNode__iface interface {

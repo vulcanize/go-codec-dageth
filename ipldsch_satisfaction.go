@@ -3278,219 +3278,6 @@ var _ ipld.Node = &_BigInt__Repr{}
 type _BigInt__ReprPrototype = _BigInt__Prototype
 type _BigInt__ReprAssembler = _BigInt__Assembler
 
-func (n BlockNonce) Bytes() []byte {
-	return n.x
-}
-func (_BlockNonce__Prototype) FromBytes(v []byte) (BlockNonce, error) {
-	n := _BlockNonce{v}
-	return &n, nil
-}
-
-type _BlockNonce__Maybe struct {
-	m schema.Maybe
-	v BlockNonce
-}
-type MaybeBlockNonce = *_BlockNonce__Maybe
-
-func (m MaybeBlockNonce) IsNull() bool {
-	return m.m == schema.Maybe_Null
-}
-func (m MaybeBlockNonce) IsAbsent() bool {
-	return m.m == schema.Maybe_Absent
-}
-func (m MaybeBlockNonce) Exists() bool {
-	return m.m == schema.Maybe_Value
-}
-func (m MaybeBlockNonce) AsNode() ipld.Node {
-	switch m.m {
-	case schema.Maybe_Absent:
-		return ipld.Absent
-	case schema.Maybe_Null:
-		return ipld.Null
-	case schema.Maybe_Value:
-		return m.v
-	default:
-		panic("unreachable")
-	}
-}
-func (m MaybeBlockNonce) Must() BlockNonce {
-	if !m.Exists() {
-		panic("unbox of a maybe rejected")
-	}
-	return m.v
-}
-
-var _ ipld.Node = (BlockNonce)(&_BlockNonce{})
-var _ schema.TypedNode = (BlockNonce)(&_BlockNonce{})
-
-func (BlockNonce) Kind() ipld.Kind {
-	return ipld.Kind_Bytes
-}
-func (BlockNonce) LookupByString(string) (ipld.Node, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.LookupByString("")
-}
-func (BlockNonce) LookupByNode(ipld.Node) (ipld.Node, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.LookupByNode(nil)
-}
-func (BlockNonce) LookupByIndex(idx int64) (ipld.Node, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.LookupByIndex(0)
-}
-func (BlockNonce) LookupBySegment(seg ipld.PathSegment) (ipld.Node, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.LookupBySegment(seg)
-}
-func (BlockNonce) MapIterator() ipld.MapIterator {
-	return nil
-}
-func (BlockNonce) ListIterator() ipld.ListIterator {
-	return nil
-}
-func (BlockNonce) Length() int64 {
-	return -1
-}
-func (BlockNonce) IsAbsent() bool {
-	return false
-}
-func (BlockNonce) IsNull() bool {
-	return false
-}
-func (BlockNonce) AsBool() (bool, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.AsBool()
-}
-func (BlockNonce) AsInt() (int64, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.AsInt()
-}
-func (BlockNonce) AsFloat() (float64, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.AsFloat()
-}
-func (BlockNonce) AsString() (string, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.AsString()
-}
-func (n BlockNonce) AsBytes() ([]byte, error) {
-	return n.x, nil
-}
-func (BlockNonce) AsLink() (ipld.Link, error) {
-	return mixins.Bytes{"dageth.BlockNonce"}.AsLink()
-}
-func (BlockNonce) Prototype() ipld.NodePrototype {
-	return _BlockNonce__Prototype{}
-}
-
-type _BlockNonce__Prototype struct{}
-
-func (_BlockNonce__Prototype) NewBuilder() ipld.NodeBuilder {
-	var nb _BlockNonce__Builder
-	nb.Reset()
-	return &nb
-}
-
-type _BlockNonce__Builder struct {
-	_BlockNonce__Assembler
-}
-
-func (nb *_BlockNonce__Builder) Build() ipld.Node {
-	if *nb.m != schema.Maybe_Value {
-		panic("invalid state: cannot call Build on an assembler that's not finished")
-	}
-	return nb.w
-}
-func (nb *_BlockNonce__Builder) Reset() {
-	var w _BlockNonce
-	var m schema.Maybe
-	*nb = _BlockNonce__Builder{_BlockNonce__Assembler{w: &w, m: &m}}
-}
-
-type _BlockNonce__Assembler struct {
-	w *_BlockNonce
-	m *schema.Maybe
-}
-
-func (na *_BlockNonce__Assembler) reset() {}
-func (_BlockNonce__Assembler) BeginMap(sizeHint int64) (ipld.MapAssembler, error) {
-	return mixins.BytesAssembler{"dageth.BlockNonce"}.BeginMap(0)
-}
-func (_BlockNonce__Assembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
-	return mixins.BytesAssembler{"dageth.BlockNonce"}.BeginList(0)
-}
-func (na *_BlockNonce__Assembler) AssignNull() error {
-	switch *na.m {
-	case allowNull:
-		*na.m = schema.Maybe_Null
-		return nil
-	case schema.Maybe_Absent:
-		return mixins.BytesAssembler{"dageth.BlockNonce"}.AssignNull()
-	case schema.Maybe_Value, schema.Maybe_Null:
-		panic("invalid state: cannot assign into assembler that's already finished")
-	}
-	panic("unreachable")
-}
-func (_BlockNonce__Assembler) AssignBool(bool) error {
-	return mixins.BytesAssembler{"dageth.BlockNonce"}.AssignBool(false)
-}
-func (_BlockNonce__Assembler) AssignInt(int64) error {
-	return mixins.BytesAssembler{"dageth.BlockNonce"}.AssignInt(0)
-}
-func (_BlockNonce__Assembler) AssignFloat(float64) error {
-	return mixins.BytesAssembler{"dageth.BlockNonce"}.AssignFloat(0)
-}
-func (_BlockNonce__Assembler) AssignString(string) error {
-	return mixins.BytesAssembler{"dageth.BlockNonce"}.AssignString("")
-}
-func (na *_BlockNonce__Assembler) AssignBytes(v []byte) error {
-	switch *na.m {
-	case schema.Maybe_Value, schema.Maybe_Null:
-		panic("invalid state: cannot assign into assembler that's already finished")
-	}
-	if na.w == nil {
-		na.w = &_BlockNonce{}
-	}
-	na.w.x = v
-	*na.m = schema.Maybe_Value
-	return nil
-}
-func (_BlockNonce__Assembler) AssignLink(ipld.Link) error {
-	return mixins.BytesAssembler{"dageth.BlockNonce"}.AssignLink(nil)
-}
-func (na *_BlockNonce__Assembler) AssignNode(v ipld.Node) error {
-	if v.IsNull() {
-		return na.AssignNull()
-	}
-	if v2, ok := v.(*_BlockNonce); ok {
-		switch *na.m {
-		case schema.Maybe_Value, schema.Maybe_Null:
-			panic("invalid state: cannot assign into assembler that's already finished")
-		}
-		if na.w == nil {
-			na.w = v2
-			*na.m = schema.Maybe_Value
-			return nil
-		}
-		*na.w = *v2
-		*na.m = schema.Maybe_Value
-		return nil
-	}
-	if v2, err := v.AsBytes(); err != nil {
-		return err
-	} else {
-		return na.AssignBytes(v2)
-	}
-}
-func (_BlockNonce__Assembler) Prototype() ipld.NodePrototype {
-	return _BlockNonce__Prototype{}
-}
-func (BlockNonce) Type() schema.Type {
-	return nil /*TODO:typelit*/
-}
-func (n BlockNonce) Representation() ipld.Node {
-	return (*_BlockNonce__Repr)(n)
-}
-
-type _BlockNonce__Repr = _BlockNonce
-
-var _ ipld.Node = &_BlockNonce__Repr{}
-
-type _BlockNonce__ReprPrototype = _BlockNonce__Prototype
-type _BlockNonce__ReprAssembler = _BlockNonce__Assembler
-
 func (n Bloom) Bytes() []byte {
 	return n.x
 }
@@ -5177,7 +4964,7 @@ func (n _Header) FieldExtra() Bytes {
 func (n _Header) FieldMixDigest() Hash {
 	return &n.MixDigest
 }
-func (n _Header) FieldNonce() BlockNonce {
+func (n _Header) FieldNonce() Uint {
 	return &n.Nonce
 }
 
@@ -5436,7 +5223,7 @@ type _Header__Assembler struct {
 	ca_Time         _Time__Assembler
 	ca_Extra        _Bytes__Assembler
 	ca_MixDigest    _Hash__Assembler
-	ca_Nonce        _BlockNonce__Assembler
+	ca_Nonce        _Uint__Assembler
 }
 
 func (na *_Header__Assembler) reset() {
@@ -6444,7 +6231,7 @@ type _Header__ReprAssembler struct {
 	ca_Time         _Time__ReprAssembler
 	ca_Extra        _Bytes__ReprAssembler
 	ca_MixDigest    _Hash__ReprAssembler
-	ca_Nonce        _BlockNonce__ReprAssembler
+	ca_Nonce        _Uint__ReprAssembler
 }
 
 func (na *_Header__ReprAssembler) reset() {
@@ -9248,8 +9035,8 @@ var _ ipld.Node = &_OpCode__Repr{}
 type _OpCode__ReprPrototype = _OpCode__Prototype
 type _OpCode__ReprAssembler = _OpCode__Assembler
 
-func (n _Receipt) FieldType() TxType {
-	return &n.Type
+func (n _Receipt) FieldTxType() TxType {
+	return &n.TxType
 }
 func (n _Receipt) FieldPostState() MaybeBytes {
 	return &n.PostState
@@ -9302,7 +9089,7 @@ func (m MaybeReceipt) Must() Receipt {
 }
 
 var (
-	fieldName__Receipt_Type              = _String{"Type"}
+	fieldName__Receipt_TxType            = _String{"TxType"}
 	fieldName__Receipt_PostState         = _String{"PostState"}
 	fieldName__Receipt_Status            = _String{"Status"}
 	fieldName__Receipt_CumulativeGasUsed = _String{"CumulativeGasUsed"}
@@ -9317,8 +9104,8 @@ func (Receipt) Kind() ipld.Kind {
 }
 func (n Receipt) LookupByString(key string) (ipld.Node, error) {
 	switch key {
-	case "Type":
-		return &n.Type, nil
+	case "TxType":
+		return &n.TxType, nil
 	case "PostState":
 		if n.PostState.m == schema.Maybe_Null {
 			return ipld.Null, nil
@@ -9367,8 +9154,8 @@ func (itr *_Receipt__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	}
 	switch itr.idx {
 	case 0:
-		k = &fieldName__Receipt_Type
-		v = &itr.n.Type
+		k = &fieldName__Receipt_TxType
+		v = &itr.n.TxType
 	case 1:
 		k = &fieldName__Receipt_PostState
 		if itr.n.PostState.m == schema.Maybe_Null {
@@ -9468,7 +9255,7 @@ type _Receipt__Assembler struct {
 	f     int
 
 	cm                   schema.Maybe
-	ca_Type              _TxType__Assembler
+	ca_TxType            _TxType__Assembler
 	ca_PostState         _Bytes__Assembler
 	ca_Status            _Uint__Assembler
 	ca_CumulativeGasUsed _Uint__Assembler
@@ -9479,7 +9266,7 @@ type _Receipt__Assembler struct {
 func (na *_Receipt__Assembler) reset() {
 	na.state = maState_initial
 	na.s = 0
-	na.ca_Type.reset()
+	na.ca_TxType.reset()
 	na.ca_PostState.reset()
 	na.ca_Status.reset()
 	na.ca_CumulativeGasUsed.reset()
@@ -9488,7 +9275,7 @@ func (na *_Receipt__Assembler) reset() {
 }
 
 var (
-	fieldBit__Receipt_Type              = 1 << 0
+	fieldBit__Receipt_TxType            = 1 << 0
 	fieldBit__Receipt_PostState         = 1 << 1
 	fieldBit__Receipt_Status            = 1 << 2
 	fieldBit__Receipt_CumulativeGasUsed = 1 << 3
@@ -9591,7 +9378,7 @@ func (ma *_Receipt__Assembler) valueFinishTidy() bool {
 	case 0:
 		switch ma.cm {
 		case schema.Maybe_Value:
-			ma.ca_Type.w = nil
+			ma.ca_TxType.w = nil
 			ma.cm = schema.Maybe_Absent
 			ma.state = maState_initial
 			return true
@@ -9672,16 +9459,16 @@ func (ma *_Receipt__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, erro
 		panic("invalid state: AssembleEntry cannot be called on an assembler that's already finished")
 	}
 	switch k {
-	case "Type":
-		if ma.s&fieldBit__Receipt_Type != 0 {
-			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Type}
+	case "TxType":
+		if ma.s&fieldBit__Receipt_TxType != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_TxType}
 		}
-		ma.s += fieldBit__Receipt_Type
+		ma.s += fieldBit__Receipt_TxType
 		ma.state = maState_midValue
 		ma.f = 0
-		ma.ca_Type.w = &ma.w.Type
-		ma.ca_Type.m = &ma.cm
-		return &ma.ca_Type, nil
+		ma.ca_TxType.w = &ma.w.TxType
+		ma.ca_TxType.m = &ma.cm
+		return &ma.ca_TxType, nil
 	case "PostState":
 		if ma.s&fieldBit__Receipt_PostState != 0 {
 			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_PostState}
@@ -9771,9 +9558,9 @@ func (ma *_Receipt__Assembler) AssembleValue() ipld.NodeAssembler {
 	ma.state = maState_midValue
 	switch ma.f {
 	case 0:
-		ma.ca_Type.w = &ma.w.Type
-		ma.ca_Type.m = &ma.cm
-		return &ma.ca_Type
+		ma.ca_TxType.w = &ma.w.TxType
+		ma.ca_TxType.m = &ma.cm
+		return &ma.ca_TxType
 	case 1:
 		ma.ca_PostState.w = ma.w.PostState.v
 		ma.ca_PostState.m = &ma.w.PostState.m
@@ -9817,8 +9604,8 @@ func (ma *_Receipt__Assembler) Finish() error {
 	}
 	if ma.s&fieldBits__Receipt_sufficient != fieldBits__Receipt_sufficient {
 		err := ipld.ErrMissingRequiredField{Missing: make([]string, 0)}
-		if ma.s&fieldBit__Receipt_Type == 0 {
-			err.Missing = append(err.Missing, "Type")
+		if ma.s&fieldBit__Receipt_TxType == 0 {
+			err.Missing = append(err.Missing, "TxType")
 		}
 		if ma.s&fieldBit__Receipt_CumulativeGasUsed == 0 {
 			err.Missing = append(err.Missing, "CumulativeGasUsed")
@@ -9867,11 +9654,11 @@ func (ka *_Receipt__KeyAssembler) AssignString(k string) error {
 		panic("misuse: KeyAssembler held beyond its valid lifetime")
 	}
 	switch k {
-	case "Type":
-		if ka.s&fieldBit__Receipt_Type != 0 {
-			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Type}
+	case "TxType":
+		if ka.s&fieldBit__Receipt_TxType != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_TxType}
 		}
-		ka.s += fieldBit__Receipt_Type
+		ka.s += fieldBit__Receipt_TxType
 		ka.state = maState_expectValue
 		ka.f = 0
 	case "PostState":
@@ -9940,7 +9727,7 @@ func (n Receipt) Representation() ipld.Node {
 type _Receipt__Repr _Receipt
 
 var (
-	fieldName__Receipt_Type_serial              = _String{"Type"}
+	fieldName__Receipt_TxType_serial            = _String{"TxType"}
 	fieldName__Receipt_PostState_serial         = _String{"PostState"}
 	fieldName__Receipt_Status_serial            = _String{"Status"}
 	fieldName__Receipt_CumulativeGasUsed_serial = _String{"CumulativeGasUsed"}
@@ -9954,8 +9741,8 @@ func (_Receipt__Repr) Kind() ipld.Kind {
 }
 func (n *_Receipt__Repr) LookupByString(key string) (ipld.Node, error) {
 	switch key {
-	case "Type":
-		return n.Type.Representation(), nil
+	case "TxType":
+		return n.TxType.Representation(), nil
 	case "PostState":
 		if n.PostState.m == schema.Maybe_Null {
 			return ipld.Null, nil
@@ -10004,8 +9791,8 @@ func (itr *_Receipt__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	}
 	switch itr.idx {
 	case 0:
-		k = &fieldName__Receipt_Type_serial
-		v = itr.n.Type.Representation()
+		k = &fieldName__Receipt_TxType_serial
+		v = itr.n.TxType.Representation()
 	case 1:
 		k = &fieldName__Receipt_PostState_serial
 		if itr.n.PostState.m == schema.Maybe_Null {
@@ -10105,7 +9892,7 @@ type _Receipt__ReprAssembler struct {
 	f     int
 
 	cm                   schema.Maybe
-	ca_Type              _TxType__ReprAssembler
+	ca_TxType            _TxType__ReprAssembler
 	ca_PostState         _Bytes__ReprAssembler
 	ca_Status            _Uint__ReprAssembler
 	ca_CumulativeGasUsed _Uint__ReprAssembler
@@ -10116,7 +9903,7 @@ type _Receipt__ReprAssembler struct {
 func (na *_Receipt__ReprAssembler) reset() {
 	na.state = maState_initial
 	na.s = 0
-	na.ca_Type.reset()
+	na.ca_TxType.reset()
 	na.ca_PostState.reset()
 	na.ca_Status.reset()
 	na.ca_CumulativeGasUsed.reset()
@@ -10294,16 +10081,16 @@ func (ma *_Receipt__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler, 
 		panic("invalid state: AssembleEntry cannot be called on an assembler that's already finished")
 	}
 	switch k {
-	case "Type":
-		if ma.s&fieldBit__Receipt_Type != 0 {
-			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Type_serial}
+	case "TxType":
+		if ma.s&fieldBit__Receipt_TxType != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_TxType_serial}
 		}
-		ma.s += fieldBit__Receipt_Type
+		ma.s += fieldBit__Receipt_TxType
 		ma.state = maState_midValue
 		ma.f = 0
-		ma.ca_Type.w = &ma.w.Type
-		ma.ca_Type.m = &ma.cm
-		return &ma.ca_Type, nil
+		ma.ca_TxType.w = &ma.w.TxType
+		ma.ca_TxType.m = &ma.cm
+		return &ma.ca_TxType, nil
 	case "PostState":
 		if ma.s&fieldBit__Receipt_PostState != 0 {
 			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_PostState_serial}
@@ -10394,9 +10181,9 @@ func (ma *_Receipt__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 	ma.state = maState_midValue
 	switch ma.f {
 	case 0:
-		ma.ca_Type.w = &ma.w.Type
-		ma.ca_Type.m = &ma.cm
-		return &ma.ca_Type
+		ma.ca_TxType.w = &ma.w.TxType
+		ma.ca_TxType.m = &ma.cm
+		return &ma.ca_TxType
 	case 1:
 		ma.ca_PostState.w = ma.w.PostState.v
 		ma.ca_PostState.m = &ma.w.PostState.m
@@ -10440,8 +10227,8 @@ func (ma *_Receipt__ReprAssembler) Finish() error {
 	}
 	if ma.s&fieldBits__Receipt_sufficient != fieldBits__Receipt_sufficient {
 		err := ipld.ErrMissingRequiredField{Missing: make([]string, 0)}
-		if ma.s&fieldBit__Receipt_Type == 0 {
-			err.Missing = append(err.Missing, "Type")
+		if ma.s&fieldBit__Receipt_TxType == 0 {
+			err.Missing = append(err.Missing, "TxType")
 		}
 		if ma.s&fieldBit__Receipt_CumulativeGasUsed == 0 {
 			err.Missing = append(err.Missing, "CumulativeGasUsed")
@@ -10490,11 +10277,11 @@ func (ka *_Receipt__ReprKeyAssembler) AssignString(k string) error {
 		panic("misuse: KeyAssembler held beyond its valid lifetime")
 	}
 	switch k {
-	case "Type":
-		if ka.s&fieldBit__Receipt_Type != 0 {
-			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_Type_serial}
+	case "TxType":
+		if ka.s&fieldBit__Receipt_TxType != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_TxType_serial}
 		}
-		ka.s += fieldBit__Receipt_Type
+		ka.s += fieldBit__Receipt_TxType
 		ka.state = maState_expectValue
 		ka.f = 0
 		return nil
@@ -11772,6 +11559,223 @@ func (la *_StorageKeys__ReprAssembler) ValuePrototype(_ int64) ipld.NodePrototyp
 	return _Hash__ReprPrototype{}
 }
 
+func (n String) String() string {
+	return n.x
+}
+func (_String__Prototype) fromString(w *_String, v string) error {
+	*w = _String{v}
+	return nil
+}
+func (_String__Prototype) FromString(v string) (String, error) {
+	n := _String{v}
+	return &n, nil
+}
+
+type _String__Maybe struct {
+	m schema.Maybe
+	v String
+}
+type MaybeString = *_String__Maybe
+
+func (m MaybeString) IsNull() bool {
+	return m.m == schema.Maybe_Null
+}
+func (m MaybeString) IsAbsent() bool {
+	return m.m == schema.Maybe_Absent
+}
+func (m MaybeString) Exists() bool {
+	return m.m == schema.Maybe_Value
+}
+func (m MaybeString) AsNode() ipld.Node {
+	switch m.m {
+	case schema.Maybe_Absent:
+		return ipld.Absent
+	case schema.Maybe_Null:
+		return ipld.Null
+	case schema.Maybe_Value:
+		return m.v
+	default:
+		panic("unreachable")
+	}
+}
+func (m MaybeString) Must() String {
+	if !m.Exists() {
+		panic("unbox of a maybe rejected")
+	}
+	return m.v
+}
+
+var _ ipld.Node = (String)(&_String{})
+var _ schema.TypedNode = (String)(&_String{})
+
+func (String) Kind() ipld.Kind {
+	return ipld.Kind_String
+}
+func (String) LookupByString(string) (ipld.Node, error) {
+	return mixins.String{"dageth.String"}.LookupByString("")
+}
+func (String) LookupByNode(ipld.Node) (ipld.Node, error) {
+	return mixins.String{"dageth.String"}.LookupByNode(nil)
+}
+func (String) LookupByIndex(idx int64) (ipld.Node, error) {
+	return mixins.String{"dageth.String"}.LookupByIndex(0)
+}
+func (String) LookupBySegment(seg ipld.PathSegment) (ipld.Node, error) {
+	return mixins.String{"dageth.String"}.LookupBySegment(seg)
+}
+func (String) MapIterator() ipld.MapIterator {
+	return nil
+}
+func (String) ListIterator() ipld.ListIterator {
+	return nil
+}
+func (String) Length() int64 {
+	return -1
+}
+func (String) IsAbsent() bool {
+	return false
+}
+func (String) IsNull() bool {
+	return false
+}
+func (String) AsBool() (bool, error) {
+	return mixins.String{"dageth.String"}.AsBool()
+}
+func (String) AsInt() (int64, error) {
+	return mixins.String{"dageth.String"}.AsInt()
+}
+func (String) AsFloat() (float64, error) {
+	return mixins.String{"dageth.String"}.AsFloat()
+}
+func (n String) AsString() (string, error) {
+	return n.x, nil
+}
+func (String) AsBytes() ([]byte, error) {
+	return mixins.String{"dageth.String"}.AsBytes()
+}
+func (String) AsLink() (ipld.Link, error) {
+	return mixins.String{"dageth.String"}.AsLink()
+}
+func (String) Prototype() ipld.NodePrototype {
+	return _String__Prototype{}
+}
+
+type _String__Prototype struct{}
+
+func (_String__Prototype) NewBuilder() ipld.NodeBuilder {
+	var nb _String__Builder
+	nb.Reset()
+	return &nb
+}
+
+type _String__Builder struct {
+	_String__Assembler
+}
+
+func (nb *_String__Builder) Build() ipld.Node {
+	if *nb.m != schema.Maybe_Value {
+		panic("invalid state: cannot call Build on an assembler that's not finished")
+	}
+	return nb.w
+}
+func (nb *_String__Builder) Reset() {
+	var w _String
+	var m schema.Maybe
+	*nb = _String__Builder{_String__Assembler{w: &w, m: &m}}
+}
+
+type _String__Assembler struct {
+	w *_String
+	m *schema.Maybe
+}
+
+func (na *_String__Assembler) reset() {}
+func (_String__Assembler) BeginMap(sizeHint int64) (ipld.MapAssembler, error) {
+	return mixins.StringAssembler{"dageth.String"}.BeginMap(0)
+}
+func (_String__Assembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	return mixins.StringAssembler{"dageth.String"}.BeginList(0)
+}
+func (na *_String__Assembler) AssignNull() error {
+	switch *na.m {
+	case allowNull:
+		*na.m = schema.Maybe_Null
+		return nil
+	case schema.Maybe_Absent:
+		return mixins.StringAssembler{"dageth.String"}.AssignNull()
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	}
+	panic("unreachable")
+}
+func (_String__Assembler) AssignBool(bool) error {
+	return mixins.StringAssembler{"dageth.String"}.AssignBool(false)
+}
+func (_String__Assembler) AssignInt(int64) error {
+	return mixins.StringAssembler{"dageth.String"}.AssignInt(0)
+}
+func (_String__Assembler) AssignFloat(float64) error {
+	return mixins.StringAssembler{"dageth.String"}.AssignFloat(0)
+}
+func (na *_String__Assembler) AssignString(v string) error {
+	switch *na.m {
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	}
+	if na.w == nil {
+		na.w = &_String{}
+	}
+	na.w.x = v
+	*na.m = schema.Maybe_Value
+	return nil
+}
+func (_String__Assembler) AssignBytes([]byte) error {
+	return mixins.StringAssembler{"dageth.String"}.AssignBytes(nil)
+}
+func (_String__Assembler) AssignLink(ipld.Link) error {
+	return mixins.StringAssembler{"dageth.String"}.AssignLink(nil)
+}
+func (na *_String__Assembler) AssignNode(v ipld.Node) error {
+	if v.IsNull() {
+		return na.AssignNull()
+	}
+	if v2, ok := v.(*_String); ok {
+		switch *na.m {
+		case schema.Maybe_Value, schema.Maybe_Null:
+			panic("invalid state: cannot assign into assembler that's already finished")
+		}
+		if na.w == nil {
+			na.w = v2
+			*na.m = schema.Maybe_Value
+			return nil
+		}
+		*na.w = *v2
+		*na.m = schema.Maybe_Value
+		return nil
+	}
+	if v2, err := v.AsString(); err != nil {
+		return err
+	} else {
+		return na.AssignString(v2)
+	}
+}
+func (_String__Assembler) Prototype() ipld.NodePrototype {
+	return _String__Prototype{}
+}
+func (String) Type() schema.Type {
+	return nil /*TODO:typelit*/
+}
+func (n String) Representation() ipld.Node {
+	return (*_String__Repr)(n)
+}
+
+type _String__Repr = _String
+
+var _ ipld.Node = &_String__Repr{}
+
+type _String__ReprPrototype = _String__Prototype
+type _String__ReprAssembler = _String__Assembler
+
 func (n Time) Bytes() []byte {
 	return n.x
 }
@@ -12592,8 +12596,8 @@ func (la *_Topics__ReprAssembler) ValuePrototype(_ int64) ipld.NodePrototype {
 	return _Hash__ReprPrototype{}
 }
 
-func (n _Transaction) FieldType() TxType {
-	return &n.Type
+func (n _Transaction) FieldTxType() TxType {
+	return &n.TxType
 }
 func (n _Transaction) FieldChainID() MaybeBigInt {
 	return &n.ChainID
@@ -12664,7 +12668,7 @@ func (m MaybeTransaction) Must() Transaction {
 }
 
 var (
-	fieldName__Transaction_Type         = _String{"Type"}
+	fieldName__Transaction_TxType       = _String{"TxType"}
 	fieldName__Transaction_ChainID      = _String{"ChainID"}
 	fieldName__Transaction_AccountNonce = _String{"AccountNonce"}
 	fieldName__Transaction_GasPrice     = _String{"GasPrice"}
@@ -12685,8 +12689,8 @@ func (Transaction) Kind() ipld.Kind {
 }
 func (n Transaction) LookupByString(key string) (ipld.Node, error) {
 	switch key {
-	case "Type":
-		return &n.Type, nil
+	case "TxType":
+		return &n.TxType, nil
 	case "ChainID":
 		if n.ChainID.m == schema.Maybe_Null {
 			return ipld.Null, nil
@@ -12750,8 +12754,8 @@ func (itr *_Transaction__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	}
 	switch itr.idx {
 	case 0:
-		k = &fieldName__Transaction_Type
-		v = &itr.n.Type
+		k = &fieldName__Transaction_TxType
+		v = &itr.n.TxType
 	case 1:
 		k = &fieldName__Transaction_ChainID
 		if itr.n.ChainID.m == schema.Maybe_Null {
@@ -12873,7 +12877,7 @@ type _Transaction__Assembler struct {
 	f     int
 
 	cm              schema.Maybe
-	ca_Type         _TxType__Assembler
+	ca_TxType       _TxType__Assembler
 	ca_ChainID      _BigInt__Assembler
 	ca_AccountNonce _Uint__Assembler
 	ca_GasPrice     _BigInt__Assembler
@@ -12890,7 +12894,7 @@ type _Transaction__Assembler struct {
 func (na *_Transaction__Assembler) reset() {
 	na.state = maState_initial
 	na.s = 0
-	na.ca_Type.reset()
+	na.ca_TxType.reset()
 	na.ca_ChainID.reset()
 	na.ca_AccountNonce.reset()
 	na.ca_GasPrice.reset()
@@ -12905,7 +12909,7 @@ func (na *_Transaction__Assembler) reset() {
 }
 
 var (
-	fieldBit__Transaction_Type         = 1 << 0
+	fieldBit__Transaction_TxType       = 1 << 0
 	fieldBit__Transaction_ChainID      = 1 << 1
 	fieldBit__Transaction_AccountNonce = 1 << 2
 	fieldBit__Transaction_GasPrice     = 1 << 3
@@ -13014,7 +13018,7 @@ func (ma *_Transaction__Assembler) valueFinishTidy() bool {
 	case 0:
 		switch ma.cm {
 		case schema.Maybe_Value:
-			ma.ca_Type.w = nil
+			ma.ca_TxType.w = nil
 			ma.cm = schema.Maybe_Absent
 			ma.state = maState_initial
 			return true
@@ -13157,16 +13161,16 @@ func (ma *_Transaction__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, 
 		panic("invalid state: AssembleEntry cannot be called on an assembler that's already finished")
 	}
 	switch k {
-	case "Type":
-		if ma.s&fieldBit__Transaction_Type != 0 {
-			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_Type}
+	case "TxType":
+		if ma.s&fieldBit__Transaction_TxType != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_TxType}
 		}
-		ma.s += fieldBit__Transaction_Type
+		ma.s += fieldBit__Transaction_TxType
 		ma.state = maState_midValue
 		ma.f = 0
-		ma.ca_Type.w = &ma.w.Type
-		ma.ca_Type.m = &ma.cm
-		return &ma.ca_Type, nil
+		ma.ca_TxType.w = &ma.w.TxType
+		ma.ca_TxType.m = &ma.cm
+		return &ma.ca_TxType, nil
 	case "ChainID":
 		if ma.s&fieldBit__Transaction_ChainID != 0 {
 			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_ChainID}
@@ -13317,9 +13321,9 @@ func (ma *_Transaction__Assembler) AssembleValue() ipld.NodeAssembler {
 	ma.state = maState_midValue
 	switch ma.f {
 	case 0:
-		ma.ca_Type.w = &ma.w.Type
-		ma.ca_Type.m = &ma.cm
-		return &ma.ca_Type
+		ma.ca_TxType.w = &ma.w.TxType
+		ma.ca_TxType.m = &ma.cm
+		return &ma.ca_TxType
 	case 1:
 		ma.ca_ChainID.w = ma.w.ChainID.v
 		ma.ca_ChainID.m = &ma.w.ChainID.m
@@ -13388,8 +13392,8 @@ func (ma *_Transaction__Assembler) Finish() error {
 	}
 	if ma.s&fieldBits__Transaction_sufficient != fieldBits__Transaction_sufficient {
 		err := ipld.ErrMissingRequiredField{Missing: make([]string, 0)}
-		if ma.s&fieldBit__Transaction_Type == 0 {
-			err.Missing = append(err.Missing, "Type")
+		if ma.s&fieldBit__Transaction_TxType == 0 {
+			err.Missing = append(err.Missing, "TxType")
 		}
 		if ma.s&fieldBit__Transaction_AccountNonce == 0 {
 			err.Missing = append(err.Missing, "AccountNonce")
@@ -13453,11 +13457,11 @@ func (ka *_Transaction__KeyAssembler) AssignString(k string) error {
 		panic("misuse: KeyAssembler held beyond its valid lifetime")
 	}
 	switch k {
-	case "Type":
-		if ka.s&fieldBit__Transaction_Type != 0 {
-			return ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_Type}
+	case "TxType":
+		if ka.s&fieldBit__Transaction_TxType != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_TxType}
 		}
-		ka.s += fieldBit__Transaction_Type
+		ka.s += fieldBit__Transaction_TxType
 		ka.state = maState_expectValue
 		ka.f = 0
 	case "ChainID":
@@ -13568,7 +13572,7 @@ func (n Transaction) Representation() ipld.Node {
 type _Transaction__Repr _Transaction
 
 var (
-	fieldName__Transaction_Type_serial         = _String{"Type"}
+	fieldName__Transaction_TxType_serial       = _String{"TxType"}
 	fieldName__Transaction_ChainID_serial      = _String{"ChainID"}
 	fieldName__Transaction_AccountNonce_serial = _String{"AccountNonce"}
 	fieldName__Transaction_GasPrice_serial     = _String{"GasPrice"}
@@ -13588,8 +13592,8 @@ func (_Transaction__Repr) Kind() ipld.Kind {
 }
 func (n *_Transaction__Repr) LookupByString(key string) (ipld.Node, error) {
 	switch key {
-	case "Type":
-		return n.Type.Representation(), nil
+	case "TxType":
+		return n.TxType.Representation(), nil
 	case "ChainID":
 		if n.ChainID.m == schema.Maybe_Null {
 			return ipld.Null, nil
@@ -13653,8 +13657,8 @@ func (itr *_Transaction__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) 
 	}
 	switch itr.idx {
 	case 0:
-		k = &fieldName__Transaction_Type_serial
-		v = itr.n.Type.Representation()
+		k = &fieldName__Transaction_TxType_serial
+		v = itr.n.TxType.Representation()
 	case 1:
 		k = &fieldName__Transaction_ChainID_serial
 		if itr.n.ChainID.m == schema.Maybe_Null {
@@ -13776,7 +13780,7 @@ type _Transaction__ReprAssembler struct {
 	f     int
 
 	cm              schema.Maybe
-	ca_Type         _TxType__ReprAssembler
+	ca_TxType       _TxType__ReprAssembler
 	ca_ChainID      _BigInt__ReprAssembler
 	ca_AccountNonce _Uint__ReprAssembler
 	ca_GasPrice     _BigInt__ReprAssembler
@@ -13793,7 +13797,7 @@ type _Transaction__ReprAssembler struct {
 func (na *_Transaction__ReprAssembler) reset() {
 	na.state = maState_initial
 	na.s = 0
-	na.ca_Type.reset()
+	na.ca_TxType.reset()
 	na.ca_ChainID.reset()
 	na.ca_AccountNonce.reset()
 	na.ca_GasPrice.reset()
@@ -14034,16 +14038,16 @@ func (ma *_Transaction__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembl
 		panic("invalid state: AssembleEntry cannot be called on an assembler that's already finished")
 	}
 	switch k {
-	case "Type":
-		if ma.s&fieldBit__Transaction_Type != 0 {
-			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_Type_serial}
+	case "TxType":
+		if ma.s&fieldBit__Transaction_TxType != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_TxType_serial}
 		}
-		ma.s += fieldBit__Transaction_Type
+		ma.s += fieldBit__Transaction_TxType
 		ma.state = maState_midValue
 		ma.f = 0
-		ma.ca_Type.w = &ma.w.Type
-		ma.ca_Type.m = &ma.cm
-		return &ma.ca_Type, nil
+		ma.ca_TxType.w = &ma.w.TxType
+		ma.ca_TxType.m = &ma.cm
+		return &ma.ca_TxType, nil
 	case "ChainID":
 		if ma.s&fieldBit__Transaction_ChainID != 0 {
 			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_ChainID_serial}
@@ -14195,9 +14199,9 @@ func (ma *_Transaction__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 	ma.state = maState_midValue
 	switch ma.f {
 	case 0:
-		ma.ca_Type.w = &ma.w.Type
-		ma.ca_Type.m = &ma.cm
-		return &ma.ca_Type
+		ma.ca_TxType.w = &ma.w.TxType
+		ma.ca_TxType.m = &ma.cm
+		return &ma.ca_TxType
 	case 1:
 		ma.ca_ChainID.w = ma.w.ChainID.v
 		ma.ca_ChainID.m = &ma.w.ChainID.m
@@ -14266,8 +14270,8 @@ func (ma *_Transaction__ReprAssembler) Finish() error {
 	}
 	if ma.s&fieldBits__Transaction_sufficient != fieldBits__Transaction_sufficient {
 		err := ipld.ErrMissingRequiredField{Missing: make([]string, 0)}
-		if ma.s&fieldBit__Transaction_Type == 0 {
-			err.Missing = append(err.Missing, "Type")
+		if ma.s&fieldBit__Transaction_TxType == 0 {
+			err.Missing = append(err.Missing, "TxType")
 		}
 		if ma.s&fieldBit__Transaction_AccountNonce == 0 {
 			err.Missing = append(err.Missing, "AccountNonce")
@@ -14331,11 +14335,11 @@ func (ka *_Transaction__ReprKeyAssembler) AssignString(k string) error {
 		panic("misuse: KeyAssembler held beyond its valid lifetime")
 	}
 	switch k {
-	case "Type":
-		if ka.s&fieldBit__Transaction_Type != 0 {
-			return ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_Type_serial}
+	case "TxType":
+		if ka.s&fieldBit__Transaction_TxType != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Transaction_TxType_serial}
 		}
-		ka.s += fieldBit__Transaction_Type
+		ka.s += fieldBit__Transaction_TxType
 		ka.state = maState_expectValue
 		ka.f = 0
 		return nil

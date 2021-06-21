@@ -32,8 +32,6 @@ type typeSlab struct {
 	Balance__Repr           _Balance__ReprPrototype
 	BigInt                  _BigInt__Prototype
 	BigInt__Repr            _BigInt__ReprPrototype
-	BlockNonce              _BlockNonce__Prototype
-	BlockNonce__Repr        _BlockNonce__ReprPrototype
 	Bloom                   _Bloom__Prototype
 	Bloom__Repr             _Bloom__ReprPrototype
 	ByteCode                _ByteCode__Prototype
@@ -60,6 +58,8 @@ type typeSlab struct {
 	Receipts__Repr          _Receipts__ReprPrototype
 	StorageKeys             _StorageKeys__Prototype
 	StorageKeys__Repr       _StorageKeys__ReprPrototype
+	String                  _String__Prototype
+	String__Repr            _String__ReprPrototype
 	Time                    _Time__Prototype
 	Time__Repr              _Time__ReprPrototype
 	Topics                  _Topics__Prototype
@@ -122,10 +122,6 @@ type _Balance struct{ x []byte }
 type BigInt = *_BigInt
 type _BigInt struct{ x []byte }
 
-// BlockNonce matches the IPLD Schema type "BlockNonce".  It has bytes kind.
-type BlockNonce = *_BlockNonce
-type _BlockNonce struct{ x []byte }
-
 // Bloom matches the IPLD Schema type "Bloom".  It has bytes kind.
 type Bloom = *_Bloom
 type _Bloom struct{ x []byte }
@@ -174,7 +170,7 @@ type _Header struct {
 	Time         _Time
 	Extra        _Bytes
 	MixDigest    _Hash
-	Nonce        _BlockNonce
+	Nonce        _Uint
 }
 
 // Link matches the IPLD Schema type "Link".  It has link kind.
@@ -202,7 +198,7 @@ type _OpCode struct{ x []byte }
 // Receipt matches the IPLD Schema type "Receipt".  It has Struct type-kind, and may be interrogated like map kind.
 type Receipt = *_Receipt
 type _Receipt struct {
-	Type              _TxType
+	TxType            _TxType
 	PostState         _Bytes__Maybe
 	Status            _Uint__Maybe
 	CumulativeGasUsed _Uint
@@ -222,6 +218,10 @@ type _StorageKeys struct {
 	x []_Hash
 }
 
+// String matches the IPLD Schema type "String".  It has string kind.
+type String = *_String
+type _String struct{ x string }
+
 // Time matches the IPLD Schema type "Time".  It has bytes kind.
 type Time = *_Time
 type _Time struct{ x []byte }
@@ -235,7 +235,7 @@ type _Topics struct {
 // Transaction matches the IPLD Schema type "Transaction".  It has Struct type-kind, and may be interrogated like map kind.
 type Transaction = *_Transaction
 type _Transaction struct {
-	Type         _TxType
+	TxType       _TxType
 	ChainID      _BigInt__Maybe
 	AccountNonce _Uint
 	GasPrice     _BigInt

@@ -93,11 +93,11 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("IPLD node is missing the expected Union keys")
 	}
-	wbs := shared.WriteableByteSlice(enc)
-	if err := rlp.Encode(&wbs, nodeFields); err != nil {
+	wbs := shared.NewWriteableByteSlice(&enc)
+	if err := rlp.Encode(wbs, nodeFields); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH TrieNode form (%v)", err)
 	}
-	return wbs, nil
+	return enc, nil
 }
 
 func packBranchNode(node ipld.Node) ([]interface{}, error) {

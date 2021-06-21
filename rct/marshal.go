@@ -40,21 +40,21 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	if err != nil {
 		return enc, fmt.Errorf("unable to encode receiptRLP (%v)", err)
 	}
-	wbs := shared.WriteableByteSlice(enc)
+	wbs := shared.NewWriteableByteSlice(&enc)
 	switch txType {
 	case types.LegacyTxType:
-		if err := rlp.Encode(&wbs, rct); err != nil {
+		if err := rlp.Encode(wbs, rct); err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Receipt form (%v)", err)
 		}
-		return wbs, nil
+		return enc, nil
 	case types.AccessListTxType:
-		wbs = append(wbs, txType)
-		if err := rlp.Encode(&wbs, rct); err != nil {
+		enc = append(enc, txType)
+		if err := rlp.Encode(wbs, rct); err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Receipt form (%v)", err)
 		}
-		return wbs, nil
+		return enc, nil
 	default:
-		return wbs, fmt.Errorf("invalid DAG-ETH Receipt form (unrecognized TxType %d)", txType)
+		return enc, fmt.Errorf("invalid DAG-ETH Receipt form (unrecognized TxType %d)", txType)
 	}
 }
 

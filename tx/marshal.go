@@ -46,29 +46,29 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	if err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 	}
-	wbs := shared.WriteableByteSlice(enc)
+	wbs := shared.NewWriteableByteSlice(&enc)
 	switch txType {
 	case types.LegacyTxType:
 		tx, err := packLegacyTx(node)
 		if err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
-		if err := rlp.Encode(&wbs, tx); err != nil {
+		if err := rlp.Encode(wbs, tx); err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
-		return wbs, nil
+		return enc, nil
 	case types.AccessListTxType:
 		tx, err := packAccessListTx(node)
 		if err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
-		wbs = append(wbs, txType)
-		if err := rlp.Encode(&wbs, tx); err != nil {
+		enc = append(enc, txType)
+		if err := rlp.Encode(wbs, tx); err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
-		return wbs, nil
+		return enc, nil
 	default:
-		return wbs, fmt.Errorf("invalid DAG-ETH Transaction form (unrecognized TxType %d)", txType)
+		return enc, fmt.Errorf("invalid DAG-ETH Transaction form (unrecognized TxType %d)", txType)
 	}
 }
 

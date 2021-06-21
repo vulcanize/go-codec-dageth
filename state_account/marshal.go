@@ -40,8 +40,8 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	if err := EncodeAccount(header, inNode); err != nil {
 		return enc, err
 	}
-	wbs := shared.WriteableByteSlice(enc)
-	if err := rlp.Encode(&wbs, header); err != nil {
+	wbs := shared.NewWriteableByteSlice(&enc)
+	if err := rlp.Encode(wbs, header); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Account form (unable to RLP encode account: %v)", err)
 	}
 	return enc, nil

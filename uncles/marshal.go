@@ -37,8 +37,8 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	if err := EncodeUncles(&uncles, inNode); err != nil {
 		return enc, err
 	}
-	wbs := shared.WriteableByteSlice(enc)
-	if err := rlp.Encode(&wbs, uncles); err != nil {
+	wbs := shared.NewWriteableByteSlice(&enc)
+	if err := rlp.Encode(wbs, uncles); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Uncles form (unable to RLP encode uncles: %v)", err)
 	}
 	return enc, nil

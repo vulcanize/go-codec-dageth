@@ -61,7 +61,7 @@ var requiredUnpackFuncs = []func(ipld.MapAssembler, types.Receipt) error{
 }
 
 func unpackTxType(ma ipld.MapAssembler, rct types.Receipt) error {
-	if err := ma.AssembleKey().AssignString("Type"); err != nil {
+	if err := ma.AssembleKey().AssignString("TxType"); err != nil {
 		return err
 	}
 	return ma.AssembleValue().AssignBytes([]byte{rct.Type})

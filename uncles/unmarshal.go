@@ -53,7 +53,9 @@ func DecodeUncles(na ipld.NodeAssembler, uncles []*types.Header) error {
 		if err := dageth_header.DecodeHeader(node, *uncle); err != nil {
 			return fmt.Errorf("invalid DAG-ETH Uncles binary (%v)", err)
 		}
-		la.AssembleValue().AssignNode(node.Build())
+		if err := la.AssembleValue().AssignNode(node.Build()); err != nil {
+			return err
+		}
 	}
 	return la.Finish()
 }

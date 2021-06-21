@@ -53,7 +53,9 @@ func DecodeRcts(na ipld.NodeAssembler, rcts []*types.Receipt) error {
 		if err := dageth_rct.DecodeReceipt(node, *rct); err != nil {
 			return fmt.Errorf("invalid DAG-ETH Receipts binary (%v)", err)
 		}
-		la.AssembleValue().AssignNode(node.Build())
+		if err := la.AssembleValue().AssignNode(node.Build()); err != nil {
+			return err
+		}
 	}
 	return la.Finish()
 }

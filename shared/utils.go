@@ -53,7 +53,7 @@ func AddressToEncodedPath(address common.Address) []byte {
 
 // GetTxType returns the eth tx type
 func GetTxType(node ipld.Node) (uint8, error) {
-	tyNode, err := node.LookupByString("Type")
+	tyNode, err := node.LookupByString("TxType")
 	if err != nil {
 		return 0, err
 	}

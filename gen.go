@@ -114,7 +114,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type AccessList [AccessElement]
 
 		type Transaction struct {
-			Type         TxType
+			TxType       TxType
 			// We could make ChainID a required field in the IPLD schema
 			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 transaction
 			AccountNonce Uint
@@ -173,7 +173,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type Logs [Log]
 
 		type Receipt struct {
-			Type			  TxType
+			TxType			  TxType
 			// We could make Status an enum
 			Status	          Uint   // nullable
 			PostState		  Hash   // nullable

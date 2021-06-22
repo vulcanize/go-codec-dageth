@@ -88,21 +88,7 @@ func testReceiptDecoding(t *testing.T) {
 }
 
 func testAccessListReceiptNodeContents(t *testing.T) {
-	alTypeNode, err := accessListReceiptNode.LookupByString("TxType")
-	if err != nil {
-		t.Fatalf("receipt is missing TxType")
-	}
-	alTypeBy, err := alTypeNode.AsBytes()
-	if err != nil {
-		t.Fatalf("receipt TxType should be of type Bytes")
-	}
-	if len(alTypeBy) != 1 {
-		t.Fatalf("receipt TxType should be a single byte")
-	}
-	if alTypeBy[0] != accessListReceipt.Type {
-		t.Errorf("receipt tx type (%d) does not match expected tx type (%d)", alTypeBy[0], accessListReceipt.Type)
-	}
-
+	verifySharedContent(t, accessListReceiptNode, accessListReceipt)
 	statusNode, err := accessListReceiptNode.LookupByString("Status")
 	if err != nil {
 		t.Fatalf("receipt is missing Status")
@@ -125,109 +111,10 @@ func testAccessListReceiptNodeContents(t *testing.T) {
 	if !bytes.Equal(postStateBy, accessListReceipt.PostState) {
 		t.Errorf("receipt post state (%d) does not match expected post state (%d)", postStateBy, accessListReceipt.PostState)
 	}
-
-	cguNode, err := accessListReceiptNode.LookupByString("CumulativeGasUsed")
-	if err != nil {
-		t.Fatalf("receipt is missing CumulativeGasUsed")
-	}
-	cguBy, err := cguNode.AsBytes()
-	if err != nil {
-		t.Fatalf("receipt CumulativeGasUsed should be of type Bytes")
-	}
-	cgu := binary.BigEndian.Uint64(cguBy)
-	if cgu != accessListReceipt.CumulativeGasUsed {
-		t.Errorf("receipt cumulative gas used (%d) does not match expected cumulative gas used (%d)", cgu, accessListReceipt.CumulativeGasUsed)
-	}
-
-	bloomNode, err := accessListReceiptNode.LookupByString("Bloom")
-	if err != nil {
-		t.Fatalf("receipt is missing Bloom")
-	}
-	bloomBy, err := bloomNode.AsBytes()
-	if err != nil {
-		t.Fatalf("receipt Bloom should be of type Bytes")
-	}
-	if !bytes.Equal(bloomBy, accessListReceipt.Bloom.Bytes()) {
-		t.Errorf("receipt bloom (%x) does not match expected bloom (%x)", bloomBy, accessListReceipt.Bloom.Bytes())
-	}
-
-	logsNode, err := accessListReceiptNode.LookupByString("Logs")
-	if err != nil {
-		t.Fatalf("receipt is missing Logs")
-	}
-	if logsNode.Length() != 2 {
-		t.Fatal("receipt should have two logs")
-	}
-	logsLI := logsNode.ListIterator()
-	for !logsLI.Done() {
-		i, logNode, err := logsLI.Next()
-		if err != nil {
-			t.Fatalf("receipt log iterator error: %v", err)
-		}
-		currentLog := accessListReceipt.Logs[i]
-		addrNode, err := logNode.LookupByString("Address")
-		if err != nil {
-			t.Fatalf("receipt log is missing Address")
-		}
-		addrBy, err := addrNode.AsBytes()
-		if err != nil {
-			t.Fatalf("receipt log Address should be of type Bytes")
-		}
-		if !bytes.Equal(addrBy, currentLog.Address.Bytes()) {
-			t.Errorf("receipt log address (%x) does not match expected address (%x)", addrBy, currentLog.Address.Bytes())
-		}
-		dataNode, err := logNode.LookupByString("Data")
-		if err != nil {
-			t.Fatalf("receipt log is missing Data")
-		}
-		data, err := dataNode.AsBytes()
-		if err != nil {
-			t.Fatalf("receipt log Data should be of type Bytes")
-		}
-		if !bytes.Equal(data, currentLog.Data) {
-			t.Errorf("receipt log data (%x) does not match expected data (%x)", data, currentLog.Data)
-		}
-		topicsNode, err := logNode.LookupByString("Topics")
-		if err != nil {
-			t.Fatalf("receipt log is missing Topics")
-		}
-		if topicsNode.Length() != 2 {
-			t.Fatal("receipt log should have two topics")
-		}
-		topicsLI := topicsNode.ListIterator()
-		for !topicsLI.Done() {
-			j, topicNode, err := topicsLI.Next()
-			if err != nil {
-				t.Fatalf("receipt log topic iterator error: %v", err)
-			}
-			currentTopic := currentLog.Topics[j].Bytes()
-			topicBy, err := topicNode.AsBytes()
-			if err != nil {
-				t.Fatalf("receipt log Topic should be of type Bytes")
-			}
-			if !bytes.Equal(topicBy, currentTopic) {
-				t.Errorf("receipt log topic%d bytes (%x) does not match expected bytes (%x)", j, topicBy, currentTopic)
-			}
-		}
-	}
 }
 
 func testLegacyReceiptNodeContents(t *testing.T) {
-	typeNode, err := legacyReceiptNode.LookupByString("TxType")
-	if err != nil {
-		t.Fatalf("receipt is missing TxType")
-	}
-	typeBy, err := typeNode.AsBytes()
-	if err != nil {
-		t.Fatalf("receipt TxType should be of type Bytes")
-	}
-	if len(typeBy) != 1 {
-		t.Fatalf("receipt TxType should be a single byte")
-	}
-	if typeBy[0] != legacyReceipt.Type {
-		t.Errorf("receipt tx type (%d) does not match expected tx type (%d)", typeBy[0], legacyReceipt.Type)
-	}
-
+	verifySharedContent(t, legacyReceiptNode, legacyReceipt)
 	statusNode, err := legacyReceiptNode.LookupByString("Status")
 	if err != nil {
 		t.Fatalf("receipt is missing Status")
@@ -251,8 +138,25 @@ func testLegacyReceiptNodeContents(t *testing.T) {
 	if !postStateNode.IsNull() {
 		t.Errorf("receipt PostState should be null")
 	}
+}
 
-	cguNode, err := legacyReceiptNode.LookupByString("CumulativeGasUsed")
+func verifySharedContent(t *testing.T, rctNode ipld.Node, rct *types.Receipt) {
+	typeNode, err := rctNode.LookupByString("TxType")
+	if err != nil {
+		t.Fatalf("receipt is missing TxType")
+	}
+	typeBy, err := typeNode.AsBytes()
+	if err != nil {
+		t.Fatalf("receipt TxType should be of type Bytes")
+	}
+	if len(typeBy) != 1 {
+		t.Fatalf("receipt TxType should be a single byte")
+	}
+	if typeBy[0] != rct.Type {
+		t.Errorf("receipt tx type (%d) does not match expected tx type (%d)", typeBy[0], rct.Type)
+	}
+
+	cguNode, err := rctNode.LookupByString("CumulativeGasUsed")
 	if err != nil {
 		t.Fatalf("receipt is missing CumulativeGasUsed")
 	}
@@ -261,11 +165,11 @@ func testLegacyReceiptNodeContents(t *testing.T) {
 		t.Fatalf("receipt CumulativeGasUsed should be of type Bytes")
 	}
 	cgu := binary.BigEndian.Uint64(cguBy)
-	if cgu != legacyReceipt.CumulativeGasUsed {
-		t.Errorf("receipt cumulative gas used (%d) does not match expected cumulative gas used (%d)", cgu, legacyReceipt.CumulativeGasUsed)
+	if cgu != rct.CumulativeGasUsed {
+		t.Errorf("receipt cumulative gas used (%d) does not match expected cumulative gas used (%d)", cgu, rct.CumulativeGasUsed)
 	}
 
-	bloomNode, err := legacyReceiptNode.LookupByString("Bloom")
+	bloomNode, err := rctNode.LookupByString("Bloom")
 	if err != nil {
 		t.Fatalf("receipt is missing Bloom")
 	}
@@ -273,16 +177,16 @@ func testLegacyReceiptNodeContents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("receipt Bloom should be of type Bytes")
 	}
-	if !bytes.Equal(bloomBy, legacyReceipt.Bloom.Bytes()) {
-		t.Errorf("receipt bloom (%x) does not match expected bloom (%x)", bloomBy, legacyReceipt.Bloom.Bytes())
+	if !bytes.Equal(bloomBy, rct.Bloom.Bytes()) {
+		t.Errorf("receipt bloom (%x) does not match expected bloom (%x)", bloomBy, rct.Bloom.Bytes())
 	}
 
-	logsNode, err := legacyReceiptNode.LookupByString("Logs")
+	logsNode, err := rctNode.LookupByString("Logs")
 	if err != nil {
 		t.Fatalf("receipt is missing Logs")
 	}
-	if logsNode.Length() != 2 {
-		t.Fatal("receipt should have two logs")
+	if logsNode.Length() != int64(len(rct.Logs)) {
+		t.Fatalf("receipt should have %d logs", len(rct.Logs))
 	}
 	logsLI := logsNode.ListIterator()
 	for !logsLI.Done() {
@@ -290,7 +194,7 @@ func testLegacyReceiptNodeContents(t *testing.T) {
 		if err != nil {
 			t.Fatalf("receipt log iterator error: %v", err)
 		}
-		currentLog := legacyReceipt.Logs[i]
+		currentLog := rct.Logs[i]
 		addrNode, err := logNode.LookupByString("Address")
 		if err != nil {
 			t.Fatalf("receipt log is missing Address")

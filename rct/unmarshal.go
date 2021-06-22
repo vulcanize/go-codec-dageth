@@ -86,11 +86,11 @@ func unpackPostStateOrStatus(ma ipld.MapAssembler, rct types.Receipt) error {
 	}
 	switch rct.Status {
 	case types.ReceiptStatusFailed:
-		if err := ma.AssembleValue().AssignBytes(receiptStatusFailedRLP); err != nil {
+		if err := ma.AssembleValue().AssignBytes(receiptStatusFailed); err != nil {
 			return err
 		}
 	case types.ReceiptStatusSuccessful:
-		if err := ma.AssembleValue().AssignBytes(receiptStatusSuccessfulRLP); err != nil {
+		if err := ma.AssembleValue().AssignBytes(receiptStatusSuccessful); err != nil {
 			return err
 		}
 	default:

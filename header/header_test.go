@@ -249,7 +249,7 @@ func testHeaderNodeContents(t *testing.T) {
 		t.Fatalf("header Extra should be of type Byets")
 	}
 	if !bytes.Equal(extraBytes, gethHeader.Extra) {
-		t.Errorf("header extra bytes (%x) dones not match expected bytes (%x)", extraBytes, gethHeader.Extra)
+		t.Errorf("header extra bytes (%x) does not match expected bytes (%x)", extraBytes, gethHeader.Extra)
 	}
 
 	mixDigestNode, err := headerNode.LookupByString("MixDigest")
@@ -261,7 +261,7 @@ func testHeaderNodeContents(t *testing.T) {
 		t.Fatalf("header Extra should be of type Byets")
 	}
 	if !bytes.Equal(mixDigestBytes, gethHeader.MixDigest.Bytes()) {
-		t.Errorf("header mixDigest bytes (%x) dones not match expected bytes (%x)", mixDigestBytes, gethHeader.MixDigest.Bytes())
+		t.Errorf("header mixDigest bytes (%x) does not match expected bytes (%x)", mixDigestBytes, gethHeader.MixDigest.Bytes())
 	}
 
 	nonceNode, err := headerNode.LookupByString("Nonce")
@@ -274,7 +274,7 @@ func testHeaderNodeContents(t *testing.T) {
 	}
 	nonce := binary.BigEndian.Uint64(nonceBytes)
 	if nonce != gethHeader.Nonce.Uint64() {
-		t.Errorf("header nonce (%d) dones not match expected nonce (%d)", nonce, gethHeader.Nonce.Uint64())
+		t.Errorf("header nonce (%d) does not match expected nonce (%d)", nonce, gethHeader.Nonce.Uint64())
 	}
 }
 

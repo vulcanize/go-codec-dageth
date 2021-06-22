@@ -175,7 +175,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type Receipt struct {
 			Type			  TxType
 			// We could make Status an enum
-			Status	          Uint // nullable
+			Status	          Uint   // nullable
 			PostState		  Hash   // nullable
 			CumulativeGasUsed Uint
 			Bloom             Bloom

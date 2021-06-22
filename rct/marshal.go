@@ -61,6 +61,8 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 var (
 	receiptStatusFailedRLP     = []byte{}
 	receiptStatusSuccessfulRLP = []byte{0x01}
+	receiptStatusFailed        = []byte{0, 0, 0, 0, 0, 0, 0, 0}
+	receiptStatusSuccessful    = []byte{0, 0, 0, 0, 0, 0, 0, 1}
 )
 
 // EncodeReceipt packs the node into the go-ethereum Receipt
@@ -68,7 +70,7 @@ func EncodeReceipt(receipt *types.Receipt, inNode ipld.Node) error {
 	rct := new(receiptRLP)
 	txType, err := packReceiptRLP(rct, inNode)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to pack receiptRLP struct: %v", err)
 	}
 	receipt.Type = txType
 	receipt.Bloom = rct.Bloom
@@ -96,7 +98,7 @@ func packReceiptRLP(rct *receiptRLP, inNode ipld.Node) (uint8, error) {
 	node := builder.Build()
 	txType, err := shared.GetTxType(node)
 	if err != nil {
-		return 0, fmt.Errorf("invalid DAG-ETH Receipt form (%v)", err)
+		return 0, fmt.Errorf("unable to get TxType from receiptRLP (%v)", err)
 	}
 	for _, pFunc := range requiredPackFuncs {
 		if err := pFunc(rct, node); err != nil {
@@ -125,12 +127,12 @@ var requiredPackFuncs = []func(*receiptRLP, ipld.Node) error{
 func packPostStateOrStatus(rct *receiptRLP, node ipld.Node) error {
 	psNode, err := node.LookupByString("PostState")
 	if err != nil {
-		return err
+		return fmt.Errorf("receipt is missing a PostState node: %v", err)
 	}
 	if !psNode.IsNull() {
 		psBytes, err := psNode.AsBytes()
 		if err != nil {
-			return err
+			return fmt.Errorf("receipt PostState should be of type Bytes")
 		}
 		rct.PostStateOrStatus = psBytes
 		return nil
@@ -138,23 +140,30 @@ func packPostStateOrStatus(rct *receiptRLP, node ipld.Node) error {
 
 	sNode, err := node.LookupByString("Status")
 	if err != nil {
-		return err
+		return fmt.Errorf("receipt is missing a Status node: %v", err)
 	}
 	if sNode.IsNull() {
 		return fmt.Errorf("receipt Node must have either PostState or Status")
 	}
 	sBytes, err := sNode.AsBytes()
 	if err != nil {
-		return err
+		return fmt.Errorf("receipt Status should be of type Bytes")
 	}
-	rct.PostStateOrStatus = sBytes
+	switch {
+	case bytes.Equal(sBytes, receiptStatusFailed):
+		rct.PostStateOrStatus = receiptStatusFailedRLP
+	case bytes.Equal(sBytes, receiptStatusSuccessful):
+		rct.PostStateOrStatus = receiptStatusSuccessfulRLP
+	default:
+		return fmt.Errorf("unrecognized tx type")
+	}
 	return nil
 }
 
 func packCumulativeGasUsed(rct *receiptRLP, node ipld.Node) error {
 	cguNode, err := node.LookupByString("CumulativeGasUsed")
 	if err != nil {
-		return err
+		return fmt.Errorf("receipt is missing a CumulativeGasUsed node: %v", err)
 	}
 	cguBytes, err := cguNode.AsBytes()
 	if err != nil {
@@ -167,7 +176,7 @@ func packCumulativeGasUsed(rct *receiptRLP, node ipld.Node) error {
 func packBloom(rct *receiptRLP, node ipld.Node) error {
 	bloomNode, err := node.LookupByString("Bloom")
 	if err != nil {
-		return err
+		return fmt.Errorf("receipt is missing a Bloom node: %v", err)
 	}
 	bloomBytes, err := bloomNode.AsBytes()
 	if err != nil {
@@ -180,7 +189,7 @@ func packBloom(rct *receiptRLP, node ipld.Node) error {
 func packLogs(rct *receiptRLP, node ipld.Node) error {
 	logsNode, err := node.LookupByString("Logs")
 	if err != nil {
-		return err
+		return fmt.Errorf("receipt is missing a Logs node: %v", err)
 	}
 	logs := make([]*types.Log, logsNode.Length())
 	logsIt := logsNode.ListIterator()
@@ -191,7 +200,7 @@ func packLogs(rct *receiptRLP, node ipld.Node) error {
 		}
 		addrNode, err := logNode.LookupByString("Address")
 		if err != nil {
-			return err
+			return fmt.Errorf("receipt log is missing an Address node: %v", err)
 		}
 		addrBytes, err := addrNode.AsBytes()
 		if err != nil {
@@ -199,7 +208,7 @@ func packLogs(rct *receiptRLP, node ipld.Node) error {
 		}
 		topicsNode, err := logNode.LookupByString("Topics")
 		if err != nil {
-			return err
+			return fmt.Errorf("receipt log is missing a Topics node: %v", err)
 		}
 		topics := make([]common.Hash, topicsNode.Length())
 		topicsIt := topicsNode.ListIterator()
@@ -216,7 +225,7 @@ func packLogs(rct *receiptRLP, node ipld.Node) error {
 		}
 		dataNode, err := logNode.LookupByString("Data")
 		if err != nil {
-			return err
+			return fmt.Errorf("receipt log is missing a Data node: %v", err)
 		}
 		data, err := dataNode.AsBytes()
 		if err != nil {

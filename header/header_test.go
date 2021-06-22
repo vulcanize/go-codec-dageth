@@ -23,6 +23,26 @@ var (
 	headerNode ipld.Node
 )
 
+/* IPLD Schema
+type Header struct {
+	ParentCID &Header
+	UnclesCID &Uncles
+	Coinbase Address
+	StateRootCID &StateTrieNode
+	TxRootCID &TxTrieNode
+	RctRootCID &RctTrieNode
+	Bloom Bloom
+	Difficulty BigInt
+	Number BigInt
+	GasLimit Uint
+	GasUsed Uint
+	Time Time
+	Extra Bytes
+	MixDigest Hash
+	Nonce Uint
+}
+*/
+
 func TestHeaderCodec(t *testing.T) {
 	block, _, err := loadBlockFromRLPFile("./block1_rlp")
 	if err != nil {

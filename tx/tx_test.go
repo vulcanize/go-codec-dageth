@@ -63,6 +63,34 @@ var (
 	legacyTxNode, accessListTxNode         ipld.Node
 )
 
+/* IPLD Schemas
+type StorageKeys [Hash]
+
+type AccessElement struct {
+	Address     Address
+	StorageKeys StorageKeys
+}
+
+type AccessList [AccessElement]
+
+type Transaction struct {
+	TxType       TxType
+	ChainID      nullable BigInt # null unless the transaction is an EIP-2930 transaction
+	AccountNonce Uint
+	GasPrice     BigInt
+	GasLimit     Uint
+	Recipient    nullable Address # null recipient means the tx is a contract creation
+	Amount       BigInt
+	Data         Bytes
+	AccessList   nullable AccessList # null unless the transaction is an EIP-2930 transaction
+
+	# Signature values
+	V            BigInt
+	R            BigInt
+	S            BigInt
+}
+*/
+
 func TestTransactionCodec(t *testing.T) {
 	var err error
 	legacyTxConsensusEnc, err = legacyTx.MarshalBinary()
@@ -94,33 +122,6 @@ func testTransactionDecoding(t *testing.T) {
 	}
 	accessListTxNode = alTxBuilder.Build()
 }
-
-/*
-type Transaction struct {
-			Type         TxType
-			// We could make ChainID a required field in the IPLD schema
-			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 transaction
-			AccountNonce Uint
-			GasPrice     BigInt
-			GasLimit     Uint
-			Recipient    nullable Address # null recipient means the tx is a contract creation
-			Amount       BigInt
-			Data         Bytes
-			AccessList   nullable AccessList # null unless the transaction is an EIP-2930 transaction
-
-			# Signature values
-			V            BigInt
-			R            BigInt
-			S            BigInt
-		}
-
-type StorageKeys [Hash]
-
-		type AccessElement struct {
-		    Address     Address
-		    StorageKeys StorageKeys
-		}
-*/
 
 func testAccessListTransactionNodeContent(t *testing.T) {
 	verifySharedContent(t, accessListTxNode, accessListTx)

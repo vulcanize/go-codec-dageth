@@ -102,7 +102,7 @@ func unpackStorageRootCID(ma ipld.MapAssembler, account state.Account) error {
 }
 
 func unpackCodeCID(ma ipld.MapAssembler, account state.Account) error {
-	cMh, err := multihash.Encode(account.Root.Bytes(), MultiHashType)
+	cMh, err := multihash.Encode(account.CodeHash, MultiHashType)
 	if err != nil {
 		return err
 	}

@@ -55,6 +55,29 @@ var (
 	legacyReceiptNode, accessListReceiptNode    ipld.Node
 )
 
+/* IPLD Schemas
+type Topics [Hash]
+
+type Log struct {
+	Address Address
+	Topics  Topics
+	Data    Bytes
+}
+
+type Logs [Log]
+
+type Receipt struct {
+	TxType			  TxType
+	Status	          nullable Uint
+	PostState		  nullable Hash
+	CumulativeGasUsed Uint
+	Bloom             Bloom
+	Logs              Logs
+}
+
+type Receipts [Receipt]
+*/
+
 func TestReceiptCodec(t *testing.T) {
 	var err error
 	lReceiptConsensusEnc, err = legacyReceipt.MarshalBinary()

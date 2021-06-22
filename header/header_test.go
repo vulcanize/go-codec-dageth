@@ -91,7 +91,7 @@ func testHeaderNodeContents(t *testing.T) {
 
 	unclesNode, err := headerNode.LookupByString("UnclesCID")
 	if err != nil {
-		t.Fatalf("header is missing UnclesCID")
+		t.Fatalf("header is missing UnclesCID: %v", err)
 	}
 	unclesLink, err := unclesNode.AsLink()
 	if err != nil {
@@ -112,7 +112,7 @@ func testHeaderNodeContents(t *testing.T) {
 
 	coinbaseNode, err := headerNode.LookupByString("Coinbase")
 	if err != nil {
-		t.Fatalf("header is missing Coinbase")
+		t.Fatalf("header is missing Coinbase: %v", err)
 	}
 	coinbaseBytes, err := coinbaseNode.AsBytes()
 	if err != nil {
@@ -124,7 +124,7 @@ func testHeaderNodeContents(t *testing.T) {
 
 	stateRootNode, err := headerNode.LookupByString("StateRootCID")
 	if err != nil {
-		t.Fatalf("header is missing StateRootCID")
+		t.Fatalf("header is missing StateRootCID: %v", err)
 	}
 	stateRootLink, err := stateRootNode.AsLink()
 	if err != nil {
@@ -145,7 +145,7 @@ func testHeaderNodeContents(t *testing.T) {
 
 	txRootNode, err := headerNode.LookupByString("TxRootCID")
 	if err != nil {
-		t.Fatalf("header is missing TxRootCID")
+		t.Fatalf("header is missing TxRootCID: %v", err)
 	}
 	txRootLink, err := txRootNode.AsLink()
 	if err != nil {
@@ -166,7 +166,7 @@ func testHeaderNodeContents(t *testing.T) {
 
 	rctRootNode, err := headerNode.LookupByString("RctRootCID")
 	if err != nil {
-		t.Fatalf("header is missing RctRootCID")
+		t.Fatalf("header is missing RctRootCID: %v", err)
 	}
 	rctRootLink, err := rctRootNode.AsLink()
 	if err != nil {
@@ -187,11 +187,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	bloomNode, err := headerNode.LookupByString("Bloom")
 	if err != nil {
-		t.Fatalf("header is missing Bloom")
+		t.Fatalf("header is missing Bloom: %v", err)
 	}
 	bloomBytes, err := bloomNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header Bloom should be of type Bytes")
+		t.Fatalf("header Bloom should be of type Bytes: %v", err)
 	}
 	if !bytes.Equal(bloomBytes, gethHeader.Bloom.Bytes()) {
 		t.Errorf("header bloom bytes (%x) does not match expected bytes (%x)", bloomBytes, gethHeader.Bloom.Bytes())
@@ -199,11 +199,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	diffNode, err := headerNode.LookupByString("Difficulty")
 	if err != nil {
-		t.Fatalf("header is missing Difficulty")
+		t.Fatalf("header is missing Difficulty: %v", err)
 	}
 	diffNodeBytes, err := diffNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header Difficulty should be of type Bytes")
+		t.Fatalf("header Difficulty should be of type Bytes: %v", err)
 	}
 	if !bytes.Equal(diffNodeBytes, gethHeader.Difficulty.Bytes()) {
 		t.Errorf("header difficulty (%x) does not match expected difficulty (%x)", diffNodeBytes, gethHeader.Difficulty.Bytes())
@@ -211,11 +211,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	numberNode, err := headerNode.LookupByString("Number")
 	if err != nil {
-		t.Fatalf("header is missing Number")
+		t.Fatalf("header is missing Number: %v", err)
 	}
 	numberBytes, err := numberNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header Number should be of type Bytes")
+		t.Fatalf("header Number should be of type Bytes: %v", err)
 	}
 	if !bytes.Equal(numberBytes, gethHeader.Number.Bytes()) {
 		t.Errorf("header number (%x) does not match expected number (%x)", numberBytes, gethHeader.Number.Bytes())
@@ -223,11 +223,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	gasLimitNode, err := headerNode.LookupByString("GasLimit")
 	if err != nil {
-		t.Fatalf("header is missing GasLimit")
+		t.Fatalf("header is missing GasLimit: %v", err)
 	}
 	gasLimitBytes, err := gasLimitNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header GasLimit should be of type Bytes")
+		t.Fatalf("header GasLimit should be of type Bytes: %v", err)
 	}
 	gasLimitUint := binary.BigEndian.Uint64(gasLimitBytes)
 	if gasLimitUint != gethHeader.GasLimit {
@@ -236,11 +236,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	gasUsedNode, err := headerNode.LookupByString("GasUsed")
 	if err != nil {
-		t.Fatalf("header is missing GasUsed")
+		t.Fatalf("header is missing GasUsed: %v", err)
 	}
 	gasUsedBytes, err := gasUsedNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header GasUsed should be of type Bytes")
+		t.Fatalf("header GasUsed should be of type Bytes: %v", err)
 	}
 	gasUsedUint := binary.BigEndian.Uint64(gasUsedBytes)
 	if gasUsedUint != gethHeader.GasUsed {
@@ -249,11 +249,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	timeNode, err := headerNode.LookupByString("Time")
 	if err != nil {
-		t.Fatalf("header is missing Time")
+		t.Fatalf("header is missing Time: %v", err)
 	}
 	timeBytes, err := timeNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header GasUsed should be of type Bytes")
+		t.Fatalf("header GasUsed should be of type Bytes: %v", err)
 	}
 	timeUint := binary.BigEndian.Uint64(timeBytes)
 	if timeUint != gethHeader.Time {
@@ -262,11 +262,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	extraNode, err := headerNode.LookupByString("Extra")
 	if err != nil {
-		t.Fatalf("header is missing Extra")
+		t.Fatalf("header is missing Extra: %v", err)
 	}
 	extraBytes, err := extraNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header Extra should be of type Byets")
+		t.Fatalf("header Extra should be of type Byets: %v", err)
 	}
 	if !bytes.Equal(extraBytes, gethHeader.Extra) {
 		t.Errorf("header extra bytes (%x) does not match expected bytes (%x)", extraBytes, gethHeader.Extra)
@@ -274,11 +274,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	mixDigestNode, err := headerNode.LookupByString("MixDigest")
 	if err != nil {
-		t.Fatalf("header is missing MixDigest")
+		t.Fatalf("header is missing MixDigest: %v", err)
 	}
 	mixDigestBytes, err := mixDigestNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header Extra should be of type Byets")
+		t.Fatalf("header Extra should be of type Byets: %v", err)
 	}
 	if !bytes.Equal(mixDigestBytes, gethHeader.MixDigest.Bytes()) {
 		t.Errorf("header mixDigest bytes (%x) does not match expected bytes (%x)", mixDigestBytes, gethHeader.MixDigest.Bytes())
@@ -286,11 +286,11 @@ func testHeaderNodeContents(t *testing.T) {
 
 	nonceNode, err := headerNode.LookupByString("Nonce")
 	if err != nil {
-		t.Fatalf("header is missing Nonce")
+		t.Fatalf("header is missing Nonce: %v", err)
 	}
 	nonceBytes, err := nonceNode.AsBytes()
 	if err != nil {
-		t.Fatalf("header Extra should be of type Byets")
+		t.Fatalf("header Extra should be of type Byets: %v", err)
 	}
 	nonce := binary.BigEndian.Uint64(nonceBytes)
 	if nonce != gethHeader.Nonce.Uint64() {

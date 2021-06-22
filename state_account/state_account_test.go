@@ -86,11 +86,11 @@ func testAccountNodeContents(t *testing.T) {
 
 	balanceNode, err := accountNode.LookupByString("Balance")
 	if err != nil {
-		t.Fatalf("account is missing Balance")
+		t.Fatalf("account is missing Balance %v", err)
 	}
 	balanceBytes, err := balanceNode.AsBytes()
 	if err != nil {
-		t.Fatalf("account Balance should be of type Bytes")
+		t.Fatalf("account Balance should be of type Bytes %v", err)
 	}
 	if !bytes.Equal(balanceBytes, mockAccount.Balance.Bytes()) {
 		t.Errorf("account balance (%x) does not match expected balance (%x)", balanceBytes, mockAccount.Balance.Bytes())
@@ -98,11 +98,11 @@ func testAccountNodeContents(t *testing.T) {
 
 	nonceNode, err := accountNode.LookupByString("Nonce")
 	if err != nil {
-		t.Fatalf("account is missing Balance")
+		t.Fatalf("account is missing Balance %v", err)
 	}
 	nonceBytes, err := nonceNode.AsBytes()
 	if err != nil {
-		t.Fatalf("account Balance should be of type Bytes")
+		t.Fatalf("account Balance should be of type Bytes %v", err)
 	}
 	nonce := binary.BigEndian.Uint64(nonceBytes)
 	if nonce != mockAccount.Nonce {

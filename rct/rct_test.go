@@ -114,7 +114,7 @@ func testAccessListReceiptNodeContents(t *testing.T) {
 	verifySharedContent(t, accessListReceiptNode, accessListReceipt)
 	statusNode, err := accessListReceiptNode.LookupByString("Status")
 	if err != nil {
-		t.Fatalf("receipt is missing Status")
+		t.Fatalf("receipt is missing Status: %v", err)
 	}
 	if !statusNode.IsNull() {
 		t.Fatalf("receipt Status should be null")
@@ -122,14 +122,14 @@ func testAccessListReceiptNodeContents(t *testing.T) {
 
 	postStateNode, err := accessListReceiptNode.LookupByString("PostState")
 	if err != nil {
-		t.Fatalf("receipt is missing PostState")
+		t.Fatalf("receipt is missing PostState: %v", err)
 	}
 	if postStateNode.IsNull() {
 		t.Errorf("receipt PostState should not be null")
 	}
 	postStateBy, err := postStateNode.AsBytes()
 	if err != nil {
-		t.Fatalf("receipt PostState should be of type Bytes")
+		t.Fatalf("receipt PostState should be of type Bytes: %v", err)
 	}
 	if !bytes.Equal(postStateBy, accessListReceipt.PostState) {
 		t.Errorf("receipt post state (%d) does not match expected post state (%d)", postStateBy, accessListReceipt.PostState)
@@ -140,14 +140,14 @@ func testLegacyReceiptNodeContents(t *testing.T) {
 	verifySharedContent(t, legacyReceiptNode, legacyReceipt)
 	statusNode, err := legacyReceiptNode.LookupByString("Status")
 	if err != nil {
-		t.Fatalf("receipt is missing Status")
+		t.Fatalf("receipt is missing Status: %v", err)
 	}
 	if statusNode.IsNull() {
 		t.Fatalf("receipt Status should not be null")
 	}
 	statusBy, err := statusNode.AsBytes()
 	if err != nil {
-		t.Fatalf("receipt Status should be of type Bytes")
+		t.Fatalf("receipt Status should be of type Bytes: %v", err)
 	}
 	status := binary.BigEndian.Uint64(statusBy)
 	if status != legacyReceipt.Status {
@@ -156,7 +156,7 @@ func testLegacyReceiptNodeContents(t *testing.T) {
 
 	postStateNode, err := legacyReceiptNode.LookupByString("PostState")
 	if err != nil {
-		t.Fatalf("receipt is missing PostState")
+		t.Fatalf("receipt is missing PostState: %v", err)
 	}
 	if !postStateNode.IsNull() {
 		t.Errorf("receipt PostState should be null")
@@ -166,11 +166,11 @@ func testLegacyReceiptNodeContents(t *testing.T) {
 func verifySharedContent(t *testing.T, rctNode ipld.Node, rct *types.Receipt) {
 	typeNode, err := rctNode.LookupByString("TxType")
 	if err != nil {
-		t.Fatalf("receipt is missing TxType")
+		t.Fatalf("receipt is missing TxType: %v", err)
 	}
 	typeBy, err := typeNode.AsBytes()
 	if err != nil {
-		t.Fatalf("receipt TxType should be of type Bytes")
+		t.Fatalf("receipt TxType should be of type Bytes: %v", err)
 	}
 	if len(typeBy) != 1 {
 		t.Fatalf("receipt TxType should be a single byte")
@@ -181,11 +181,11 @@ func verifySharedContent(t *testing.T, rctNode ipld.Node, rct *types.Receipt) {
 
 	cguNode, err := rctNode.LookupByString("CumulativeGasUsed")
 	if err != nil {
-		t.Fatalf("receipt is missing CumulativeGasUsed")
+		t.Fatalf("receipt is missing CumulativeGasUsed: %v", err)
 	}
 	cguBy, err := cguNode.AsBytes()
 	if err != nil {
-		t.Fatalf("receipt CumulativeGasUsed should be of type Bytes")
+		t.Fatalf("receipt CumulativeGasUsed should be of type Bytes: %v", err)
 	}
 	cgu := binary.BigEndian.Uint64(cguBy)
 	if cgu != rct.CumulativeGasUsed {
@@ -194,11 +194,11 @@ func verifySharedContent(t *testing.T, rctNode ipld.Node, rct *types.Receipt) {
 
 	bloomNode, err := rctNode.LookupByString("Bloom")
 	if err != nil {
-		t.Fatalf("receipt is missing Bloom")
+		t.Fatalf("receipt is missing Bloom: %v", err)
 	}
 	bloomBy, err := bloomNode.AsBytes()
 	if err != nil {
-		t.Fatalf("receipt Bloom should be of type Bytes")
+		t.Fatalf("receipt Bloom should be of type Bytes: %v", err)
 	}
 	if !bytes.Equal(bloomBy, rct.Bloom.Bytes()) {
 		t.Errorf("receipt bloom (%x) does not match expected bloom (%x)", bloomBy, rct.Bloom.Bytes())
@@ -206,7 +206,7 @@ func verifySharedContent(t *testing.T, rctNode ipld.Node, rct *types.Receipt) {
 
 	logsNode, err := rctNode.LookupByString("Logs")
 	if err != nil {
-		t.Fatalf("receipt is missing Logs")
+		t.Fatalf("receipt is missing Logs: %v", err)
 	}
 	if logsNode.Length() != int64(len(rct.Logs)) {
 		t.Fatalf("receipt should have %d logs", len(rct.Logs))
@@ -220,29 +220,29 @@ func verifySharedContent(t *testing.T, rctNode ipld.Node, rct *types.Receipt) {
 		currentLog := rct.Logs[i]
 		addrNode, err := logNode.LookupByString("Address")
 		if err != nil {
-			t.Fatalf("receipt log is missing Address")
+			t.Fatalf("receipt log is missing Address: %v", err)
 		}
 		addrBy, err := addrNode.AsBytes()
 		if err != nil {
-			t.Fatalf("receipt log Address should be of type Bytes")
+			t.Fatalf("receipt log Address should be of type Bytes: %v", err)
 		}
 		if !bytes.Equal(addrBy, currentLog.Address.Bytes()) {
 			t.Errorf("receipt log address (%x) does not match expected address (%x)", addrBy, currentLog.Address.Bytes())
 		}
 		dataNode, err := logNode.LookupByString("Data")
 		if err != nil {
-			t.Fatalf("receipt log is missing Data")
+			t.Fatalf("receipt log is missing Data: %v", err)
 		}
 		data, err := dataNode.AsBytes()
 		if err != nil {
-			t.Fatalf("receipt log Data should be of type Bytes")
+			t.Fatalf("receipt log Data should be of type Bytes: %v", err)
 		}
 		if !bytes.Equal(data, currentLog.Data) {
 			t.Errorf("receipt log data (%x) does not match expected data (%x)", data, currentLog.Data)
 		}
 		topicsNode, err := logNode.LookupByString("Topics")
 		if err != nil {
-			t.Fatalf("receipt log is missing Topics")
+			t.Fatalf("receipt log is missing Topics: %v", err)
 		}
 		if topicsNode.Length() != 2 {
 			t.Fatal("receipt log should have two topics")
@@ -256,7 +256,7 @@ func verifySharedContent(t *testing.T, rctNode ipld.Node, rct *types.Receipt) {
 			currentTopic := currentLog.Topics[j].Bytes()
 			topicBy, err := topicNode.AsBytes()
 			if err != nil {
-				t.Fatalf("receipt log Topic should be of type Bytes")
+				t.Fatalf("receipt log Topic should be of type Bytes: %v", err)
 			}
 			if !bytes.Equal(topicBy, currentTopic) {
 				t.Errorf("receipt log topic%d bytes (%x) does not match expected bytes (%x)", j, topicBy, currentTopic)

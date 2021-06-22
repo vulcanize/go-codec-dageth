@@ -218,7 +218,7 @@ func verifyBranchNodeContents(t *testing.T) {
 
 	valEnumNode, err := branch.LookupByString("Value")
 	if err != nil {
-		t.Fatalf("state trie leaf node missing Value: %v", err)
+		t.Fatalf("state trie branch node missing Value: %v", err)
 	}
 	verifyLeafValue(valEnumNode, t)
 }

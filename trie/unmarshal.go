@@ -7,12 +7,13 @@ import (
 	"strconv"
 	"strings"
 
+	dageth "github.com/vulcanize/go-codec-dageth"
+	"github.com/vulcanize/go-codec-dageth/shared"
+
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
-	"github.com/multiformats/go-multihash"
-
 	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
 	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
 	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
@@ -49,7 +50,7 @@ func DecodeTrieNodeBytes(na ipld.NodeAssembler, src []byte, codec uint64) error 
 	}
 	switch len(nodeFields) {
 	case 2:
-		nodeKind, decoded, err := decodeCompactKey(nodeFields)
+		nodeKind, decoded, err := decodeTwoMemberNode(nodeFields)
 		if err != nil {
 			return err
 		}
@@ -117,14 +118,18 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 	if err := ma.AssembleKey().AssignString("Child"); err != nil {
 		return err
 	}
+	childNodeBuilder := dageth.Type.Child__Repr.NewBuilder()
 	childLink, ok := nodeFields[1].([]byte)
 	if ok {
 		// it's a hash referencing the child node
 		// make CID link from the bytes
 		// assign the link value to the MA
-		childCID := keccak256ToCid(codec, childLink)
+		childCID := shared.Keccak256ToCid(codec, childLink)
 		childCIDLink := cidlink.Link{Cid: childCID}
-		return ma.AssembleValue().AssignLink(childCIDLink)
+		if err := childNodeBuilder.AssignLink(childCIDLink); err != nil {
+			return err
+		}
+		return ma.AssembleValue().AssignNode(childNodeBuilder.Build())
 	}
 	// the child node is included directly
 	// it must be a leaf node, branch and extension will never be less than 32 bytes
@@ -135,11 +140,11 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 	if len(childLeaf) != 2 {
 		return fmt.Errorf("unexpected number of entries for leaf node; got %d want 2", len(childLeaf))
 	}
-	childNode, err := ma.AssembleValue().BeginMap(1)
+	childNode, err := childNodeBuilder.BeginMap(1)
 	if err != nil {
 		return err
 	}
-	if err := childNode.AssembleKey().AssignString("Leaf"); err != nil {
+	if err := childNode.AssembleKey().AssignString(LEAF_NODE.String()); err != nil {
 		return err
 	}
 	leafNodeMA, err := childNode.AssembleValue().BeginMap(2)
@@ -152,7 +157,10 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 	if err := leafNodeMA.Finish(); err != nil {
 		return err
 	}
-	return childNode.Finish()
+	if err := childNode.Finish(); err != nil {
+		return err
+	}
+	return ma.AssembleValue().AssignNode(childNodeBuilder.Build())
 }
 
 func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint64) error {
@@ -161,6 +169,7 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 		if err := ma.AssembleKey().AssignString(key); err != nil {
 			return err
 		}
+		childNodeBuilder := dageth.Type.Child__Repr.NewBuilder()
 		childLink, ok := nodeFields[i].([]byte)
 		if ok {
 			switch len(childLink) {
@@ -169,9 +178,12 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 					return err
 				}
 			case 32:
-				childCID := keccak256ToCid(codec, childLink)
+				childCID := shared.Keccak256ToCid(codec, childLink)
 				childCIDLink := cidlink.Link{Cid: childCID}
-				if err := ma.AssembleValue().AssignLink(childCIDLink); err != nil {
+				if err := childNodeBuilder.AssignLink(childCIDLink); err != nil {
+					return err
+				}
+				if err := ma.AssembleValue().AssignNode(childNodeBuilder.Build()); err != nil {
 					return err
 				}
 			default:
@@ -188,11 +200,11 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 		if len(childLeaf) != 2 {
 			return fmt.Errorf("unexpected number of entries for leaf node; got %d want 2", len(childLeaf))
 		}
-		childNode, err := ma.AssembleValue().BeginMap(1)
+		childNode, err := childNodeBuilder.BeginMap(1)
 		if err != nil {
 			return err
 		}
-		if err := childNode.AssembleKey().AssignString("Leaf"); err != nil {
+		if err := childNode.AssembleKey().AssignString(LEAF_NODE.String()); err != nil {
 			return err
 		}
 		leafNodeMA, err := childNode.AssembleValue().BeginMap(2)
@@ -206,6 +218,9 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 			return err
 		}
 		if err := childNode.Finish(); err != nil {
+			return err
+		}
+		if err := ma.AssembleValue().AssignNode(childNodeBuilder.Build()); err != nil {
 			return err
 		}
 	}
@@ -241,7 +256,7 @@ func unpackLeafNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint64
 	if err := ma.AssembleKey().AssignString("PartialPath"); err != nil {
 		return err
 	}
-	if err := ma.AssembleValue().AssignBytes(partialPath); err != nil { // de-compact partial path first???
+	if err := ma.AssembleValue().AssignBytes(partialPath); err != nil {
 		return err
 	}
 	if err := ma.AssembleKey().AssignString("Value"); err != nil {
@@ -284,55 +299,20 @@ func unpackValue(ma ipld.MapAssembler, val []byte, codec uint64) error {
 	}
 }
 
-// decodeCompactKey takes a compact key, and returns its nodeKind and value.
-func decodeCompactKey(i []interface{}) (NodeKind, []interface{}, error) {
+// decodeTwoMemberNode takes a two-member node, discerns its type and decodes its partial path before returning it
+func decodeTwoMemberNode(i []interface{}) (NodeKind, []interface{}, error) {
 	first := i[0].([]byte)
-
+	decodedPartialPath := shared.CompactToHex(i[0].([]byte))
+	decodedNode := []interface{}{
+		decodedPartialPath,
+		i[1],
+	}
 	switch first[0] / 16 {
-	case '\x00':
-		return EXTENSION_NODE, []interface{}{
-			nibbleToByte(first)[2:],
-			i[1],
-		}, nil
-	case '\x01':
-		return EXTENSION_NODE, []interface{}{
-			nibbleToByte(first)[1:],
-			i[1],
-		}, nil
-	case '\x02':
-		return LEAF_NODE, []interface{}{
-			nibbleToByte(first)[2:],
-			i[1],
-		}, nil
-	case '\x03':
-		return LEAF_NODE, []interface{}{
-			nibbleToByte(first)[1:],
-			i[1],
-		}, nil
+	case '\x00', '\x01':
+		return EXTENSION_NODE, decodedNode, nil
+	case '\x02', '\x03':
+		return LEAF_NODE, decodedNode, nil
 	default:
 		return UNKNOWN_NODE, nil, fmt.Errorf("unknown hex prefix")
 	}
-}
-
-// keccak256ToCid takes a keccak256 hash and returns its cid based on
-// the codec given.
-func keccak256ToCid(codec uint64, h []byte) cid.Cid {
-	buf, err := multihash.Encode(h, multihash.KECCAK_256)
-	if err != nil {
-		panic(err)
-	}
-
-	return cid.NewCidV1(codec, multihash.Multihash(buf))
-}
-
-// nibbleToByte expands the nibbles of a byte slice into their own bytes.
-func nibbleToByte(k []byte) []byte {
-	var out []byte
-
-	for _, b := range k {
-		out = append(out, b/16)
-		out = append(out, b%16)
-	}
-
-	return out
 }

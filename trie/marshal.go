@@ -24,15 +24,15 @@ type ValueKind string
 
 const (
 	UNKNOWN_NODE   NodeKind = "unknown"
-	BRANCH_NODE    NodeKind = "branch"
-	EXTENSION_NODE NodeKind = "extension"
-	LEAF_NODE      NodeKind = "leaf"
+	BRANCH_NODE    NodeKind = "TrieBranchNode"
+	EXTENSION_NODE NodeKind = "TrieExtensionNode"
+	LEAF_NODE      NodeKind = "TrieLeafNode"
 
 	UNKNOWN_VALUE ValueKind = "unknown"
-	TX_VALUE      ValueKind = "tx"
-	RCT_VALUE     ValueKind = "rct"
-	STATE_VALUE   ValueKind = "state"
-	STORAGE_VALUE ValueKind = "storage"
+	TX_VALUE      ValueKind = "Transaction"
+	RCT_VALUE     ValueKind = "Receipt"
+	STATE_VALUE   ValueKind = "Account"
+	STORAGE_VALUE ValueKind = "Bytes"
 )
 
 func (n NodeKind) String() string {
@@ -108,6 +108,48 @@ func packBranchNode(node ipld.Node) ([]interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+		if childNode.IsNull() {
+			nodeFields[i] = []byte{}
+			continue
+		}
+		childLinkNode, err := childNode.LookupByString("Link")
+		if err == nil {
+			childLink, err := childLinkNode.AsLink()
+			if err != nil {
+				return nil, err
+			}
+			childCIDLink, ok := childLink.(cidlink.Link)
+			if !ok {
+				return nil, fmt.Errorf("branch node child link needs to be a CID")
+			}
+			childMh := childCIDLink.Hash()
+			decodedChildMh, err := multihash.Decode(childMh)
+			if err != nil {
+				return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
+			}
+			nodeFields[i] = decodedChildMh.Digest
+			continue
+		}
+		childTrieNodeNode, err := childNode.LookupByString("TrieNode")
+		if err == nil {
+			// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
+			childLeafNode, err := childTrieNodeNode.LookupByString(LEAF_NODE.String())
+			if err != nil {
+				return nil, fmt.Errorf("only leaf nodes can be less than 32 bytes and stored direclty in a parent node")
+			}
+			childLeafNodeFields, err := packLeafNode(childLeafNode)
+			if err != nil {
+				return nil, err
+			}
+			childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
+			if err != nil {
+				return nil, err
+			}
+			nodeFields[i] = childLeafNodeRLP
+			continue
+		}
+		return nil, fmt.Errorf("branch node child needs to be of kind bytes, link, or null: %v", err)
+		/* Child should be a kinded Union, in which case we could do the below type switch instead of map key checking
 		switch childNode.Kind() {
 		case ipld.Kind_Null:
 			nodeFields[i] = []byte{}
@@ -144,6 +186,7 @@ func packBranchNode(node ipld.Node) ([]interface{}, error) {
 		default:
 			return nil, fmt.Errorf("branch node child needs to be of kind bytes, link, or null")
 		}
+		*/
 	}
 	valueBytes, err := packValue(node)
 	if err != nil {
@@ -163,11 +206,50 @@ func packExtensionNode(node ipld.Node) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	nodeFields[0] = pp // TODO: need to compact the key
+	nodeFields[0] = shared.HexToCompact(pp)
 	childNode, err := node.LookupByString("Child")
 	if err != nil {
 		return nil, err
 	}
+	childLinkNode, err := childNode.LookupByString("Link")
+	if err == nil {
+		childLink, err := childLinkNode.AsLink()
+		if err != nil {
+			return nil, err
+		}
+		childCIDLink, ok := childLink.(cidlink.Link)
+		if !ok {
+			return nil, fmt.Errorf("extension node child link needs to be a CID")
+		}
+		childMh := childCIDLink.Hash()
+		decodedChildMh, err := multihash.Decode(childMh)
+		if err != nil {
+			return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
+		}
+		nodeFields[1] = decodedChildMh.Digest
+		return nodeFields, nil
+	}
+	childTrieNodeNode, err := childNode.LookupByString("TrieNode")
+	if err == nil {
+		// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
+		childLeafNode, err := childTrieNodeNode.LookupByString(LEAF_NODE.String())
+		if err != nil {
+			return nil, fmt.Errorf("only leaf nodes can be less than 32 bytes and stored direclty in a parent node")
+		}
+		childLeafNodeFields, err := packLeafNode(childLeafNode)
+		if err != nil {
+			return nil, err
+		}
+		childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
+		if err != nil {
+			return nil, err
+		}
+		nodeFields[1] = childLeafNodeRLP
+		return nodeFields, nil
+	}
+	return nil, fmt.Errorf("extension node child needs to be of kind bytes or link")
+
+	/* Child should be a kinded Union, in which case we could do the below type switch instead of map key checking
 	switch childNode.Kind() {
 	case ipld.Kind_Link:
 		childLink, err := childNode.AsLink()
@@ -202,7 +284,7 @@ func packExtensionNode(node ipld.Node) ([]interface{}, error) {
 	default:
 		return nil, fmt.Errorf("extension node child needs to be of kind bytes or link")
 	}
-	return nodeFields, nil
+	*/
 }
 
 func packLeafNode(node ipld.Node) ([]interface{}, error) {
@@ -215,7 +297,7 @@ func packLeafNode(node ipld.Node) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	nodeFields[0] = pp // TODO: need to compact the key
+	nodeFields[0] = shared.HexToCompact(pp)
 	valueBytes, err := packValue(node)
 	if err != nil {
 		return nil, err

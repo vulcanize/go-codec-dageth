@@ -7,7 +7,7 @@ require (
 	github.com/ipfs/go-cid v0.0.7
 	github.com/ipfs/go-ipfs-blockstore v1.0.4
 	github.com/ipfs/go-ipfs-ds-help v1.0.0
-	github.com/ipld/go-ipld-prime v0.9.0
+	github.com/ipld/go-ipld-prime v0.10.0
 	github.com/multiformats/go-multihash v0.0.15
 )
 

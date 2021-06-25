@@ -3,10 +3,11 @@ package storage_trie_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/vulcanize/go-codec-dageth/shared"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/vulcanize/go-codec-dageth/shared"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -21,18 +22,18 @@ import (
 )
 
 var (
-	mockLeafVal, _      = rlp.EncodeToBytes([]byte{1, 2, 3, 4, 5})
-	mockLeafParitalPath = common.Hex2Bytes("3114658a74d9cc9f7acf2c5cd696c3494d7c344d78bfec3add0d91ec4e8d1c45")
+	mockLeafVal, _             = rlp.EncodeToBytes([]byte{1, 2, 3, 4, 5})
+	mockLeafParitalPath        = common.Hex2Bytes("3114658a74d9cc9f7acf2c5cd696c3494d7c344d78bfec3add0d91ec4e8d1c45")
 	mockDecodedLeafPartialPath = shared.CompactToHex(mockLeafParitalPath)
-	mockLeafNode        = []interface{}{
+	mockLeafNode               = []interface{}{
 		mockLeafParitalPath,
 		mockLeafVal,
 	}
-	mockLeafNodeRLP, _       = rlp.EncodeToBytes(mockLeafNode)
-	mockExtensionPartialPath = common.Hex2Bytes("1114658a74d9cc9f7acf2c5cd696c3494d7c344d78bfec3add0d91ec4e8d1c45")
+	mockLeafNodeRLP, _              = rlp.EncodeToBytes(mockLeafNode)
+	mockExtensionPartialPath        = common.Hex2Bytes("1114658a74d9cc9f7acf2c5cd696c3494d7c344d78bfec3add0d91ec4e8d1c45")
 	mockDecodedExtensionPartialPath = shared.CompactToHex(mockExtensionPartialPath)
-	mockExtensionHash        = crypto.Keccak256(mockLeafNodeRLP)
-	mockExtensionNode        = []interface{}{
+	mockExtensionHash               = crypto.Keccak256(mockLeafNodeRLP)
+	mockExtensionNode               = []interface{}{
 		mockExtensionPartialPath,
 		mockExtensionHash,
 	}

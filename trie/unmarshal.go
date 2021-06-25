@@ -274,12 +274,12 @@ func unpackLeafNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint64
 
 func unpackValue(ma ipld.MapAssembler, val []byte, codec uint64) error {
 	switch codec {
-	case cid.EthTx:
+	case cid.EthTxTrie:
 		if err := ma.AssembleKey().AssignString(TX_VALUE.String()); err != nil {
 			return err
 		}
 		return dageth_tx.DecodeBytes(ma.AssembleValue(), val)
-	case cid.EthTxReceipt:
+	case cid.EthTxReceiptTrie:
 		if err := ma.AssembleKey().AssignString(RCT_VALUE.String()); err != nil {
 			return err
 		}

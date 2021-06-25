@@ -19826,15 +19826,21 @@ func (ma *_TrieNode__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
+		if ma.w.x1 == nil {
+			ma.w.x1 = &_TrieBranchNode{}
+		}
 		ma.ca1.w = ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
+		if ma.w.x2 == nil {
+			ma.w.x2 = &_TrieExtensionNode{}
+		}
 		ma.ca2.w = ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 2:
+	case 3:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
@@ -20290,15 +20296,15 @@ func (ma *_TrieNode__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
 		ma.ca1.w = ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
 		ma.ca2.w = ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 2:
+	case 3:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
@@ -21849,19 +21855,19 @@ func (ma *_Value__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 2:
+	case 3:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
-	case 3:
+	case 4:
 		ma.ca4.w = &ma.w.x4
 		ma.ca4.m = &ma.cm
 		return &ma.ca4

@@ -1,4 +1,4 @@
-package dageth_tx
+package tx
 
 import (
 	"encoding/binary"
@@ -66,7 +66,7 @@ var RequiredUnpackFuncs = []func(ipld.MapAssembler, types.Transaction) error{
 }
 
 func unpackTxType(ma ipld.MapAssembler, tx types.Transaction) error {
-	if err := ma.AssembleKey().AssignString("Type"); err != nil {
+	if err := ma.AssembleKey().AssignString("TxType"); err != nil {
 		return err
 	}
 	return ma.AssembleValue().AssignBytes([]byte{tx.Type()})

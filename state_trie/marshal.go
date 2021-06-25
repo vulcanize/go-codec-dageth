@@ -1,4 +1,4 @@
-package dageth_statetrie
+package state_trie
 
 import (
 	"io"

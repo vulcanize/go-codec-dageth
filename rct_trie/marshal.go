@@ -1,4 +1,4 @@
-package dageth_rcttrie
+package rct_trie
 
 import (
 	"io"

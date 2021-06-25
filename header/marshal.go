@@ -1,4 +1,4 @@
-package dageth_header
+package header
 
 import (
 	"encoding/binary"
@@ -41,8 +41,8 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	if err := EncodeHeader(header, inNode); err != nil {
 		return enc, err
 	}
-	wbs := shared.WriteableByteSlice(enc)
-	if err := rlp.Encode(&wbs, header); err != nil {
+	wbs := shared.NewWriteableByteSlice(&enc)
+	if err := rlp.Encode(wbs, header); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Header form (unable to RLP encode header: %v)", err)
 	}
 	return enc, nil

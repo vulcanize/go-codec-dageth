@@ -45,10 +45,9 @@ func accumulateBasicTypes(ts *schema.TypeSystem) {
 	// we could more explicitly type our links with SpawnLinkReference
 	ts.Accumulate(schema.SpawnLink("Link"))
 	ts.Accumulate(schema.SpawnBytes("Bytes"))
-
+	ts.Accumulate(schema.SpawnString("String"))
 	ts.Accumulate(schema.SpawnBytes("BigInt"))
 	ts.Accumulate(schema.SpawnBytes("Uint"))
-	ts.Accumulate(schema.SpawnBytes("BlockNonce"))
 	ts.Accumulate(schema.SpawnBytes("Hash"))
 	ts.Accumulate(schema.SpawnBytes("Address"))
 	ts.Accumulate(schema.SpawnBytes("Bloom"))
@@ -75,7 +74,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			Time Time
 			Extra Bytes
 			MixDigest Hash
-			Nonce BlockNonce
+			Nonce Uint
 		}
 	*/
 	ts.Accumulate(schema.SpawnStruct("Header",
@@ -94,7 +93,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			schema.SpawnStructField("Time", "Time", false, false),
 			schema.SpawnStructField("Extra", "Bytes", false, false),
 			schema.SpawnStructField("MixDigest", "Hash", false, false),
-			schema.SpawnStructField("Nonce", "BlockNonce", false, false),
+			schema.SpawnStructField("Nonce", "Uint", false, false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
@@ -115,7 +114,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type AccessList [AccessElement]
 
 		type Transaction struct {
-			Type         TxType
+			TxType       TxType
 			// We could make ChainID a required field in the IPLD schema
 			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 transaction
 			AccountNonce Uint
@@ -145,7 +144,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnList("AccessList", "AccessElement", false))
 	ts.Accumulate(schema.SpawnStruct("Transaction",
 		[]schema.StructField{
-			schema.SpawnStructField("Type", "TxType", false, false),
+			schema.SpawnStructField("TxType", "TxType", false, false),
 			schema.SpawnStructField("ChainID", "BigInt", false, true),
 			schema.SpawnStructField("AccountNonce", "Uint", false, false),
 			schema.SpawnStructField("GasPrice", "BigInt", false, false),
@@ -174,9 +173,9 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type Logs [Log]
 
 		type Receipt struct {
-			Type			  TxType
+			TxType			  TxType
 			// We could make Status an enum
-			Status	          Uint // nullable
+			Status	          Uint   // nullable
 			PostState		  Hash   // nullable
 			CumulativeGasUsed Uint
 			Bloom             Bloom
@@ -197,7 +196,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnList("Logs", "Log", false))
 	ts.Accumulate(schema.SpawnStruct("Receipt",
 		[]schema.StructField{
-			schema.SpawnStructField("Type", "TxType", false, false),
+			schema.SpawnStructField("TxType", "TxType", false, false),
 			schema.SpawnStructField("PostState", "Bytes", false, true),
 			schema.SpawnStructField("Status", "Uint", false, true),
 			schema.SpawnStructField("CumulativeGasUsed", "Uint", false, false),

@@ -1,4 +1,4 @@
-package dageth_rct
+package rct
 
 import (
 	"encoding/binary"
@@ -61,7 +61,7 @@ var requiredUnpackFuncs = []func(ipld.MapAssembler, types.Receipt) error{
 }
 
 func unpackTxType(ma ipld.MapAssembler, rct types.Receipt) error {
-	if err := ma.AssembleKey().AssignString("Type"); err != nil {
+	if err := ma.AssembleKey().AssignString("TxType"); err != nil {
 		return err
 	}
 	return ma.AssembleValue().AssignBytes([]byte{rct.Type})
@@ -86,11 +86,11 @@ func unpackPostStateOrStatus(ma ipld.MapAssembler, rct types.Receipt) error {
 	}
 	switch rct.Status {
 	case types.ReceiptStatusFailed:
-		if err := ma.AssembleValue().AssignBytes(receiptStatusFailedRLP); err != nil {
+		if err := ma.AssembleValue().AssignBytes(receiptStatusFailed); err != nil {
 			return err
 		}
 	case types.ReceiptStatusSuccessful:
-		if err := ma.AssembleValue().AssignBytes(receiptStatusSuccessfulRLP); err != nil {
+		if err := ma.AssembleValue().AssignBytes(receiptStatusSuccessful); err != nil {
 			return err
 		}
 	default:

@@ -37,8 +37,8 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 	if err := EncodeTxs(&txs, inNode); err != nil {
 		return enc, err
 	}
-	wbs := shared.WriteableByteSlice(enc)
-	if err := rlp.Encode(&wbs, txs); err != nil {
+	wbs := shared.NewWriteableByteSlice(&enc)
+	if err := rlp.Encode(wbs, txs); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Transactions form (unable to RLP encode transactions: %v)", err)
 	}
 	return enc, nil

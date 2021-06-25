@@ -53,7 +53,9 @@ func DecodeTxs(na ipld.NodeAssembler, txs []*types.Transaction) error {
 		if err := dageth_tx.DecodeTx(node, *tx); err != nil {
 			return fmt.Errorf("invalid DAG-ETH Transactions binary (%v)", err)
 		}
-		la.AssembleValue().AssignNode(node.Build())
+		if err := la.AssembleValue().AssignNode(node.Build()); err != nil {
+			return err
+		}
 	}
 	return la.Finish()
 }

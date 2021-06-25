@@ -1,4 +1,4 @@
-package dageth_header
+package header
 
 import (
 	"io"

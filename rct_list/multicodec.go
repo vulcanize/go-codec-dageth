@@ -1,4 +1,4 @@
-package dageth_rctlist
+package rct_list
 
 import (
 	"io"

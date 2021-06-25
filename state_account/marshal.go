@@ -1,4 +1,4 @@
-package dageth_account
+package account
 
 import (
 	"encoding/binary"
@@ -36,12 +36,12 @@ func Encode(node ipld.Node, w io.Writer) error {
 // This means less copying of bytes, and if the destination has enough capacity,
 // fewer allocations.
 func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
-	header := new(state.Account)
-	if err := EncodeAccount(header, inNode); err != nil {
+	account := new(state.Account)
+	if err := EncodeAccount(account, inNode); err != nil {
 		return enc, err
 	}
-	wbs := shared.WriteableByteSlice(enc)
-	if err := rlp.Encode(&wbs, header); err != nil {
+	wbs := shared.NewWriteableByteSlice(&enc)
+	if err := rlp.Encode(wbs, account); err != nil {
 		return enc, fmt.Errorf("invalid DAG-ETH Account form (unable to RLP encode account: %v)", err)
 	}
 	return enc, nil
@@ -136,6 +136,6 @@ func packCodeCID(account *state.Account, node ipld.Node) error {
 	if err != nil {
 		return fmt.Errorf("unable to decode CodeCID multihash: %v", err)
 	}
-	account.Root = common.BytesToHash(decodedCMh.Digest)
+	account.CodeHash = decodedCMh.Digest
 	return nil
 }

@@ -50,9 +50,26 @@ var (
 		},
 		Type: types.AccessListTxType,
 	}
+	dynamicFeeReceipt = &types.Receipt{
+		Status:            types.ReceiptStatusSuccessful,
+		CumulativeGasUsed: 1,
+		Logs: []*types.Log{
+			{
+				Address: common.BytesToAddress([]byte{0x11}),
+				Topics:  []common.Hash{common.HexToHash("hello"), common.HexToHash("world")},
+				Data:    []byte{0x01, 0x00, 0xff},
+			},
+			{
+				Address: common.BytesToAddress([]byte{0x01, 0x11}),
+				Topics:  []common.Hash{common.HexToHash("goodbye"), common.HexToHash("world")},
+				Data:    []byte{0x01, 0x00, 0xff},
+			},
+		},
+		Type: types.DynamicFeeTxType,
+	}
 
-	lReceiptConsensusEnc, alReceiptConsensusEnc []byte
-	legacyReceiptNode, accessListReceiptNode    ipld.Node
+	lReceiptConsensusEnc, alReceiptConsensusEnc, dfReceiptConsensusEnc []byte
+	legacyReceiptNode, accessListReceiptNode, dynamicFeeReceiptNode    ipld.Node
 )
 
 /* IPLD Schemas
@@ -133,6 +150,33 @@ func testAccessListReceiptNodeContents(t *testing.T) {
 	}
 	if !bytes.Equal(postStateBy, accessListReceipt.PostState) {
 		t.Errorf("receipt post state (%d) does not match expected post state (%d)", postStateBy, accessListReceipt.PostState)
+	}
+}
+
+func testDynamicFeeReceiptNodeContents(t *testing.T) {
+	verifySharedContent(t, dynamicFeeReceiptNode, dynamicFeeReceipt)
+	statusNode, err := dynamicFeeReceiptNode.LookupByString("Status")
+	if err != nil {
+		t.Fatalf("receipt is missing Status: %v", err)
+	}
+	if statusNode.IsNull() {
+		t.Fatalf("receipt Status should not be null")
+	}
+	statusBy, err := statusNode.AsBytes()
+	if err != nil {
+		t.Fatalf("receipt Status should be of type Bytes: %v", err)
+	}
+	status := binary.BigEndian.Uint64(statusBy)
+	if status != dynamicFeeReceipt.Status {
+		t.Errorf("receipt status (%d) does not match expected status (%d)", status, dynamicFeeReceipt.Status)
+	}
+
+	postStateNode, err := dynamicFeeReceiptNode.LookupByString("PostState")
+	if err != nil {
+		t.Fatalf("receipt is missing PostState: %v", err)
+	}
+	if !postStateNode.IsNull() {
+		t.Errorf("receipt PostState should be null")
 	}
 }
 

@@ -47,7 +47,7 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 			return enc, fmt.Errorf("invalid DAG-ETH Receipt form (%v)", err)
 		}
 		return enc, nil
-	case types.AccessListTxType:
+	case types.AccessListTxType, types.DynamicFeeTxType:
 		enc = append(enc, txType)
 		if err := rlp.Encode(wbs, rct); err != nil {
 			return enc, fmt.Errorf("invalid DAG-ETH Receipt form (%v)", err)

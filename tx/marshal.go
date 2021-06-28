@@ -67,6 +67,16 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
 		}
 		return enc, nil
+	case types.DynamicFeeTxType:
+		tx, err := packDynamicFeeTx(node)
+		if err != nil {
+			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
+		}
+		enc = append(enc, txType)
+		if err := rlp.Encode(wbs, tx); err != nil {
+			return enc, fmt.Errorf("invalid DAG-ETH Transaction form (%v)", err)
+		}
+		return enc, nil
 	default:
 		return enc, fmt.Errorf("invalid DAG-ETH Transaction form (unrecognized TxType %d)", txType)
 	}
@@ -83,7 +93,7 @@ func EncodeTx(tx *types.Transaction, inNode ipld.Node) error {
 
 func packLegacyTx(node ipld.Node) (*types.LegacyTx, error) {
 	lTx := &types.LegacyTx{}
-	for _, pFunc := range requiredPackFuncs {
+	for _, pFunc := range requiredPackLegacyTxFuncs {
 		if err := pFunc(lTx, node); err != nil {
 			return nil, err
 		}
@@ -93,7 +103,7 @@ func packLegacyTx(node ipld.Node) (*types.LegacyTx, error) {
 
 func packAccessListTx(node ipld.Node) (*types.AccessListTx, error) {
 	alTx := &types.AccessListTx{}
-	for _, pFunc := range requiredPackFuncs {
+	for _, pFunc := range requiredPackAccessListTxFuncs {
 		if err := pFunc(alTx, node); err != nil {
 			return nil, err
 		}
@@ -101,42 +111,78 @@ func packAccessListTx(node ipld.Node) (*types.AccessListTx, error) {
 	return alTx, nil
 }
 
-var requiredPackFuncs = []func(interface{}, ipld.Node) error{
-	packChainID,
+func packDynamicFeeTx(node ipld.Node) (*types.DynamicFeeTx, error) {
+	alTx := &types.DynamicFeeTx{}
+	for _, pFunc := range requiredPackDynamicFeeTxFuncs {
+		if err := pFunc(alTx, node); err != nil {
+			return nil, err
+		}
+	}
+	return alTx, nil
+}
+
+var requiredPackLegacyTxFuncs = []func(*types.LegacyTx, ipld.Node) error{
 	packAccountNonce,
 	packGasPrice,
 	packGasLimit,
 	packRecipient,
 	packAmount,
 	packData,
-	packAccessList,
 	packSignatureValues,
 }
 
-func packChainID(tx interface{}, node ipld.Node) error {
+var requiredPackAccessListTxFuncs = []func(*types.AccessListTx, ipld.Node) error{
+	packChainIDAL,
+	packAccountNonceAL,
+	packGasPriceAL,
+	packGasLimitAL,
+	packRecipientAL,
+	packAmountAL,
+	packDataAL,
+	packAccessListAL,
+	packSignatureValuesAL,
+}
+
+var requiredPackDynamicFeeTxFuncs = []func(*types.DynamicFeeTx, ipld.Node) error{
+	packChainIDDF,
+	packAccountNonceDF,
+	packGasTipCap,
+	packGasFeeCap,
+	packGasLimitDF,
+	packRecipientDF,
+	packAmountDF,
+	packDataDF,
+	packAccessListDF,
+	packSignatureValuesDF,
+}
+
+func packChainIDAL(tx *types.AccessListTx, node ipld.Node) error {
 	chainIDNode, err := node.LookupByString("ChainID")
 	if err != nil {
 		return err
-	}
-	if chainIDNode.IsNull() { // Throw error if null for accessList tx or if not null for legacy
-		return nil
 	}
 	chainIDBytes, err := chainIDNode.AsBytes()
 	if err != nil {
 		return err
 	}
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.ChainID = new(big.Int).SetBytes(chainIDBytes)
-	case *types.LegacyTx:
-		return nil
-	default:
-		return fmt.Errorf("unrecognized tx type")
-	}
+	tx.ChainID = new(big.Int).SetBytes(chainIDBytes)
 	return nil
 }
 
-func packAccountNonce(tx interface{}, node ipld.Node) error {
+func packChainIDDF(tx *types.DynamicFeeTx, node ipld.Node) error {
+	chainIDNode, err := node.LookupByString("ChainID")
+	if err != nil {
+		return err
+	}
+	chainIDBytes, err := chainIDNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	tx.ChainID = new(big.Int).SetBytes(chainIDBytes)
+	return nil
+}
+
+func packAccountNonce(tx *types.LegacyTx, node ipld.Node) error {
 	nonceNode, err := node.LookupByString("AccountNonce")
 	if err != nil {
 		return err
@@ -146,18 +192,39 @@ func packAccountNonce(tx interface{}, node ipld.Node) error {
 		return err
 	}
 	nonce := binary.BigEndian.Uint64(nonceBytes)
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.Nonce = nonce
-	case *types.LegacyTx:
-		t.Nonce = nonce
-	default:
-		return fmt.Errorf("unrecognized tx type %T", t)
-	}
+	tx.Nonce = nonce
 	return nil
 }
 
-func packGasPrice(tx interface{}, node ipld.Node) error {
+func packAccountNonceAL(tx *types.AccessListTx, node ipld.Node) error {
+	nonceNode, err := node.LookupByString("AccountNonce")
+	if err != nil {
+		return err
+	}
+	nonceBytes, err := nonceNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	nonce := binary.BigEndian.Uint64(nonceBytes)
+	tx.Nonce = nonce
+	return nil
+}
+
+func packAccountNonceDF(tx *types.DynamicFeeTx, node ipld.Node) error {
+	nonceNode, err := node.LookupByString("AccountNonce")
+	if err != nil {
+		return err
+	}
+	nonceBytes, err := nonceNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	nonce := binary.BigEndian.Uint64(nonceBytes)
+	tx.Nonce = nonce
+	return nil
+}
+
+func packGasPrice(tx *types.LegacyTx, node ipld.Node) error {
 	gpNode, err := node.LookupByString("GasPrice")
 	if err != nil {
 		return err
@@ -167,18 +234,53 @@ func packGasPrice(tx interface{}, node ipld.Node) error {
 		return err
 	}
 	gp := new(big.Int).SetBytes(gpBytes)
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.GasPrice = gp
-	case *types.LegacyTx:
-		t.GasPrice = gp
-	default:
-		return fmt.Errorf("unrecognized tx type %T", t)
-	}
+	tx.GasPrice = gp
 	return nil
 }
 
-func packGasLimit(tx interface{}, node ipld.Node) error {
+func packGasPriceAL(tx *types.AccessListTx, node ipld.Node) error {
+	gpNode, err := node.LookupByString("GasPrice")
+	if err != nil {
+		return err
+	}
+	gpBytes, err := gpNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	gp := new(big.Int).SetBytes(gpBytes)
+	tx.GasPrice = gp
+	return nil
+}
+
+func packGasTipCap(tx *types.DynamicFeeTx, node ipld.Node) error {
+	gtcNode, err := node.LookupByString("GasTipCap")
+	if err != nil {
+		return err
+	}
+	gtcBytes, err := gtcNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	gtc := new(big.Int).SetBytes(gtcBytes)
+	tx.GasTipCap = gtc
+	return nil
+}
+
+func packGasFeeCap(tx *types.DynamicFeeTx, node ipld.Node) error {
+	gfcNode, err := node.LookupByString("GasFeeCap")
+	if err != nil {
+		return err
+	}
+	gfcBytes, err := gfcNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	gfc := new(big.Int).SetBytes(gfcBytes)
+	tx.GasFeeCap = gfc
+	return nil
+}
+
+func packGasLimit(tx *types.LegacyTx, node ipld.Node) error {
 	glNode, err := node.LookupByString("GasLimit")
 	if err != nil {
 		return err
@@ -188,18 +290,39 @@ func packGasLimit(tx interface{}, node ipld.Node) error {
 		return err
 	}
 	gl := binary.BigEndian.Uint64(glBytes)
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.Gas = gl
-	case *types.LegacyTx:
-		t.Gas = gl
-	default:
-		return fmt.Errorf("unrecognized tx type %T", t)
-	}
+	tx.Gas = gl
 	return nil
 }
 
-func packRecipient(tx interface{}, node ipld.Node) error {
+func packGasLimitAL(tx *types.AccessListTx, node ipld.Node) error {
+	glNode, err := node.LookupByString("GasLimit")
+	if err != nil {
+		return err
+	}
+	glBytes, err := glNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	gl := binary.BigEndian.Uint64(glBytes)
+	tx.Gas = gl
+	return nil
+}
+
+func packGasLimitDF(tx *types.DynamicFeeTx, node ipld.Node) error {
+	glNode, err := node.LookupByString("GasLimit")
+	if err != nil {
+		return err
+	}
+	glBytes, err := glNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	gl := binary.BigEndian.Uint64(glBytes)
+	tx.Gas = gl
+	return nil
+}
+
+func packRecipient(tx *types.LegacyTx, node ipld.Node) error {
 	rNode, err := node.LookupByString("Recipient")
 	if err != nil {
 		return err
@@ -212,18 +335,45 @@ func packRecipient(tx interface{}, node ipld.Node) error {
 		return err
 	}
 	recipient := common.BytesToAddress(rBytes)
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.To = &recipient
-	case *types.LegacyTx:
-		t.To = &recipient
-	default:
-		return fmt.Errorf("unrecognized tx type %T", t)
-	}
+	tx.To = &recipient
 	return nil
 }
 
-func packAmount(tx interface{}, node ipld.Node) error {
+func packRecipientAL(tx *types.AccessListTx, node ipld.Node) error {
+	rNode, err := node.LookupByString("Recipient")
+	if err != nil {
+		return err
+	}
+	if rNode.IsNull() {
+		return nil
+	}
+	rBytes, err := rNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	recipient := common.BytesToAddress(rBytes)
+	tx.To = &recipient
+	return nil
+}
+
+func packRecipientDF(tx *types.DynamicFeeTx, node ipld.Node) error {
+	rNode, err := node.LookupByString("Recipient")
+	if err != nil {
+		return err
+	}
+	if rNode.IsNull() {
+		return nil
+	}
+	rBytes, err := rNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	recipient := common.BytesToAddress(rBytes)
+	tx.To = &recipient
+	return nil
+}
+
+func packAmount(tx *types.LegacyTx, node ipld.Node) error {
 	aNode, err := node.LookupByString("Amount")
 	if err != nil {
 		return err
@@ -233,18 +383,39 @@ func packAmount(tx interface{}, node ipld.Node) error {
 		return err
 	}
 	amount := new(big.Int).SetBytes(aBytes)
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.Value = amount
-	case *types.LegacyTx:
-		t.Value = amount
-	default:
-		return fmt.Errorf("unrecognized tx type %T", t)
-	}
+	tx.Value = amount
 	return nil
 }
 
-func packData(tx interface{}, node ipld.Node) error {
+func packAmountAL(tx *types.AccessListTx, node ipld.Node) error {
+	aNode, err := node.LookupByString("Amount")
+	if err != nil {
+		return err
+	}
+	aBytes, err := aNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	amount := new(big.Int).SetBytes(aBytes)
+	tx.Value = amount
+	return nil
+}
+
+func packAmountDF(tx *types.DynamicFeeTx, node ipld.Node) error {
+	aNode, err := node.LookupByString("Amount")
+	if err != nil {
+		return err
+	}
+	aBytes, err := aNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	amount := new(big.Int).SetBytes(aBytes)
+	tx.Value = amount
+	return nil
+}
+
+func packData(tx *types.LegacyTx, node ipld.Node) error {
 	dNode, err := node.LookupByString("Data")
 	if err != nil {
 		return err
@@ -253,56 +424,90 @@ func packData(tx interface{}, node ipld.Node) error {
 	if err != nil {
 		return err
 	}
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.Data = dBytes
-	case *types.LegacyTx:
-		t.Data = dBytes
-	default:
-		return fmt.Errorf("unrecognized tx type %T", t)
-	}
+	tx.Data = dBytes
 	return nil
 }
 
-func packAccessList(tx interface{}, node ipld.Node) error {
-	alNode, err := node.LookupByString("AccessList")
+func packDataAL(tx *types.AccessListTx, node ipld.Node) error {
+	dNode, err := node.LookupByString("Data")
 	if err != nil {
 		return err
 	}
-	if alNode.IsNull() { // Throw error if null for accessList tx or if not null for legacy
-		return nil
+	dBytes, err := dNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	tx.Data = dBytes
+	return nil
+}
+
+func packDataDF(tx *types.DynamicFeeTx, node ipld.Node) error {
+	dNode, err := node.LookupByString("Data")
+	if err != nil {
+		return err
+	}
+	dBytes, err := dNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	tx.Data = dBytes
+	return nil
+}
+
+func packAccessListAL(tx *types.AccessListTx, node ipld.Node) error {
+	accessList, err := createAccessList(node)
+	if err != nil {
+		return err
+	}
+	tx.AccessList = accessList
+	return nil
+}
+
+func packAccessListDF(tx *types.DynamicFeeTx, node ipld.Node) error {
+	accessList, err := createAccessList(node)
+	if err != nil {
+		return err
+	}
+	tx.AccessList = accessList
+	return nil
+}
+
+func createAccessList(node ipld.Node) (types.AccessList, error) {
+	alNode, err := node.LookupByString("AccessList")
+	if err != nil {
+		return nil, err
 	}
 	accessList := make(types.AccessList, alNode.Length())
 	accessListIt := alNode.ListIterator()
 	for !accessListIt.Done() {
 		index, accessElementNode, err := accessListIt.Next()
 		if err != nil {
-			return err
+			return nil, err
 		}
 		addrNode, err := accessElementNode.LookupByString("Address")
 		if err != nil {
-			return err
+			return nil, err
 		}
 		addrBytes, err := addrNode.AsBytes()
 		if err != nil {
-			return err
+			return nil, err
 		}
 		addr := common.BytesToAddress(addrBytes)
 
 		storageKeysNode, err := accessElementNode.LookupByString("StorageKeys")
 		if err != nil {
-			return err
+			return nil, err
 		}
 		storageKeys := make([]common.Hash, storageKeysNode.Length())
 		storageKeysIt := storageKeysNode.ListIterator()
 		for !storageKeysIt.Done() {
 			index, storageKeyNode, err := storageKeysIt.Next()
 			if err != nil {
-				return err
+				return nil, err
 			}
 			storageKeyBytes, err := storageKeyNode.AsBytes()
 			if err != nil {
-				return err
+				return nil, err
 			}
 			storageKeys[index] = common.BytesToHash(storageKeyBytes)
 		}
@@ -312,56 +517,69 @@ func packAccessList(tx interface{}, node ipld.Node) error {
 		}
 		accessList[index] = accessElement
 	}
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.AccessList = accessList
-	case *types.LegacyTx:
-		return nil
-	default:
-		return fmt.Errorf("unrecognized tx type %T", t)
-	}
-	return nil
+	return accessList, nil
 }
 
-func packSignatureValues(tx interface{}, node ipld.Node) error {
+func createVRS(node ipld.Node) (*big.Int, *big.Int, *big.Int, error) {
 	vNode, err := node.LookupByString("V")
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	vBytes, err := vNode.AsBytes()
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	v := new(big.Int).SetBytes(vBytes)
 	rNode, err := node.LookupByString("R")
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	rBytes, err := rNode.AsBytes()
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	r := new(big.Int).SetBytes(rBytes)
 	sNode, err := node.LookupByString("S")
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	sBytes, err := sNode.AsBytes()
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	s := new(big.Int).SetBytes(sBytes)
-	switch t := tx.(type) {
-	case *types.AccessListTx:
-		t.V = v
-		t.R = r
-		t.S = s
-	case *types.LegacyTx:
-		t.V = v
-		t.R = r
-		t.S = s
-	default:
-		return fmt.Errorf("unrecognized tx type %T", t)
+	return v, r, s, nil
+}
+
+func packSignatureValues(tx *types.LegacyTx, node ipld.Node) error {
+	v, r, s, err := createVRS(node)
+	if err != nil {
+		return err
 	}
+	tx.V = v
+	tx.R = r
+	tx.S = s
+	return nil
+}
+
+func packSignatureValuesAL(tx *types.AccessListTx, node ipld.Node) error {
+	v, r, s, err := createVRS(node)
+	if err != nil {
+		return err
+	}
+	tx.V = v
+	tx.R = r
+	tx.S = s
+	return nil
+}
+
+func packSignatureValuesDF(tx *types.DynamicFeeTx, node ipld.Node) error {
+	v, r, s, err := createVRS(node)
+	if err != nil {
+		return err
+	}
+	tx.V = v
+	tx.R = r
+	tx.S = s
 	return nil
 }

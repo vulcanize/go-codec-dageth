@@ -72,6 +72,7 @@ var requiredUnpackFuncs = []func(ipld.MapAssembler, types.Header) error{
 	unpackExtra,
 	unpackMixDigest,
 	unpackNonce,
+	unpackBaseFee,
 }
 
 func unpackNonce(ma ipld.MapAssembler, header types.Header) error {
@@ -225,4 +226,14 @@ func unpackParentCID(ma ipld.MapAssembler, header types.Header) error {
 		return err
 	}
 	return ma.AssembleValue().AssignLink(parentLinkCID)
+}
+
+func unpackBaseFee(ma ipld.MapAssembler, header types.Header) error {
+	if err := ma.AssembleKey().AssignString("BaseFee"); err != nil {
+		return err
+	}
+	if header.BaseFee == nil {
+		return ma.AssembleValue().AssignNull()
+	}
+	return ma.AssembleValue().AssignBytes(header.BaseFee.Bytes())
 }

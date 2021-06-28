@@ -75,6 +75,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			Extra Bytes
 			MixDigest Hash
 			Nonce Uint
+			BaseFee nullable BigInt
 		}
 	*/
 	ts.Accumulate(schema.SpawnStruct("Header",
@@ -94,6 +95,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			schema.SpawnStructField("Extra", "Bytes", false, false),
 			schema.SpawnStructField("MixDigest", "Hash", false, false),
 			schema.SpawnStructField("Nonce", "Uint", false, false),
+			schema.SpawnStructField("BaseFee", "BigInt", false, true),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
@@ -114,16 +116,17 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type AccessList [AccessElement]
 
 		type Transaction struct {
-			TxType       TxType
-			// We could make ChainID a required field in the IPLD schema
-			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 transaction
+			Type         TxType
+			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 or EIP-1559 transaction
 			AccountNonce Uint
-			GasPrice     BigInt
+			GasPrice     nullable BigInt # null if the transaction is an EIP-1559 transaction
+			GasTipCap    nullable BigInt # null unless the transaciton is an EIP-1559 transaction
+			GasFeeCap    nullable BigInt # null unless the transaction is an EIP-1559 transaction
 			GasLimit     Uint
-			Recipient    nullable Address # null recipient means the tx is a contract creation
+			Recipient    nullable Address # null recipient means the tx is a contract creation tx
 			Amount       BigInt
 			Data         Bytes
-			AccessList   nullable AccessList # null unless the transaction is an EIP-2930 transaction
+			AccessList   nullable AccessList # null unless the transaction is an EIP-2930 or EIP-1559 transaction
 
 			# Signature values
 			V            BigInt
@@ -147,7 +150,9 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			schema.SpawnStructField("TxType", "TxType", false, false),
 			schema.SpawnStructField("ChainID", "BigInt", false, true),
 			schema.SpawnStructField("AccountNonce", "Uint", false, false),
-			schema.SpawnStructField("GasPrice", "BigInt", false, false),
+			schema.SpawnStructField("GasPrice", "BigInt", false, true),
+			schema.SpawnStructField("GasTipCap", "BigInt", false, true),
+			schema.SpawnStructField("GasFeeCap", "BigInt", false, true),
 			schema.SpawnStructField("GasLimit", "Uint", false, false),
 			schema.SpawnStructField("Recipient", "Address", false, true),
 			schema.SpawnStructField("Amount", "BigInt", false, false),

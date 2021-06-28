@@ -40,11 +40,11 @@ func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
 
 // DecodeTx unpacks a go-ethereum Transaction into a NodeAssembler
 func DecodeTx(na ipld.NodeAssembler, tx types.Transaction) error {
-	ma, err := na.BeginMap(12)
+	ma, err := na.BeginMap(14)
 	if err != nil {
 		return err
 	}
-	for _, upFunc := range RequiredUnpackFuncs {
+	for _, upFunc := range requiredUnpackFuncs {
 		if err := upFunc(ma, tx); err != nil {
 			return fmt.Errorf("invalid DAG-ETH Transaction binary (%v)", err)
 		}
@@ -52,11 +52,13 @@ func DecodeTx(na ipld.NodeAssembler, tx types.Transaction) error {
 	return ma.Finish()
 }
 
-var RequiredUnpackFuncs = []func(ipld.MapAssembler, types.Transaction) error{
+var requiredUnpackFuncs = []func(ipld.MapAssembler, types.Transaction) error{
 	unpackTxType,
 	unpackChainID,
 	unpackAccountNonce,
 	unpackGasPrice,
+	unpackGasTipCap,
+	unpackGasFeeCap,
 	unpackGasLimit,
 	unpackRecipient,
 	unpackAmount,
@@ -96,7 +98,30 @@ func unpackGasPrice(ma ipld.MapAssembler, tx types.Transaction) error {
 	if err := ma.AssembleKey().AssignString("GasPrice"); err != nil {
 		return err
 	}
+	if tx.Type() == types.DynamicFeeTxType {
+		return ma.AssembleValue().AssignNull()
+	}
 	return ma.AssembleValue().AssignBytes(tx.GasPrice().Bytes())
+}
+
+func unpackGasFeeCap(ma ipld.MapAssembler, tx types.Transaction) error {
+	if err := ma.AssembleKey().AssignString("GasTipCap"); err != nil {
+		return err
+	}
+	if tx.Type() != types.DynamicFeeTxType {
+		return ma.AssembleValue().AssignNull()
+	}
+	return ma.AssembleValue().AssignBytes(tx.GasTipCap().Bytes())
+}
+
+func unpackGasTipCap(ma ipld.MapAssembler, tx types.Transaction) error {
+	if err := ma.AssembleKey().AssignString("GasFeeCap"); err != nil {
+		return err
+	}
+	if tx.Type() != types.DynamicFeeTxType {
+		return ma.AssembleValue().AssignNull()
+	}
+	return ma.AssembleValue().AssignBytes(tx.GasFeeCap().Bytes())
 }
 
 func unpackGasLimit(ma ipld.MapAssembler, tx types.Transaction) error {

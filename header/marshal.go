@@ -80,6 +80,7 @@ var requiredPackFuncs = []func(*types.Header, ipld.Node) error{
 	packExtra,
 	packMixDigest,
 	packNonce,
+	packBaseFee,
 }
 
 func packNonce(header *types.Header, node ipld.Node) error {
@@ -326,5 +327,21 @@ func packParentCID(header *types.Header, node ipld.Node) error {
 		return fmt.Errorf("unable to decode ParentCID multihash: %v", err)
 	}
 	header.ParentHash = common.BytesToHash(decodedParentMh.Digest)
+	return nil
+}
+
+func packBaseFee(header *types.Header, node ipld.Node) error {
+	baseFeeNode, err := node.LookupByString("BaseFee")
+	if err != nil {
+		return err
+	}
+	if baseFeeNode.IsNull() {
+		return nil
+	}
+	baseFeeBytes, err := baseFeeNode.AsBytes()
+	if err != nil {
+		return err
+	}
+	header.BaseFee = new(big.Int).SetBytes(baseFeeBytes)
 	return nil
 }

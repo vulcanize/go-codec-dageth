@@ -171,6 +171,7 @@ type _Header struct {
 	Extra        _Bytes
 	MixDigest    _Hash
 	Nonce        _Uint
+	BaseFee      _BigInt__Maybe
 }
 
 // Link matches the IPLD Schema type "Link".  It has link kind.
@@ -238,7 +239,9 @@ type _Transaction struct {
 	TxType       _TxType
 	ChainID      _BigInt__Maybe
 	AccountNonce _Uint
-	GasPrice     _BigInt
+	GasPrice     _BigInt__Maybe
+	GasTipCap    _BigInt__Maybe
+	GasFeeCap    _BigInt__Maybe
 	GasLimit     _Uint
 	Recipient    _Address__Maybe
 	Amount       _BigInt

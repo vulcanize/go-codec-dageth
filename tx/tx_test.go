@@ -20,8 +20,7 @@ var (
 	testAddr2       = common.HexToAddress("b94f5374fce5edbc8e2a8697c15331677e6ebf1a")
 	testStorageKey  = crypto.Keccak256Hash(testAddr.Bytes())
 	testStorageKey2 = crypto.Keccak256Hash(testAddr2.Bytes())
-
-	legacyTx, _ = types.NewTransaction(
+	legacyTx, _     = types.NewTransaction(
 		3,
 		testAddr,
 		big.NewInt(10),
@@ -59,8 +58,35 @@ var (
 		common.Hex2Bytes("c9519f4f2b30335884581971573fadf60c6204f59a911df35ee8a540456b266032f1e8e2c5dd761f9e4f88f41c8310aeaba26a8bfcdacfedfa12ec3862d3752101"),
 	)
 
-	legacyTxConsensusEnc, alTxConsensusEnc []byte
-	legacyTxNode, accessListTxNode         ipld.Node
+	dynamicFeeTx, _ = types.NewTx(&types.DynamicFeeTx{
+		ChainID:   big.NewInt(1),
+		Nonce:     3,
+		To:        &testAddr,
+		Value:     big.NewInt(10),
+		Gas:       25000,
+		GasTipCap: big.NewInt(1),
+		GasFeeCap: big.NewInt(2),
+		Data:      common.FromHex("5544"),
+		AccessList: types.AccessList{
+			types.AccessTuple{
+				Address: testAddr,
+				StorageKeys: []common.Hash{
+					testStorageKey,
+					testStorageKey2,
+				},
+			},
+			types.AccessTuple{
+				Address:     testAddr2,
+				StorageKeys: nil,
+			},
+		},
+	}).WithSignature(
+		types.NewLondonSigner(big.NewInt(1)),
+		common.Hex2Bytes("c9519f4f2b30335884581971573fadf60c6204f59a911df35ee8a540456b266032f1e8e2c5dd761f9e4f88f41c8310aeaba26a8bfcdacfedfa12ec3862d3752101"),
+	)
+
+	legacyTxConsensusEnc, alTxConsensusEnc, dfTxConsensusEnc []byte
+	legacyTxNode, accessListTxNode, dynamicFeeTxNode         ipld.Node
 )
 
 /* IPLD Schemas
@@ -74,15 +100,17 @@ type AccessElement struct {
 type AccessList [AccessElement]
 
 type Transaction struct {
-	TxType       TxType
-	ChainID      nullable BigInt # null unless the transaction is an EIP-2930 transaction
+	Type         TxType
+	ChainID      nullable BigInt # null unless the transaction is an EIP-2930 or EIP-1559 transaction
 	AccountNonce Uint
-	GasPrice     BigInt
+	GasPrice     nullable BigInt # null if the transaction is an EIP-1559 transaction
+	GasTipCap    nullable BigInt # null unless the transaciton is an EIP-1559 transaction
+	GasFeeCap    nullable BigInt # null unless the transaction is an EIP-1559 transaction
 	GasLimit     Uint
-	Recipient    nullable Address # null recipient means the tx is a contract creation
+	Recipient    nullable Address # null recipient means the tx is a contract creation tx
 	Amount       BigInt
 	Data         Bytes
-	AccessList   nullable AccessList # null unless the transaction is an EIP-2930 transaction
+	AccessList   nullable AccessList # null unless the transaction is an EIP-2930 or EIP-1559 transaction
 
 	# Signature values
 	V            BigInt
@@ -101,8 +129,13 @@ func TestTransactionCodec(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to marshal access list transaction binary: %v", err)
 	}
+	dfTxConsensusEnc, err = dynamicFeeTx.MarshalBinary()
+	if err != nil {
+		t.Fatalf("unable to marshal dynamic fee transaction binary: %v", err)
+	}
 	testTransactionDecoding(t)
 	testAccessListTransactionNodeContent(t)
+	testDynamicFeeTransactionNodeContent(t)
 	testLegacyTransactionNodeContent(t)
 	testTransactionEncoding(t)
 }
@@ -121,83 +154,77 @@ func testTransactionDecoding(t *testing.T) {
 		t.Fatalf("unable to decode access list transaction into an IPLD node: %v", err)
 	}
 	accessListTxNode = alTxBuilder.Build()
+
+	dfTxBuilder := dageth.Type.Transaction.NewBuilder()
+	dfTxReader := bytes.NewReader(dfTxConsensusEnc)
+	if err := tx.Decode(dfTxBuilder, dfTxReader); err != nil {
+		t.Fatalf("unable to decode dynamic fee transaction into an IPLD node: %v", err)
+	}
+	dynamicFeeTxNode = dfTxBuilder.Build()
+}
+
+func testDynamicFeeTransactionNodeContent(t *testing.T) {
+	verifySharedContent(t, dynamicFeeTxNode, dynamicFeeTx)
+	verifySharedContent2(t, dynamicFeeTxNode, dynamicFeeTx)
+
+	gasTipCapNode, err := dynamicFeeTxNode.LookupByString("GasTipCap")
+	if err != nil {
+		t.Fatalf("transaction missing GasTipCap: %v", err)
+	}
+	gasTipCapBytes, err := gasTipCapNode.AsBytes()
+	if err != nil {
+		t.Fatalf("transaction GasTipCap should be of type Bytes: %v", err)
+	}
+	if !bytes.Equal(gasTipCapBytes, dynamicFeeTx.GasTipCap().Bytes()) {
+		t.Errorf("transaction gas tip cap (%x) does not match expected gas tip cap (%x)", gasTipCapBytes, dynamicFeeTx.GasTipCap().Bytes())
+	}
+
+	gasFeeCapNode, err := dynamicFeeTxNode.LookupByString("GasFeeCap")
+	if err != nil {
+		t.Fatalf("transaction missing GasFeeCap: %v", err)
+	}
+	gasFeeCapBytes, err := gasFeeCapNode.AsBytes()
+	if err != nil {
+		t.Fatalf("transaction GasFeeCap should be of type Bytes: %v", err)
+	}
+	if !bytes.Equal(gasFeeCapBytes, dynamicFeeTx.GasFeeCap().Bytes()) {
+		t.Errorf("transaction gas fee cap (%x) does not match expected gas fee cap (%x)", gasFeeCapBytes, dynamicFeeTx.GasFeeCap().Bytes())
+	}
 }
 
 func testAccessListTransactionNodeContent(t *testing.T) {
 	verifySharedContent(t, accessListTxNode, accessListTx)
-	accessListNode, err := accessListTxNode.LookupByString("AccessList")
+	verifySharedContent2(t, accessListTxNode, accessListTx)
+	gasPriceNode, err := accessListTxNode.LookupByString("GasPrice")
 	if err != nil {
-		t.Fatalf("transaction missing AccessList: %v", err)
+		t.Fatalf("transaction missing GasPrice: %v", err)
 	}
-	if accessListNode.IsNull() {
-		t.Fatalf("access list transaction AccessList should not be null")
-	}
-	if accessListNode.Length() != int64(len(accessListTx.AccessList())) {
-		t.Fatalf("transaction access list should have %d elements", len(accessListTx.AccessList()))
-	}
-	accessListIT := accessListNode.ListIterator()
-	for !accessListIT.Done() {
-		i, accessListElementNode, err := accessListIT.Next()
-		if err != nil {
-			t.Fatalf("transaction access list iterator error: %v", err)
-		}
-		currentAccessListElement := accessListTx.AccessList()[i]
-		addressNode, err := accessListElementNode.LookupByString("Address")
-		if err != nil {
-			t.Fatalf("transaction access list missing Address: %v", err)
-		}
-		addressBytes, err := addressNode.AsBytes()
-		if err != nil {
-			t.Fatalf("transaction access list Address should be of type Bytes: %v", err)
-		}
-		if !bytes.Equal(addressBytes, currentAccessListElement.Address.Bytes()) {
-			t.Errorf("transaction access list address (%x) does not match expected address (%x)", addressBytes, currentAccessListElement.Address.Bytes())
-		}
-
-		storageKeysNode, err := accessListElementNode.LookupByString("StorageKeys")
-		if err != nil {
-			t.Fatalf("transaction access list missing StorageKeys: %v", err)
-		}
-		if storageKeysNode.Length() != int64(len(currentAccessListElement.StorageKeys)) {
-			t.Fatalf("transaction access list storage keys should have %d entries", len(currentAccessListElement.StorageKeys))
-		}
-		storageKeyIT := storageKeysNode.ListIterator()
-		for !storageKeyIT.Done() {
-			j, storageKeyNode, err := storageKeyIT.Next()
-			if err != nil {
-				t.Fatalf("transaction access list storage keys iterator error: %v", err)
-			}
-			currentStorageKey := currentAccessListElement.StorageKeys[j]
-			storageKeyBytes, err := storageKeyNode.AsBytes()
-			if err != nil {
-				t.Fatalf("transaction access list StorageKey should be of type Bytes: %v", err)
-			}
-			if !bytes.Equal(storageKeyBytes, currentStorageKey.Bytes()) {
-				t.Errorf("transaction access list storage key (%x) does not match expected value (%x)", storageKeyBytes, currentStorageKey.Bytes())
-			}
-		}
-	}
-
-	idNode, err := accessListTxNode.LookupByString("ChainID")
+	gasPriceBytes, err := gasPriceNode.AsBytes()
 	if err != nil {
-		t.Fatalf("transaction is missing ChainID: %v", err)
+		t.Fatalf("transaction GasPrice should be of type Bytes: %v", err)
 	}
-	if idNode.IsNull() {
-		t.Fatalf("access list transaction ChainID should not be null")
-	}
-	idBytes, err := idNode.AsBytes()
-	if err != nil {
-		t.Fatalf("transaction ChainID should be of type Bytes: %v", err)
-	}
-	if !bytes.Equal(idBytes, accessListTx.ChainId().Bytes()) {
-		t.Errorf("transaction chain id (%x) does not match expected status (%x)", idBytes, accessListTx.ChainId().Bytes())
+	if !bytes.Equal(gasPriceBytes, accessListTx.GasPrice().Bytes()) {
+		t.Errorf("transaction gas price (%x) does not match expected gas price (%x)", gasPriceBytes, accessListTx.GasPrice().Bytes())
 	}
 }
 
 func testLegacyTransactionNodeContent(t *testing.T) {
 	verifySharedContent(t, legacyTxNode, legacyTx)
+
+	gasPriceNode, err := legacyTxNode.LookupByString("GasPrice")
+	if err != nil {
+		t.Fatalf("transaction missing GasPrice: %v", err)
+	}
+	gasPriceBytes, err := gasPriceNode.AsBytes()
+	if err != nil {
+		t.Fatalf("transaction GasPrice should be of type Bytes: %v", err)
+	}
+	if !bytes.Equal(gasPriceBytes, legacyTx.GasPrice().Bytes()) {
+		t.Errorf("transaction gas price (%x) does not match expected gas price (%x)", gasPriceBytes, legacyTx.GasPrice().Bytes())
+	}
 }
 
+// verifySharedContent verifies the content shared between all 3 tx types
 func verifySharedContent(t *testing.T, txNode ipld.Node, tx *types.Transaction) {
 	v, r, s := tx.RawSignatureValues()
 	vNode, err := txNode.LookupByString("V")
@@ -285,18 +312,6 @@ func verifySharedContent(t *testing.T, txNode ipld.Node, tx *types.Transaction) 
 		t.Errorf("transaction gas limit (%d) does not match expected gas limit (%d)", gas, tx.Gas())
 	}
 
-	gasPriceNode, err := txNode.LookupByString("GasPrice")
-	if err != nil {
-		t.Fatalf("transaction missing GasPrice: %v", err)
-	}
-	gasPriceBytes, err := gasPriceNode.AsBytes()
-	if err != nil {
-		t.Fatalf("transaction GasPrice should be of type Bytes: %v", err)
-	}
-	if !bytes.Equal(gasPriceBytes, tx.GasPrice().Bytes()) {
-		t.Errorf("transaction gas price (%x) does not match expected gas price (%x)", gasPriceBytes, tx.GasPrice().Bytes())
-	}
-
 	nonceNode, err := txNode.LookupByString("AccountNonce")
 	if err != nil {
 		t.Fatalf("transaction missing AccountNonce: %v", err)
@@ -323,6 +338,77 @@ func verifySharedContent(t *testing.T, txNode ipld.Node, tx *types.Transaction) 
 	}
 	if typeBy[0] != tx.Type() {
 		t.Errorf("transaction tx type (%d) does not match expected tx type (%d)", typeBy[0], tx.Type())
+	}
+}
+
+// verifySharedContent2 verifies the content shared between access list and dynamic fee txs
+func verifySharedContent2(t *testing.T, txNode ipld.Node, tx *types.Transaction) {
+	accessListNode, err := txNode.LookupByString("AccessList")
+	if err != nil {
+		t.Fatalf("transaction missing AccessList: %v", err)
+	}
+	if accessListNode.IsNull() {
+		t.Fatalf("access list transaction AccessList should not be null")
+	}
+	if accessListNode.Length() != int64(len(tx.AccessList())) {
+		t.Fatalf("transaction access list should have %d elements", len(tx.AccessList()))
+	}
+	accessListIT := accessListNode.ListIterator()
+	for !accessListIT.Done() {
+		i, accessListElementNode, err := accessListIT.Next()
+		if err != nil {
+			t.Fatalf("transaction access list iterator error: %v", err)
+		}
+		currentAccessListElement := tx.AccessList()[i]
+		addressNode, err := accessListElementNode.LookupByString("Address")
+		if err != nil {
+			t.Fatalf("transaction access list missing Address: %v", err)
+		}
+		addressBytes, err := addressNode.AsBytes()
+		if err != nil {
+			t.Fatalf("transaction access list Address should be of type Bytes: %v", err)
+		}
+		if !bytes.Equal(addressBytes, currentAccessListElement.Address.Bytes()) {
+			t.Errorf("transaction access list address (%x) does not match expected address (%x)", addressBytes, currentAccessListElement.Address.Bytes())
+		}
+
+		storageKeysNode, err := accessListElementNode.LookupByString("StorageKeys")
+		if err != nil {
+			t.Fatalf("transaction access list missing StorageKeys: %v", err)
+		}
+		if storageKeysNode.Length() != int64(len(currentAccessListElement.StorageKeys)) {
+			t.Fatalf("transaction access list storage keys should have %d entries", len(currentAccessListElement.StorageKeys))
+		}
+		storageKeyIT := storageKeysNode.ListIterator()
+		for !storageKeyIT.Done() {
+			j, storageKeyNode, err := storageKeyIT.Next()
+			if err != nil {
+				t.Fatalf("transaction access list storage keys iterator error: %v", err)
+			}
+			currentStorageKey := currentAccessListElement.StorageKeys[j]
+			storageKeyBytes, err := storageKeyNode.AsBytes()
+			if err != nil {
+				t.Fatalf("transaction access list StorageKey should be of type Bytes: %v", err)
+			}
+			if !bytes.Equal(storageKeyBytes, currentStorageKey.Bytes()) {
+				t.Errorf("transaction access list storage key (%x) does not match expected value (%x)", storageKeyBytes, currentStorageKey.Bytes())
+			}
+		}
+	}
+
+	idNode, err := txNode.LookupByString("ChainID")
+	if err != nil {
+		t.Fatalf("transaction is missing ChainID: %v", err)
+	}
+	if idNode.IsNull() {
+		t.Fatalf("access list transaction ChainID should not be null")
+	}
+	idBytes, err := idNode.AsBytes()
+	if err != nil {
+		t.Fatalf("transaction ChainID should be of type Bytes: %v", err)
+	}
+	if !bytes.Equal(idBytes, tx.ChainId().Bytes()) {
+		t.Errorf("transaction chain id (%x) does not match expected status (%x)", idBytes, tx.ChainId().Bytes())
 	}
 }
 

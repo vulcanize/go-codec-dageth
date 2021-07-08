@@ -1,5 +1,5 @@
 # go-codec-dageth
-A Go implementation of the DAG interface for [Ethereum IPLD types](https://github.com/ipld/ipld/tree/master/specs/codecs/ethereum) for use with for [go-ipld-prime](https://github.com/ipld/go-ipld-prime/)
+A Go implementation of the DAG interface for [Ethereum IPLD types](https://github.com/ipld/ipld/tree/master/specs/codecs/dag-eth) for use with for [go-ipld-prime](https://github.com/ipld/go-ipld-prime/)
 
 Use `Decode(ipld.NodeAssembler, io.Reader)` and `Encode(ipld.Node, io.Writer)` directly, or import the packages to have the codecs registered into the go-ipld-prime CID link loader.
 

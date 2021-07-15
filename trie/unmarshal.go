@@ -118,7 +118,11 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 	if err := ma.AssembleKey().AssignString("Child"); err != nil {
 		return err
 	}
-	childNodeBuilder := dageth.Type.Child__Repr.NewBuilder()
+	childNodeBuilder := dageth.Type.Child.NewBuilder()
+	childNodeMA, err := childNodeBuilder.BeginMap(1)
+	if err != nil {
+		return err
+	}
 	childLink, ok := nodeFields[1].([]byte)
 	if ok {
 		// it's a hash referencing the child node
@@ -126,7 +130,13 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 		// assign the link value to the MA
 		childCID := shared.Keccak256ToCid(codec, childLink)
 		childCIDLink := cidlink.Link{Cid: childCID}
-		if err := childNodeBuilder.AssignLink(childCIDLink); err != nil {
+		if err := childNodeMA.AssembleKey().AssignString("Link"); err != nil {
+			return err
+		}
+		if err := childNodeMA.AssembleValue().AssignLink(childCIDLink); err != nil {
+			return err
+		}
+		if err := childNodeMA.Finish(); err != nil {
 			return err
 		}
 		return ma.AssembleValue().AssignNode(childNodeBuilder.Build())
@@ -135,29 +145,42 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 	// it must be a leaf node, branch and extension will never be less than 32 bytes
 	childLeaf, ok := nodeFields[1].([]interface{})
 	if !ok {
-		return fmt.Errorf("unable to decode extension node element into []byte or []interface{}")
+		return fmt.Errorf("unable to decode branch node entry into []byte or []interface{}")
 	}
 	if len(childLeaf) != 2 {
 		return fmt.Errorf("unexpected number of entries for leaf node; got %d want 2", len(childLeaf))
 	}
-	childNode, err := childNodeBuilder.BeginMap(1)
+	nodeKind, decodedChildLeaf, err := decodeTwoMemberNode(childLeaf)
 	if err != nil {
 		return err
 	}
-	if err := childNode.AssembleKey().AssignString(LEAF_NODE.String()); err != nil {
+	if nodeKind != LEAF_NODE {
+		return fmt.Errorf("child node included directly in branch must be a leaf; got %s", nodeKind.String())
+	}
+	if err := childNodeMA.AssembleKey().AssignString("TrieNode"); err != nil {
 		return err
 	}
-	leafNodeMA, err := childNode.AssembleValue().BeginMap(2)
+	childTrieNodeMA, err := childNodeMA.AssembleValue().BeginMap(1)
 	if err != nil {
 		return err
 	}
-	if err := unpackLeafNode(leafNodeMA, childLeaf, codec); err != nil {
+	if err := childTrieNodeMA.AssembleKey().AssignString(LEAF_NODE.String()); err != nil {
+		return err
+	}
+	leafNodeMA, err := childTrieNodeMA.AssembleValue().BeginMap(2)
+	if err != nil {
+		return err
+	}
+	if err := unpackLeafNode(leafNodeMA, decodedChildLeaf, codec); err != nil {
 		return err
 	}
 	if err := leafNodeMA.Finish(); err != nil {
 		return err
 	}
-	if err := childNode.Finish(); err != nil {
+	if err := childTrieNodeMA.Finish(); err != nil {
+		return err
+	}
+	if err := childNodeMA.Finish(); err != nil {
 		return err
 	}
 	return ma.AssembleValue().AssignNode(childNodeBuilder.Build())
@@ -169,7 +192,11 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 		if err := ma.AssembleKey().AssignString(key); err != nil {
 			return err
 		}
-		childNodeBuilder := dageth.Type.Child__Repr.NewBuilder()
+		childNodeBuilder := dageth.Type.Child.NewBuilder()
+		childNodeMA, err := childNodeBuilder.BeginMap(1)
+		if err != nil {
+			return err
+		}
 		childLink, ok := nodeFields[i].([]byte)
 		if ok {
 			switch len(childLink) {
@@ -178,9 +205,18 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 					return err
 				}
 			case 32:
+				// it's a hash referencing the child node
+				// make CID link from the bytes
+				// assign the link value to the MA
 				childCID := shared.Keccak256ToCid(codec, childLink)
 				childCIDLink := cidlink.Link{Cid: childCID}
-				if err := childNodeBuilder.AssignLink(childCIDLink); err != nil {
+				if err := childNodeMA.AssembleKey().AssignString("Link"); err != nil {
+					return err
+				}
+				if err := childNodeMA.AssembleValue().AssignLink(childCIDLink); err != nil {
+					return err
+				}
+				if err := childNodeMA.Finish(); err != nil {
 					return err
 				}
 				if err := ma.AssembleValue().AssignNode(childNodeBuilder.Build()); err != nil {
@@ -200,24 +236,37 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 		if len(childLeaf) != 2 {
 			return fmt.Errorf("unexpected number of entries for leaf node; got %d want 2", len(childLeaf))
 		}
-		childNode, err := childNodeBuilder.BeginMap(1)
+		nodeKind, decodedChildLeaf, err := decodeTwoMemberNode(childLeaf)
 		if err != nil {
 			return err
 		}
-		if err := childNode.AssembleKey().AssignString(LEAF_NODE.String()); err != nil {
+		if nodeKind != LEAF_NODE {
+			return fmt.Errorf("child node included directly in branch must be a leaf; got %s", nodeKind.String())
+		}
+		if err := childNodeMA.AssembleKey().AssignString("TrieNode"); err != nil {
 			return err
 		}
-		leafNodeMA, err := childNode.AssembleValue().BeginMap(2)
+		childTrieNodeMA, err := childNodeMA.AssembleValue().BeginMap(1)
 		if err != nil {
 			return err
 		}
-		if err := unpackLeafNode(leafNodeMA, childLeaf, codec); err != nil {
+		if err := childTrieNodeMA.AssembleKey().AssignString(LEAF_NODE.String()); err != nil {
+			return err
+		}
+		leafNodeMA, err := childTrieNodeMA.AssembleValue().BeginMap(2)
+		if err != nil {
+			return err
+		}
+		if err := unpackLeafNode(leafNodeMA, decodedChildLeaf, codec); err != nil {
 			return err
 		}
 		if err := leafNodeMA.Finish(); err != nil {
 			return err
 		}
-		if err := childNode.Finish(); err != nil {
+		if err := childTrieNodeMA.Finish(); err != nil {
+			return err
+		}
+		if err := childNodeMA.Finish(); err != nil {
 			return err
 		}
 		if err := ma.AssembleValue().AssignNode(childNodeBuilder.Build()); err != nil {

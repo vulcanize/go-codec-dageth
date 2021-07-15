@@ -4223,6 +4223,9 @@ func (ma *_Child__Assembler) AssembleValue() ipld.NodeAssembler {
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
 	case 2:
+		if ma.ca2 == nil {
+			ma.ca2 = &_TrieNode__Assembler{}
+		}
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return ma.ca2
@@ -4480,6 +4483,9 @@ func (na *_Child__ReprAssembler) BeginMap(sizeHint int64) (ipld.MapAssembler, er
 	}
 	na.ca = 2
 	na.w.tag = 2
+	if na.ca2 == nil {
+		na.ca2 = &_TrieNode__ReprAssembler{}
+	}
 	na.ca2.w = &na.w.x2
 	na.ca2.m = na.m
 	return na.ca2.BeginMap(sizeHint)

@@ -262,7 +262,7 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 
 		type TrieExtensionNode struct {
 			PartialPath Bytes
-			Child Child
+			Child &TrieNode
 		}
 
 		type TrieLeafNode struct {
@@ -319,10 +319,11 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnStruct("TrieExtensionNode",
 		[]schema.StructField{
 			schema.SpawnStructField("PartialPath", "Bytes", false, false),
-			schema.SpawnStructField("Child", "Child", false, false),
+			schema.SpawnStructField("Child", "Link", false, false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
+
 	ts.Accumulate(schema.SpawnStruct("TrieLeafNode",
 		[]schema.StructField{
 			schema.SpawnStructField("PartialPath", "Bytes", false, false),

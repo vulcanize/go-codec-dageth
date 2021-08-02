@@ -211,80 +211,21 @@ func packExtensionNode(node ipld.Node) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	childLinkNode, err := childNode.LookupByString("Link")
-	if err == nil {
-		childLink, err := childLinkNode.AsLink()
-		if err != nil {
-			return nil, err
-		}
-		childCIDLink, ok := childLink.(cidlink.Link)
-		if !ok {
-			return nil, fmt.Errorf("extension node child link needs to be a CID")
-		}
-		childMh := childCIDLink.Hash()
-		decodedChildMh, err := multihash.Decode(childMh)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
-		}
-		nodeFields[1] = decodedChildMh.Digest
-		return nodeFields, nil
+	childLink, err := childNode.AsLink()
+	if err != nil {
+		return nil, err
 	}
-	childTrieNodeNode, err := childNode.LookupByString("TrieNode")
-	if err == nil {
-		// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
-		childLeafNode, err := childTrieNodeNode.LookupByString(LEAF_NODE.String())
-		if err != nil {
-			return nil, fmt.Errorf("only leaf nodes can be less than 32 bytes and stored direclty in a parent node")
-		}
-		childLeafNodeFields, err := packLeafNode(childLeafNode)
-		if err != nil {
-			return nil, err
-		}
-		childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
-		if err != nil {
-			return nil, err
-		}
-		nodeFields[1] = childLeafNodeRLP
-		return nodeFields, nil
+	childCIDLink, ok := childLink.(cidlink.Link)
+	if !ok {
+		return nil, fmt.Errorf("extension node child link needs to be a CID")
 	}
-	return nil, fmt.Errorf("extension node child needs to be of kind bytes or link")
-
-	/* Child should be a kinded Union, in which case we could do the below type switch instead of map key checking
-	switch childNode.Kind() {
-	case ipld.Kind_Link:
-		childLink, err := childNode.AsLink()
-		if err != nil {
-			return nil, err
-		}
-		childCIDLink, ok := childLink.(cidlink.Link)
-		if !ok {
-			return nil, fmt.Errorf("extension node child link needs to be a CID")
-		}
-		childMh := childCIDLink.Hash()
-		decodedChildMh, err := multihash.Decode(childMh)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
-		}
-		nodeFields[1] = decodedChildMh.Digest
-	case ipld.Kind_Map: // is this possible? Will an extension node ever link to a leaf? In that case it could just be a leaf itself...?
-		// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
-		childLeafNode, err := childNode.LookupByString(LEAF_NODE.String())
-		if err != nil {
-			return nil, fmt.Errorf("only leaf nodes can be less than 32 bytes and stored direclty in a parent node")
-		}
-		childLeafNodeFields, err := packLeafNode(childLeafNode)
-		if err != nil {
-			return nil, err
-		}
-		childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
-		if err != nil {
-			return nil, err
-		}
-		nodeFields[1] = childLeafNodeRLP
-	default:
-		return nil, fmt.Errorf("extension node child needs to be of kind bytes or link")
+	childMh := childCIDLink.Hash()
+	decodedChildMh, err := multihash.Decode(childMh)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
 	}
-	*/
+	nodeFields[1] = decodedChildMh.Digest
+	return nodeFields, nil
 }
 
 func packLeafNode(node ipld.Node) ([]interface{}, error) {

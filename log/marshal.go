@@ -1,4 +1,4 @@
-package rct
+package log
 
 import (
 	"fmt"

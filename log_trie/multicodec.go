@@ -1,8 +1,9 @@
-package log
+package log_trie
 
 import (
 	"io"
 
+	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/ipld/go-ipld-prime/multicodec"
@@ -16,7 +17,7 @@ var (
 	_ ipld.Decoder = Decode
 	_ ipld.Encoder = Encode
 
-	MultiCodecType = uint64(0x9000) // TBD
+	MultiCodecType = uint64(cid.EthTxReceiptTrie) // TBD
 	MultiHashType  = uint64(multihash.KECCAK_256)
 )
 
@@ -26,11 +27,11 @@ func init() {
 }
 
 // AddSupportToChooser takes an existing node prototype chooser and subs in
-// Log for the eth log multicodec code.
+// TrieNode for the eth log trie multicodec code.
 func AddSupportToChooser(existing traversal.LinkTargetNodePrototypeChooser) traversal.LinkTargetNodePrototypeChooser {
 	return func(lnk ipld.Link, lnkCtx ipld.LinkContext) (ipld.NodePrototype, error) {
 		if lnk, ok := lnk.(cidlink.Link); ok && lnk.Cid.Prefix().Codec == MultiCodecType {
-			return dageth.Type.Log, nil
+			return dageth.Type.TrieNode, nil
 		}
 		return existing(lnk, lnkCtx)
 	}

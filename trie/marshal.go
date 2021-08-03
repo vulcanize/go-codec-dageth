@@ -33,6 +33,7 @@ const (
 	RCT_VALUE     ValueKind = "Receipt"
 	STATE_VALUE   ValueKind = "Account"
 	STORAGE_VALUE ValueKind = "Bytes"
+	LOG_VALUE     ValueKind = "Log"
 )
 
 func (n NodeKind) String() string {

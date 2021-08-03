@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/vulcanize/go-codec-dageth/log"
+
 	dageth "github.com/vulcanize/go-codec-dageth"
 	"github.com/vulcanize/go-codec-dageth/shared"
 
@@ -14,9 +16,9 @@ import (
 	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
-	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
-	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
-	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
+	"github.com/vulcanize/go-codec-dageth/rct"
+	"github.com/vulcanize/go-codec-dageth/state_account"
+	"github.com/vulcanize/go-codec-dageth/tx"
 )
 
 // DecodeTrieNode provides an IPLD codec decode interface for eth merkle patricia trie nodes
@@ -268,22 +270,27 @@ func unpackValue(ma ipld.MapAssembler, val []byte, codec uint64) error {
 		if err := ma.AssembleKey().AssignString(TX_VALUE.String()); err != nil {
 			return err
 		}
-		return dageth_tx.DecodeBytes(ma.AssembleValue(), val)
+		return tx.DecodeBytes(ma.AssembleValue(), val)
 	case cid.EthTxReceiptTrie:
 		if err := ma.AssembleKey().AssignString(RCT_VALUE.String()); err != nil {
 			return err
 		}
-		return dageth_rct.DecodeBytes(ma.AssembleValue(), val)
+		return rct.DecodeBytes(ma.AssembleValue(), val)
 	case cid.EthStateTrie:
 		if err := ma.AssembleKey().AssignString(STATE_VALUE.String()); err != nil {
 			return err
 		}
-		return dageth_account.DecodeBytes(ma.AssembleValue(), val)
+		return account.DecodeBytes(ma.AssembleValue(), val)
 	case cid.EthStorageTrie:
 		if err := ma.AssembleKey().AssignString(STORAGE_VALUE.String()); err != nil {
 			return err
 		}
 		return ma.AssembleValue().AssignBytes(val)
+	case log.MultiCodecType:
+		if err := ma.AssembleKey().AssignString(LOG_VALUE.String()); err != nil {
+			return err
+		}
+		return log.DecodeBytes(ma.AssembleValue(), val)
 	default:
 		return fmt.Errorf("unsupported multicodec type (%d) for eth TrieNode unmarshaller", codec)
 	}

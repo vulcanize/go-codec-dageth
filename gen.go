@@ -63,9 +63,9 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			ParentCID &Header
 			UnclesCID &Uncles
 			Coinbase Address
-			StateRootCID &StateTrieNode
-			TxRootCID &TxTrieNode
-			RctRootCID &RctTrieNode
+			StateRootCID &TrieNode
+			TxRootCID &TrieNode
+			RctRootCID &TrieNode
 			Bloom Bloom
 			Difficulty BigInt
 			Number BigInt
@@ -174,20 +174,6 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			Topics  Topics
 			Data    Bytes
 		}
-
-		type Logs [Log]
-
-		type Receipt struct {
-			TxType			  TxType
-			// We could make Status an enum
-			Status	          Uint   // nullable
-			PostState		  Hash   // nullable
-			CumulativeGasUsed Uint
-			Bloom             Bloom
-			Logs              Logs
-		}
-
-		type Receipts [Receipt]
 	*/
 	ts.Accumulate(schema.SpawnList("Topics", "Hash", false))
 	ts.Accumulate(schema.SpawnStruct("Log",
@@ -198,7 +184,20 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
-	ts.Accumulate(schema.SpawnList("Logs", "Log", false))
+
+	/*
+		type Receipt struct {
+			TxType			  TxType
+			// We could make Status an enum
+			Status	          Uint   // nullable
+			PostState		  Hash   // nullable
+			CumulativeGasUsed Uint
+			Bloom             Bloom
+			LogRootCID        &TrieNode
+		}
+
+		type Receipts [Receipt]
+	*/
 	ts.Accumulate(schema.SpawnStruct("Receipt",
 		[]schema.StructField{
 			schema.SpawnStructField("TxType", "TxType", false, false),
@@ -206,7 +205,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 			schema.SpawnStructField("Status", "Uint", false, true),
 			schema.SpawnStructField("CumulativeGasUsed", "Uint", false, false),
 			schema.SpawnStructField("Bloom", "Bloom", false, false),
-			schema.SpawnStructField("Logs", "Logs", false, false),
+			schema.SpawnStructField("LogRootCID", "Link", false, false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))
@@ -349,7 +348,7 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 		type Account struct {
 			Nonce    Uint
 			Balance  Balance
-			StorageRootCID &StorageTrieNode
+			StorageRootCID &TrieNode
 			CodeCID &ByteCode
 		}
 	*/

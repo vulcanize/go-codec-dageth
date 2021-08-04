@@ -16,7 +16,7 @@ var (
 	_ ipld.Decoder = Decode
 	_ ipld.Encoder = Encode
 
-	MultiCodecType = uint64(0x9000) // TBD
+	MultiCodecType = uint64(0x9a) // Proposed
 	MultiHashType  = uint64(multihash.KECCAK_256)
 )
 

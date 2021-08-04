@@ -10,7 +10,7 @@ import (
 
 // Decode provides an IPLD codec decode interface for eth log trie node IPLDs.
 // This function is registered via the go-ipld-prime link loader for multicodec
-// code 0x94 when this package is invoked via init.
+// code 0x99 (proposed) when this package is invoked via init.
 // This simply wraps dageth_trie.DecodeTrieNode with the proper multicodec type
 func Decode(na ipld.NodeAssembler, in io.Reader) error {
 	return dageth_trie.DecodeTrieNode(na, in, MultiCodecType)

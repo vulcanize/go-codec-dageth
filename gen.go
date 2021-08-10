@@ -255,6 +255,7 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 			| Receipt "rct"
 			| Account "state"
 			| Bytes "storage"
+			| Log "log"
 		} representation keyed
 
 		# Child union type used to handle the case where the node is stored directly in the parent node because it is smaller
@@ -280,12 +281,14 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 			"Receipt",
 			"Account",
 			"Bytes",
+			"Log",
 		},
 		schema.SpawnUnionRepresentationKeyed(map[string]schema.TypeName{
 			"tx":      "Transaction",
 			"rct":     "Receipt",
 			"state":   "Account",
 			"storage": "Bytes",
+			"log":     "Log",
 		}),
 	))
 	ts.Accumulate(schema.SpawnUnion("Child",

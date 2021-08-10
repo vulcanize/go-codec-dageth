@@ -4031,7 +4031,7 @@ type _Child__Assembler struct {
 	cm  schema.Maybe
 	ca1 _Link__Assembler
 
-	ca2 _TrieNode__Assembler
+	ca2 *_TrieNode__Assembler
 	ca  uint
 }
 
@@ -4181,7 +4181,7 @@ func (ma *_Child__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, error)
 		ma.w.tag = 2
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
-		return &ma.ca2, nil
+		return ma.ca2, nil
 	}
 	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Child", Key: &_String{k}}
 }
@@ -4218,14 +4218,17 @@ func (ma *_Child__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
+		if ma.ca2 == nil {
+			ma.ca2 = new(_TrieNode__Assembler)
+		}
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
-		return &ma.ca2
+		return ma.ca2
 	default:
 		panic("unreachable")
 	}
@@ -4451,7 +4454,7 @@ type _Child__ReprAssembler struct {
 	w   *_Child
 	m   *schema.Maybe
 	ca1 _Link__ReprAssembler
-	ca2 _TrieNode__ReprAssembler
+	ca2 *_TrieNode__ReprAssembler
 	ca  uint
 }
 
@@ -20044,15 +20047,15 @@ func (ma *_TrieNode__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 2:
+	case 3:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
@@ -21636,6 +21639,8 @@ func (n _Value) AsInterface() _Value__iface {
 		return &n.x3
 	case 4:
 		return &n.x4
+	case 5:
+		return &n.x5
 	default:
 		panic("invalid union state; how did you create this object?")
 	}
@@ -21680,6 +21685,7 @@ var (
 	memberName__Value_Receipt     = _String{"Receipt"}
 	memberName__Value_Account     = _String{"Account"}
 	memberName__Value_Bytes       = _String{"Bytes"}
+	memberName__Value_Log         = _String{"Log"}
 )
 var _ ipld.Node = (Value)(&_Value{})
 var _ schema.TypedNode = (Value)(&_Value{})
@@ -21709,6 +21715,11 @@ func (n Value) LookupByString(key string) (ipld.Node, error) {
 			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
 		}
 		return &n.x4, nil
+	case "Log":
+		if n.tag != 5 {
+			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
+		}
+		return &n.x5, nil
 	default:
 		return nil, schema.ErrNoSuchField{Type: nil /*TODO*/, Field: ipld.PathSegmentOfString(key)}
 	}
@@ -21748,6 +21759,8 @@ func (itr *_Value__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 		k, v = &memberName__Value_Account, &itr.n.x3
 	case 4:
 		k, v = &memberName__Value_Bytes, &itr.n.x4
+	case 5:
+		k, v = &memberName__Value_Log, &itr.n.x5
 	default:
 		panic("unreachable")
 	}
@@ -21829,6 +21842,8 @@ type _Value__Assembler struct {
 	ca3 _Account__Assembler
 
 	ca4 _Bytes__Assembler
+
+	ca5 _Log__Assembler
 	ca  uint
 }
 
@@ -21848,6 +21863,9 @@ func (na *_Value__Assembler) reset() {
 
 	case 4:
 		na.ca4.reset()
+
+	case 5:
+		na.ca5.reset()
 	default:
 		panic("unreachable")
 	}
@@ -21999,6 +22017,13 @@ func (ma *_Value__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, error)
 		ma.ca4.w = &ma.w.x4
 		ma.ca4.m = &ma.cm
 		return &ma.ca4, nil
+	case "Log":
+		ma.state = maState_midValue
+		ma.ca = 5
+		ma.w.tag = 5
+		ma.ca5.w = &ma.w.x5
+		ma.ca5.m = &ma.cm
+		return &ma.ca5, nil
 	}
 	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Value", Key: &_String{k}}
 }
@@ -22035,22 +22060,26 @@ func (ma *_Value__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 2:
+	case 3:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
-	case 3:
+	case 4:
 		ma.ca4.w = &ma.w.x4
 		ma.ca4.m = &ma.cm
 		return &ma.ca4
+	case 5:
+		ma.ca5.w = &ma.w.x5
+		ma.ca5.m = &ma.cm
+		return &ma.ca5
 	default:
 		panic("unreachable")
 	}
@@ -22090,6 +22119,8 @@ func (ma *_Value__Assembler) ValuePrototype(k string) ipld.NodePrototype {
 		return _Account__Prototype{}
 	case "Bytes":
 		return _Bytes__Prototype{}
+	case "Log":
+		return _Log__Prototype{}
 	default:
 		return nil
 	}
@@ -22143,6 +22174,11 @@ func (ka *_Value__KeyAssembler) AssignString(k string) error {
 		ka.w.tag = 4
 		ka.state = maState_expectValue
 		return nil
+	case "Log":
+		ka.ca = 5
+		ka.w.tag = 5
+		ka.state = maState_expectValue
+		return nil
 	}
 	return ipld.ErrInvalidKey{TypeName: "dageth.Value", Key: &_String{k}} // TODO: error quality: ErrInvalidUnionDiscriminant ?
 }
@@ -22176,6 +22212,7 @@ var (
 	memberName__Value_Receipt_serial     = _String{"rct"}
 	memberName__Value_Account_serial     = _String{"state"}
 	memberName__Value_Bytes_serial       = _String{"storage"}
+	memberName__Value_Log_serial         = _String{"log"}
 )
 var _ ipld.Node = &_Value__Repr{}
 
@@ -22204,6 +22241,11 @@ func (n *_Value__Repr) LookupByString(key string) (ipld.Node, error) {
 			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
 		}
 		return n.x4.Representation(), nil
+	case "log":
+		if n.tag != 5 {
+			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
+		}
+		return n.x5.Representation(), nil
 	default:
 		return nil, schema.ErrNoSuchField{Type: nil /*TODO*/, Field: ipld.PathSegmentOfString(key)}
 	}
@@ -22243,6 +22285,8 @@ func (itr *_Value__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 		k, v = &memberName__Value_Account_serial, itr.n.x3.Representation()
 	case 4:
 		k, v = &memberName__Value_Bytes_serial, itr.n.x4.Representation()
+	case 5:
+		k, v = &memberName__Value_Log_serial, itr.n.x5.Representation()
 	default:
 		panic("unreachable")
 	}
@@ -22324,6 +22368,8 @@ type _Value__ReprAssembler struct {
 	ca3 _Account__ReprAssembler
 
 	ca4 _Bytes__ReprAssembler
+
+	ca5 _Log__ReprAssembler
 	ca  uint
 }
 
@@ -22343,6 +22389,9 @@ func (na *_Value__ReprAssembler) reset() {
 
 	case 4:
 		na.ca4.reset()
+
+	case 5:
+		na.ca5.reset()
 	default:
 		panic("unreachable")
 	}
@@ -22494,6 +22543,13 @@ func (ma *_Value__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler, er
 		ma.ca4.w = &ma.w.x4
 		ma.ca4.m = &ma.cm
 		return &ma.ca4, nil
+	case "log":
+		ma.state = maState_midValue
+		ma.ca = 5
+		ma.w.tag = 5
+		ma.ca5.w = &ma.w.x5
+		ma.ca5.m = &ma.cm
+		return &ma.ca5, nil
 	}
 	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Value.Repr", Key: &_String{k}}
 }
@@ -22546,6 +22602,10 @@ func (ma *_Value__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 		ma.ca4.w = &ma.w.x4
 		ma.ca4.m = &ma.cm
 		return &ma.ca4
+	case 4:
+		ma.ca5.w = &ma.w.x5
+		ma.ca5.m = &ma.cm
+		return &ma.ca5
 	default:
 		panic("unreachable")
 	}
@@ -22585,6 +22645,8 @@ func (ma *_Value__ReprAssembler) ValuePrototype(k string) ipld.NodePrototype {
 		return _Account__ReprPrototype{}
 	case "Bytes":
 		return _Bytes__ReprPrototype{}
+	case "Log":
+		return _Log__ReprPrototype{}
 	default:
 		return nil
 	}
@@ -22636,6 +22698,11 @@ func (ka *_Value__ReprKeyAssembler) AssignString(k string) error {
 	case "storage":
 		ka.ca = 4
 		ka.w.tag = 4
+		ka.state = maState_expectValue
+		return nil
+	case "log":
+		ka.ca = 5
+		ka.w.tag = 5
 		ka.state = maState_expectValue
 		return nil
 	}

@@ -335,6 +335,7 @@ type _Value struct {
 	x2  _Receipt
 	x3  _Account
 	x4  _Bytes
+	x5  _Log
 }
 type _Value__iface interface {
 	_Value__member()
@@ -344,3 +345,4 @@ func (_Transaction) _Value__member() {}
 func (_Receipt) _Value__member()     {}
 func (_Account) _Value__member()     {}
 func (_Bytes) _Value__member()       {}
+func (_Log) _Value__member()         {}

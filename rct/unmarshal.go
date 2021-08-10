@@ -8,16 +8,15 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 	"github.com/ipfs/go-cid"
+	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/multiformats/go-multihash"
 	"github.com/vulcanize/go-codec-dageth/log"
-
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ipld/go-ipld-prime"
 )
 
 // Decode provides an IPLD codec decode interface for eth receipt IPLDs.

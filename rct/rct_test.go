@@ -106,6 +106,10 @@ func TestReceiptCodec(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to marshal access list receipt binary: %v", err)
 	}
+	dfReceiptConsensusEnc, err = dynamicFeeReceipt.MarshalBinary()
+	if err != nil {
+		t.Fatalf("unable to marshal dynamic fee receipt binary: %v", err)
+	}
 	testReceiptDecoding(t)
 	testAccessListReceiptNodeContents(t)
 	testDynamicFeeReceiptNodeContents(t)
@@ -127,6 +131,13 @@ func testReceiptDecoding(t *testing.T) {
 		t.Fatalf("unable to decode access list receipt into an IPLD node: %v", err)
 	}
 	accessListReceiptNode = alRctBuilder.Build()
+
+	dfRctBuilder := dageth.Type.Receipt.NewBuilder()
+	dfRctReader := bytes.NewReader(dfReceiptConsensusEnc)
+	if err := rct.Decode(dfRctBuilder, dfRctReader); err != nil {
+		t.Fatalf("unable to decode dynamic fee receipt into an IPLD node: %v", err)
+	}
+	dynamicFeeReceiptNode = dfRctBuilder.Build()
 }
 
 func testAccessListReceiptNodeContents(t *testing.T) {

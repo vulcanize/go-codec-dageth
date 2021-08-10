@@ -32,11 +32,11 @@ func Decode(na ipld.NodeAssembler, in io.Reader) error {
 // Decode will grab or read all the bytes from an io.Reader anyway, so this can
 // save having to copy the bytes or create a bytes.Buffer.
 func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
-	var log types.Log
+	log := new(types.Log)
 	if err := rlp.DecodeBytes(src, log); err != nil {
 		return err
 	}
-	return DecodeLog(na, log)
+	return DecodeLog(na, *log)
 }
 
 // DecodeLog unpacks a go-ethereum Log into the NodeAssembler

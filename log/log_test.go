@@ -10,7 +10,7 @@ import (
 	"github.com/ipld/go-ipld-prime"
 
 	dageth "github.com/vulcanize/go-codec-dageth"
-	"github.com/vulcanize/go-codec-dageth/rct"
+	"github.com/vulcanize/go-codec-dageth/log"
 )
 
 var (
@@ -44,8 +44,8 @@ func TestLogCodec(t *testing.T) {
 func testLogDecoding(t *testing.T) {
 	logBuilder := dageth.Type.Log.NewBuilder()
 	logReader := bytes.NewReader(logEncoding)
-	if err := rct.Decode(logBuilder, logReader); err != nil {
-		t.Fatalf("unable to decode legacy Log into an IPLD node: %v", err)
+	if err := log.Decode(logBuilder, logReader); err != nil {
+		t.Fatalf("unable to decode log into an IPLD node: %v", err)
 	}
 	logNode = logBuilder.Build()
 }
@@ -63,7 +63,7 @@ func testLogNodeContents(t *testing.T) {
 		t.Errorf("log Address (%x) does not match expected Address (%x)", addrBytes, mockLog.Address.Bytes())
 	}
 
-	dataNode, err := logNode.LookupByString("data")
+	dataNode, err := logNode.LookupByString("Data")
 	if err != nil {
 		t.Fatalf("log is missing Data: %v", err)
 	}
@@ -101,7 +101,7 @@ func testLogNodeContents(t *testing.T) {
 
 func testLogEncoding(t *testing.T) {
 	logWriter := new(bytes.Buffer)
-	if err := rct.Encode(logNode, logWriter); err != nil {
+	if err := log.Encode(logNode, logWriter); err != nil {
 		t.Fatalf("unable to encode log into writer: %v", err)
 	}
 	logBytes := logWriter.Bytes()

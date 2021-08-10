@@ -311,6 +311,10 @@ func ValueAndKind(node ipld.Node) (ipld.Node, ValueKind, error) {
 	if err == nil {
 		return n, STORAGE_VALUE, nil
 	}
+	n, err = node.LookupByString(LOG_VALUE.String())
+	if err == nil {
+		return n, LOG_VALUE, nil
+	}
 	return nil, "", fmt.Errorf("eth trie value IPLD node is missing the expected keyed Union keys")
 }
 

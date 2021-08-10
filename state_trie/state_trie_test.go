@@ -289,11 +289,7 @@ func verifyExtensionNodeContents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("state trie extension node missing Child: %v", err)
 	}
-	childLinkNode, err := childNode.LookupByString("Link")
-	if err != nil {
-		t.Fatalf("state trie extension node Child should be of kind Link: %v", err)
-	}
-	childLink, err := childLinkNode.AsLink()
+	childLink, err := childNode.AsLink()
 	if err != nil {
 		t.Fatalf("state trie extension node Child should be of kind Link: %v", err)
 	}

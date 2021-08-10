@@ -16,7 +16,7 @@ import (
 	"github.com/multiformats/go-multihash"
 
 	dageth "github.com/vulcanize/go-codec-dageth"
-	"github.com/vulcanize/go-codec-dageth/rct_trie"
+	"github.com/vulcanize/go-codec-dageth/log_trie"
 	"github.com/vulcanize/go-codec-dageth/shared"
 	"github.com/vulcanize/go-codec-dageth/trie"
 )
@@ -36,7 +36,8 @@ var (
 		mockLeafParitalPath,
 		mockLogVal,
 	}
-	mockLeafNodeRLP, _              = rlp.EncodeToBytes(mockLeafNode)
+	mockLeafNodeRLP, _ = rlp.EncodeToBytes(mockLeafNode)
+
 	mockExtensionPartialPath        = common.Hex2Bytes("1114658a74d9cc9f7acf2c5cd696c3494d7c344d78bfec3add0d91ec4e8d1c45")
 	mockDecodedExtensionPartialPath = shared.CompactToHex(mockExtensionPartialPath)
 	mockExtensionHash               = crypto.Keccak256(mockLeafNodeRLP)
@@ -140,21 +141,21 @@ func TestLogTrieCodec(t *testing.T) {
 func testLogTrieDecode(t *testing.T) {
 	branchNodeBuilder := dageth.Type.TrieNode.NewBuilder()
 	branchNodeReader := bytes.NewReader(mockBranchNodeRLP)
-	if err := rct_trie.Decode(branchNodeBuilder, branchNodeReader); err != nil {
+	if err := log_trie.Decode(branchNodeBuilder, branchNodeReader); err != nil {
 		t.Fatalf("unable to decode log trie branch node into an IPLD node: %v", err)
 	}
 	branchNode = branchNodeBuilder.Build()
 
 	extensionNodeBuilder := dageth.Type.TrieNode.NewBuilder()
 	extensionNodeReader := bytes.NewReader(mockExtensionNodeRLP)
-	if err := rct_trie.Decode(extensionNodeBuilder, extensionNodeReader); err != nil {
+	if err := log_trie.Decode(extensionNodeBuilder, extensionNodeReader); err != nil {
 		t.Fatalf("unable to decode log trie extension node into an IPLD node: %v", err)
 	}
 	extensionNode = extensionNodeBuilder.Build()
 
 	leafNodeBuilder := dageth.Type.TrieNode.NewBuilder()
 	leafNodeReader := bytes.NewReader(mockLeafNodeRLP)
-	if err := rct_trie.Decode(leafNodeBuilder, leafNodeReader); err != nil {
+	if err := log_trie.Decode(leafNodeBuilder, leafNodeReader); err != nil {
 		t.Fatalf("unable to decode log trie leaf node into an IPLD node: %v", err)
 	}
 	leafNode = leafNodeBuilder.Build()
@@ -288,11 +289,7 @@ func verifyExtensionNodeContents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("log trie extension node missing Child: %v", err)
 	}
-	childLinkNode, err := childNode.LookupByString("Link")
-	if err != nil {
-		t.Fatalf("log trie extension node Child should be of kind Link: %v", err)
-	}
-	childLink, err := childLinkNode.AsLink()
+	childLink, err := childNode.AsLink()
 	if err != nil {
 		t.Fatalf("log trie extension node Child should be of kind Link: %v", err)
 	}
@@ -354,7 +351,7 @@ func verifyLeafValue(valEnumNode ipld.Node, t *testing.T) {
 		t.Errorf("log Address (%x) does not match expected Address (%x)", addrBytes, mockLog.Address.Bytes())
 	}
 
-	dataNode, err := logNode.LookupByString("data")
+	dataNode, err := logNode.LookupByString("Data")
 	if err != nil {
 		t.Fatalf("log is missing Data: %v", err)
 	}
@@ -392,7 +389,7 @@ func verifyLeafValue(valEnumNode ipld.Node, t *testing.T) {
 
 func testLogTrieEncode(t *testing.T) {
 	branchWriter := new(bytes.Buffer)
-	if err := rct_trie.Encode(branchNode, branchWriter); err != nil {
+	if err := log_trie.Encode(branchNode, branchWriter); err != nil {
 		t.Fatalf("unable to encode log trie branch node into writer: %v", err)
 	}
 	encodedBranchBytes := branchWriter.Bytes()
@@ -401,7 +398,7 @@ func testLogTrieEncode(t *testing.T) {
 	}
 
 	extensionWriter := new(bytes.Buffer)
-	if err := rct_trie.Encode(extensionNode, extensionWriter); err != nil {
+	if err := log_trie.Encode(extensionNode, extensionWriter); err != nil {
 		t.Fatalf("unable to encode log trie extension node into writer: %v", err)
 	}
 	encodedExtensionBytes := extensionWriter.Bytes()
@@ -410,7 +407,7 @@ func testLogTrieEncode(t *testing.T) {
 	}
 
 	leafWriter := new(bytes.Buffer)
-	if err := rct_trie.Encode(leafNode, leafWriter); err != nil {
+	if err := log_trie.Encode(leafNode, leafWriter); err != nil {
 		t.Fatalf("unable to encode log trie leaf node into writer: %v", err)
 	}
 	encodedLeafBytes := leafWriter.Bytes()

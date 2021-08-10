@@ -7,19 +7,20 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/vulcanize/go-codec-dageth/log"
-
-	dageth "github.com/vulcanize/go-codec-dageth"
-	"github.com/vulcanize/go-codec-dageth/shared"
-
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
+	"github.com/vulcanize/go-codec-dageth/log"
 	"github.com/vulcanize/go-codec-dageth/rct"
+
+	dageth "github.com/vulcanize/go-codec-dageth"
+	"github.com/vulcanize/go-codec-dageth/shared"
 	account "github.com/vulcanize/go-codec-dageth/state_account"
 	"github.com/vulcanize/go-codec-dageth/tx"
 )
+
+const logTrieMulticodec = uint64(0x99) // Proposed
 
 // DecodeTrieNode provides an IPLD codec decode interface for eth merkle patricia trie nodes
 // It's not possible to meet the Decode(na ipld.NodeAssembler, in io.Reader) interface
@@ -286,7 +287,7 @@ func unpackValue(ma ipld.MapAssembler, val []byte, codec uint64) error {
 			return err
 		}
 		return ma.AssembleValue().AssignBytes(val)
-	case log.MultiCodecType:
+	case logTrieMulticodec:
 		if err := ma.AssembleKey().AssignString(LOG_VALUE.String()); err != nil {
 			return err
 		}

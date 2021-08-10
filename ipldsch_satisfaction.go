@@ -4031,7 +4031,7 @@ type _Child__Assembler struct {
 	cm  schema.Maybe
 	ca1 _Link__Assembler
 
-	ca2 *_TrieNode__Assembler
+	ca2 _TrieNode__Assembler
 	ca  uint
 }
 
@@ -4181,7 +4181,7 @@ func (ma *_Child__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, error)
 		ma.w.tag = 2
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
-		return ma.ca2, nil
+		return &ma.ca2, nil
 	}
 	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Child", Key: &_String{k}}
 }
@@ -4218,17 +4218,14 @@ func (ma *_Child__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 1:
+	case 0:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 2:
-		if ma.ca2 == nil {
-			ma.ca2 = &_TrieNode__Assembler{}
-		}
+	case 1:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
-		return ma.ca2
+		return &ma.ca2
 	default:
 		panic("unreachable")
 	}
@@ -4454,7 +4451,7 @@ type _Child__ReprAssembler struct {
 	w   *_Child
 	m   *schema.Maybe
 	ca1 _Link__ReprAssembler
-	ca2 *_TrieNode__ReprAssembler
+	ca2 _TrieNode__ReprAssembler
 	ca  uint
 }
 
@@ -4483,9 +4480,6 @@ func (na *_Child__ReprAssembler) BeginMap(sizeHint int64) (ipld.MapAssembler, er
 	}
 	na.ca = 2
 	na.w.tag = 2
-	if na.ca2 == nil {
-		na.ca2 = &_TrieNode__ReprAssembler{}
-	}
 	na.ca2.w = &na.w.x2
 	na.ca2.m = na.m
 	return na.ca2.BeginMap(sizeHint)
@@ -9058,6 +9052,9 @@ func (n _Receipt) FieldBloom() Bloom {
 func (n _Receipt) FieldLogs() Logs {
 	return &n.Logs
 }
+func (n _Receipt) FieldLogRootCID() Link {
+	return &n.LogRootCID
+}
 
 type _Receipt__Maybe struct {
 	m schema.Maybe
@@ -9100,6 +9097,7 @@ var (
 	fieldName__Receipt_CumulativeGasUsed = _String{"CumulativeGasUsed"}
 	fieldName__Receipt_Bloom             = _String{"Bloom"}
 	fieldName__Receipt_Logs              = _String{"Logs"}
+	fieldName__Receipt_LogRootCID        = _String{"LogRootCID"}
 )
 var _ ipld.Node = (Receipt)(&_Receipt{})
 var _ schema.TypedNode = (Receipt)(&_Receipt{})
@@ -9127,6 +9125,8 @@ func (n Receipt) LookupByString(key string) (ipld.Node, error) {
 		return &n.Bloom, nil
 	case "Logs":
 		return &n.Logs, nil
+	case "LogRootCID":
+		return &n.LogRootCID, nil
 	default:
 		return nil, schema.ErrNoSuchField{Type: nil /*TODO*/, Field: ipld.PathSegmentOfString(key)}
 	}
@@ -9154,7 +9154,7 @@ type _Receipt__MapItr struct {
 }
 
 func (itr *_Receipt__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
-	if itr.idx >= 6 {
+	if itr.idx >= 7 {
 		return nil, nil, ipld.ErrIteratorOverread{}
 	}
 	switch itr.idx {
@@ -9184,6 +9184,9 @@ func (itr *_Receipt__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	case 5:
 		k = &fieldName__Receipt_Logs
 		v = &itr.n.Logs
+	case 6:
+		k = &fieldName__Receipt_LogRootCID
+		v = &itr.n.LogRootCID
 	default:
 		panic("unreachable")
 	}
@@ -9191,14 +9194,14 @@ func (itr *_Receipt__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	return
 }
 func (itr *_Receipt__MapItr) Done() bool {
-	return itr.idx >= 6
+	return itr.idx >= 7
 }
 
 func (Receipt) ListIterator() ipld.ListIterator {
 	return nil
 }
 func (Receipt) Length() int64 {
-	return 6
+	return 7
 }
 func (Receipt) IsAbsent() bool {
 	return false
@@ -9266,6 +9269,7 @@ type _Receipt__Assembler struct {
 	ca_CumulativeGasUsed _Uint__Assembler
 	ca_Bloom             _Bloom__Assembler
 	ca_Logs              _Logs__Assembler
+	ca_LogRootCID        _Link__Assembler
 }
 
 func (na *_Receipt__Assembler) reset() {
@@ -9277,6 +9281,7 @@ func (na *_Receipt__Assembler) reset() {
 	na.ca_CumulativeGasUsed.reset()
 	na.ca_Bloom.reset()
 	na.ca_Logs.reset()
+	na.ca_LogRootCID.reset()
 }
 
 var (
@@ -9286,7 +9291,8 @@ var (
 	fieldBit__Receipt_CumulativeGasUsed = 1 << 3
 	fieldBit__Receipt_Bloom             = 1 << 4
 	fieldBit__Receipt_Logs              = 1 << 5
-	fieldBits__Receipt_sufficient       = 0 + 1<<0 + 1<<1 + 1<<2 + 1<<3 + 1<<4 + 1<<5
+	fieldBit__Receipt_LogRootCID        = 1 << 6
+	fieldBits__Receipt_sufficient       = 0 + 1<<0 + 1<<1 + 1<<2 + 1<<3 + 1<<4 + 1<<5 + 1<<6
 )
 
 func (na *_Receipt__Assembler) BeginMap(int64) (ipld.MapAssembler, error) {
@@ -9442,6 +9448,16 @@ func (ma *_Receipt__Assembler) valueFinishTidy() bool {
 		default:
 			return false
 		}
+	case 6:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.ca_LogRootCID.w = nil
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
 	default:
 		panic("unreachable")
 	}
@@ -9524,6 +9540,16 @@ func (ma *_Receipt__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, erro
 		ma.ca_Logs.w = &ma.w.Logs
 		ma.ca_Logs.m = &ma.cm
 		return &ma.ca_Logs, nil
+	case "LogRootCID":
+		if ma.s&fieldBit__Receipt_LogRootCID != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_LogRootCID}
+		}
+		ma.s += fieldBit__Receipt_LogRootCID
+		ma.state = maState_midValue
+		ma.f = 6
+		ma.ca_LogRootCID.w = &ma.w.LogRootCID
+		ma.ca_LogRootCID.m = &ma.cm
+		return &ma.ca_LogRootCID, nil
 	}
 	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Receipt", Key: &_String{k}}
 }
@@ -9586,6 +9612,10 @@ func (ma *_Receipt__Assembler) AssembleValue() ipld.NodeAssembler {
 		ma.ca_Logs.w = &ma.w.Logs
 		ma.ca_Logs.m = &ma.cm
 		return &ma.ca_Logs
+	case 6:
+		ma.ca_LogRootCID.w = &ma.w.LogRootCID
+		ma.ca_LogRootCID.m = &ma.cm
+		return &ma.ca_LogRootCID
 	default:
 		panic("unreachable")
 	}
@@ -9618,6 +9648,9 @@ func (ma *_Receipt__Assembler) Finish() error {
 		}
 		if ma.s&fieldBit__Receipt_Logs == 0 {
 			err.Missing = append(err.Missing, "Logs")
+		}
+		if ma.s&fieldBit__Receipt_LogRootCID == 0 {
+			err.Missing = append(err.Missing, "LogRootCID")
 		}
 		return err
 	}
@@ -9699,6 +9732,13 @@ func (ka *_Receipt__KeyAssembler) AssignString(k string) error {
 		ka.s += fieldBit__Receipt_Logs
 		ka.state = maState_expectValue
 		ka.f = 5
+	case "LogRootCID":
+		if ka.s&fieldBit__Receipt_LogRootCID != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_LogRootCID}
+		}
+		ka.s += fieldBit__Receipt_LogRootCID
+		ka.state = maState_expectValue
+		ka.f = 6
 	default:
 		return ipld.ErrInvalidKey{TypeName: "dageth.Receipt", Key: &_String{k}}
 	}
@@ -9736,6 +9776,7 @@ var (
 	fieldName__Receipt_CumulativeGasUsed_serial = _String{"CumulativeGasUsed"}
 	fieldName__Receipt_Bloom_serial             = _String{"Bloom"}
 	fieldName__Receipt_Logs_serial              = _String{"Logs"}
+	fieldName__Receipt_LogRootCID_serial        = _String{"LogRootCID"}
 )
 var _ ipld.Node = &_Receipt__Repr{}
 
@@ -9762,6 +9803,8 @@ func (n *_Receipt__Repr) LookupByString(key string) (ipld.Node, error) {
 		return n.Bloom.Representation(), nil
 	case "Logs":
 		return n.Logs.Representation(), nil
+	case "LogRootCID":
+		return n.LogRootCID.Representation(), nil
 	default:
 		return nil, schema.ErrNoSuchField{Type: nil /*TODO*/, Field: ipld.PathSegmentOfString(key)}
 	}
@@ -9789,7 +9832,7 @@ type _Receipt__ReprMapItr struct {
 }
 
 func (itr *_Receipt__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
-	if itr.idx >= 6 {
+	if itr.idx >= 7 {
 		return nil, nil, ipld.ErrIteratorOverread{}
 	}
 	switch itr.idx {
@@ -9819,6 +9862,9 @@ func (itr *_Receipt__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	case 5:
 		k = &fieldName__Receipt_Logs_serial
 		v = itr.n.Logs.Representation()
+	case 6:
+		k = &fieldName__Receipt_LogRootCID_serial
+		v = itr.n.LogRootCID.Representation()
 	default:
 		panic("unreachable")
 	}
@@ -9826,13 +9872,13 @@ func (itr *_Receipt__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	return
 }
 func (itr *_Receipt__ReprMapItr) Done() bool {
-	return itr.idx >= 6
+	return itr.idx >= 7
 }
 func (_Receipt__Repr) ListIterator() ipld.ListIterator {
 	return nil
 }
 func (rn *_Receipt__Repr) Length() int64 {
-	l := 6
+	l := 7
 	return int64(l)
 }
 func (_Receipt__Repr) IsAbsent() bool {
@@ -9901,6 +9947,7 @@ type _Receipt__ReprAssembler struct {
 	ca_CumulativeGasUsed _Uint__ReprAssembler
 	ca_Bloom             _Bloom__ReprAssembler
 	ca_Logs              _Logs__ReprAssembler
+	ca_LogRootCID        _Link__ReprAssembler
 }
 
 func (na *_Receipt__ReprAssembler) reset() {
@@ -9912,6 +9959,7 @@ func (na *_Receipt__ReprAssembler) reset() {
 	na.ca_CumulativeGasUsed.reset()
 	na.ca_Bloom.reset()
 	na.ca_Logs.reset()
+	na.ca_LogRootCID.reset()
 }
 func (na *_Receipt__ReprAssembler) BeginMap(int64) (ipld.MapAssembler, error) {
 	switch *na.m {
@@ -10062,6 +10110,15 @@ func (ma *_Receipt__ReprAssembler) valueFinishTidy() bool {
 		default:
 			return false
 		}
+	case 6:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
 	default:
 		panic("unreachable")
 	}
@@ -10144,6 +10201,16 @@ func (ma *_Receipt__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler, 
 		ma.ca_Logs.w = &ma.w.Logs
 		ma.ca_Logs.m = &ma.cm
 		return &ma.ca_Logs, nil
+	case "LogRootCID":
+		if ma.s&fieldBit__Receipt_LogRootCID != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_LogRootCID_serial}
+		}
+		ma.s += fieldBit__Receipt_LogRootCID
+		ma.state = maState_midValue
+		ma.f = 6
+		ma.ca_LogRootCID.w = &ma.w.LogRootCID
+		ma.ca_LogRootCID.m = &ma.cm
+		return &ma.ca_LogRootCID, nil
 	default:
 	}
 	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Receipt.Repr", Key: &_String{k}}
@@ -10207,6 +10274,10 @@ func (ma *_Receipt__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 		ma.ca_Logs.w = &ma.w.Logs
 		ma.ca_Logs.m = &ma.cm
 		return &ma.ca_Logs
+	case 6:
+		ma.ca_LogRootCID.w = &ma.w.LogRootCID
+		ma.ca_LogRootCID.m = &ma.cm
+		return &ma.ca_LogRootCID
 	default:
 		panic("unreachable")
 	}
@@ -10239,6 +10310,9 @@ func (ma *_Receipt__ReprAssembler) Finish() error {
 		}
 		if ma.s&fieldBit__Receipt_Logs == 0 {
 			err.Missing = append(err.Missing, "Logs")
+		}
+		if ma.s&fieldBit__Receipt_LogRootCID == 0 {
+			err.Missing = append(err.Missing, "LogRootCID")
 		}
 		return err
 	}
@@ -10325,6 +10399,14 @@ func (ka *_Receipt__ReprKeyAssembler) AssignString(k string) error {
 		ka.s += fieldBit__Receipt_Logs
 		ka.state = maState_expectValue
 		ka.f = 5
+		return nil
+	case "LogRootCID":
+		if ka.s&fieldBit__Receipt_LogRootCID != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Receipt_LogRootCID_serial}
+		}
+		ka.s += fieldBit__Receipt_LogRootCID
+		ka.state = maState_expectValue
+		ka.f = 6
 		return nil
 	}
 	return ipld.ErrInvalidKey{TypeName: "dageth.Receipt.Repr", Key: &_String{k}}
@@ -17730,7 +17812,7 @@ func (_TrieBranchNode__ReprKeyAssembler) Prototype() ipld.NodePrototype {
 func (n _TrieExtensionNode) FieldPartialPath() Bytes {
 	return &n.PartialPath
 }
-func (n _TrieExtensionNode) FieldChild() Child {
+func (n _TrieExtensionNode) FieldChild() Link {
 	return &n.Child
 }
 
@@ -17898,7 +17980,7 @@ type _TrieExtensionNode__Assembler struct {
 
 	cm             schema.Maybe
 	ca_PartialPath _Bytes__Assembler
-	ca_Child       _Child__Assembler
+	ca_Child       _Link__Assembler
 }
 
 func (na *_TrieExtensionNode__Assembler) reset() {
@@ -18347,7 +18429,7 @@ type _TrieExtensionNode__ReprAssembler struct {
 
 	cm             schema.Maybe
 	ca_PartialPath _Bytes__ReprAssembler
-	ca_Child       _Child__ReprAssembler
+	ca_Child       _Link__ReprAssembler
 }
 
 func (na *_TrieExtensionNode__ReprAssembler) reset() {
@@ -19578,9 +19660,9 @@ func (_TrieLeafNode__ReprKeyAssembler) Prototype() ipld.NodePrototype {
 func (n _TrieNode) AsInterface() _TrieNode__iface {
 	switch n.tag {
 	case 1:
-		return n.x1
+		return &n.x1
 	case 2:
-		return n.x2
+		return &n.x2
 	case 3:
 		return &n.x3
 	default:
@@ -19639,12 +19721,12 @@ func (n TrieNode) LookupByString(key string) (ipld.Node, error) {
 		if n.tag != 1 {
 			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
 		}
-		return n.x1, nil
+		return &n.x1, nil
 	case "TrieExtensionNode":
 		if n.tag != 2 {
 			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
 		}
-		return n.x2, nil
+		return &n.x2, nil
 	case "TrieLeafNode":
 		if n.tag != 3 {
 			return nil, ipld.ErrNotExists{Segment: ipld.PathSegmentOfString(key)}
@@ -19682,9 +19764,9 @@ func (itr *_TrieNode__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
 	}
 	switch itr.n.tag {
 	case 1:
-		k, v = &memberName__TrieNode_TrieBranchNode, itr.n.x1
+		k, v = &memberName__TrieNode_TrieBranchNode, &itr.n.x1
 	case 2:
-		k, v = &memberName__TrieNode_TrieExtensionNode, itr.n.x2
+		k, v = &memberName__TrieNode_TrieExtensionNode, &itr.n.x2
 	case 3:
 		k, v = &memberName__TrieNode_TrieLeafNode, &itr.n.x3
 	default:
@@ -19909,14 +19991,14 @@ func (ma *_TrieNode__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, err
 		ma.state = maState_midValue
 		ma.ca = 1
 		ma.w.tag = 1
-		ma.ca1.w = ma.w.x1
+		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1, nil
 	case "TrieExtensionNode":
 		ma.state = maState_midValue
 		ma.ca = 2
 		ma.w.tag = 2
-		ma.ca2.w = ma.w.x2
+		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2, nil
 	case "TrieLeafNode":
@@ -19962,21 +20044,15 @@ func (ma *_TrieNode__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 1:
-		if ma.w.x1 == nil {
-			ma.w.x1 = &_TrieBranchNode{}
-		}
-		ma.ca1.w = ma.w.x1
+	case 0:
+		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 2:
-		if ma.w.x2 == nil {
-			ma.w.x2 = &_TrieExtensionNode{}
-		}
-		ma.ca2.w = ma.w.x2
+	case 1:
+		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 3:
+	case 2:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
@@ -20379,14 +20455,14 @@ func (ma *_TrieNode__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler,
 		ma.state = maState_midValue
 		ma.ca = 1
 		ma.w.tag = 1
-		ma.ca1.w = ma.w.x1
+		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1, nil
 	case "extension":
 		ma.state = maState_midValue
 		ma.ca = 2
 		ma.w.tag = 2
-		ma.ca2.w = ma.w.x2
+		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2, nil
 	case "leaf":
@@ -20432,21 +20508,15 @@ func (ma *_TrieNode__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 1:
-		if ma.w.x1 == nil {
-			ma.w.x1 = &_TrieBranchNode{}
-		}
-		ma.ca1.w = ma.w.x1
+	case 0:
+		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 2:
-		if ma.w.x2 == nil {
-			ma.w.x2 = &_TrieExtensionNode{}
-		}
-		ma.ca2.w = ma.w.x2
+	case 1:
+		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 3:
+	case 2:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
@@ -21965,19 +22035,19 @@ func (ma *_Value__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 1:
+	case 0:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 2:
+	case 1:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 3:
+	case 2:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
-	case 4:
+	case 3:
 		ma.ca4.w = &ma.w.x4
 		ma.ca4.m = &ma.cm
 		return &ma.ca4
@@ -22460,19 +22530,19 @@ func (ma *_Value__ReprAssembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 1:
+	case 0:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 2:
+	case 1:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 3:
+	case 2:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
-	case 4:
+	case 3:
 		ma.ca4.w = &ma.w.x4
 		ma.ca4.m = &ma.cm
 		return &ma.ca4

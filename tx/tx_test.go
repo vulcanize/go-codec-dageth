@@ -430,4 +430,13 @@ func testTransactionEncoding(t *testing.T) {
 	if !bytes.Equal(alTxBytes, alTxConsensusEnc) {
 		t.Errorf("access list transaction encoding (%x) does not match the expected consensus encoding (%x)", alTxBytes, alTxConsensusEnc)
 	}
+
+	dfTxWriter := new(bytes.Buffer)
+	if err := tx.Encode(dynamicFeeTxNode, dfTxWriter); err != nil {
+		t.Fatalf("unable to encode access list transaction into writer: %v", err)
+	}
+	dfTxBytes := dfTxWriter.Bytes()
+	if !bytes.Equal(dfTxBytes, dfTxConsensusEnc) {
+		t.Errorf("dynamic fee transaction encoding (%x) does not match the expected consensus encoding (%x)", dfTxBytes, dfTxConsensusEnc)
+	}
 }

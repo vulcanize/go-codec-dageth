@@ -17,7 +17,7 @@ import (
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/vulcanize/go-codec-dageth/rct"
-	"github.com/vulcanize/go-codec-dageth/state_account"
+	account "github.com/vulcanize/go-codec-dageth/state_account"
 	"github.com/vulcanize/go-codec-dageth/tx"
 )
 

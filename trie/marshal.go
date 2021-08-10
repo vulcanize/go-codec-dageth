@@ -7,16 +7,18 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/vulcanize/go-codec-dageth/log"
+
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/multiformats/go-multihash"
 
 	dageth "github.com/vulcanize/go-codec-dageth"
-	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
+	"github.com/vulcanize/go-codec-dageth/rct"
 	"github.com/vulcanize/go-codec-dageth/shared"
-	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
-	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
+	account "github.com/vulcanize/go-codec-dageth/state_account"
+	"github.com/vulcanize/go-codec-dageth/tx"
 )
 
 type NodeKind string
@@ -263,24 +265,30 @@ func packValue(node ipld.Node) ([]byte, error) {
 	switch valKind {
 	case TX_VALUE:
 		buf := new(bytes.Buffer)
-		if err := dageth_tx.Encode(valNode, buf); err != nil {
+		if err := tx.Encode(valNode, buf); err != nil {
 			return nil, err
 		}
 		return buf.Bytes(), nil
 	case RCT_VALUE:
 		buf := new(bytes.Buffer)
-		if err := dageth_rct.Encode(valNode, buf); err != nil {
+		if err := rct.Encode(valNode, buf); err != nil {
 			return nil, err
 		}
 		return buf.Bytes(), nil
 	case STATE_VALUE:
 		buf := new(bytes.Buffer)
-		if err := dageth_account.Encode(valNode, buf); err != nil {
+		if err := account.Encode(valNode, buf); err != nil {
 			return nil, err
 		}
 		return buf.Bytes(), nil
 	case STORAGE_VALUE:
 		return valNode.AsBytes()
+	case LOG_VALUE:
+		buf := new(bytes.Buffer)
+		if err := log.Encode(valNode, buf); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
 	default:
 		return nil, fmt.Errorf("eth trie value of unexpected kind %s", valKind.String())
 	}

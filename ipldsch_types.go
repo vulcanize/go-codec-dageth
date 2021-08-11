@@ -34,12 +34,18 @@ type typeSlab struct {
 	BigInt__Repr            _BigInt__ReprPrototype
 	Bloom                   _Bloom__Prototype
 	Bloom__Repr             _Bloom__ReprPrototype
+	Bool                    _Bool__Prototype
+	Bool__Repr              _Bool__ReprPrototype
 	ByteCode                _ByteCode__Prototype
 	ByteCode__Repr          _ByteCode__ReprPrototype
 	Bytes                   _Bytes__Prototype
 	Bytes__Repr             _Bytes__ReprPrototype
 	Child                   _Child__Prototype
 	Child__Repr             _Child__ReprPrototype
+	Frame                   _Frame__Prototype
+	Frame__Repr             _Frame__ReprPrototype
+	FrameList               _FrameList__Prototype
+	FrameList__Repr         _FrameList__ReprPrototype
 	Hash                    _Hash__Prototype
 	Hash__Repr              _Hash__ReprPrototype
 	Header                  _Header__Prototype
@@ -76,6 +82,10 @@ type typeSlab struct {
 	TrieLeafNode__Repr      _TrieLeafNode__ReprPrototype
 	TrieNode                _TrieNode__Prototype
 	TrieNode__Repr          _TrieNode__ReprPrototype
+	TxCIDList               _TxCIDList__Prototype
+	TxCIDList__Repr         _TxCIDList__ReprPrototype
+	TxTrace                 _TxTrace__Prototype
+	TxTrace__Repr           _TxTrace__ReprPrototype
 	TxType                  _TxType__Prototype
 	TxType__Repr            _TxType__ReprPrototype
 	Uint                    _Uint__Prototype
@@ -126,6 +136,10 @@ type _BigInt struct{ x []byte }
 type Bloom = *_Bloom
 type _Bloom struct{ x []byte }
 
+// Bool matches the IPLD Schema type "Bool".  It has bool kind.
+type Bool = *_Bool
+type _Bool struct{ x bool }
+
 // ByteCode matches the IPLD Schema type "ByteCode".  It has bytes kind.
 type ByteCode = *_ByteCode
 type _ByteCode struct{ x []byte }
@@ -148,6 +162,25 @@ type _Child__iface interface {
 
 func (_Link) _Child__member()     {}
 func (_TrieNode) _Child__member() {}
+
+// Frame matches the IPLD Schema type "Frame".  It has Struct type-kind, and may be interrogated like map kind.
+type Frame = *_Frame
+type _Frame struct {
+	Op     _OpCode
+	From   _Address
+	To     _Address
+	Input  _Bytes
+	Output _Bytes
+	Gas    _Uint
+	Cost   _Uint
+	Value  _BigInt
+}
+
+// FrameList matches the IPLD Schema type "FrameList".  It has list kind.
+type FrameList = *_FrameList
+type _FrameList struct {
+	x []_Frame
+}
 
 // Hash matches the IPLD Schema type "Hash".  It has bytes kind.
 type Hash = *_Hash
@@ -311,6 +344,23 @@ type _TrieNode__iface interface {
 func (_TrieBranchNode) _TrieNode__member()    {}
 func (_TrieExtensionNode) _TrieNode__member() {}
 func (_TrieLeafNode) _TrieNode__member()      {}
+
+// TxCIDList matches the IPLD Schema type "TxCIDList".  It has list kind.
+type TxCIDList = *_TxCIDList
+type _TxCIDList struct {
+	x []_Link
+}
+
+// TxTrace matches the IPLD Schema type "TxTrace".  It has Struct type-kind, and may be interrogated like map kind.
+type TxTrace = *_TxTrace
+type _TxTrace struct {
+	TxCIDs       _TxCIDList
+	StateRootCID _Link
+	Result       _Bytes
+	Frames       _FrameList
+	Gas          _Uint
+	Failed       _Bool
+}
 
 // TxType matches the IPLD Schema type "TxType".  It has bytes kind.
 type TxType = *_TxType

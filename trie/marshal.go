@@ -7,16 +7,18 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/vulcanize/go-codec-dageth/log"
+
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/multiformats/go-multihash"
 
 	dageth "github.com/vulcanize/go-codec-dageth"
-	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
+	"github.com/vulcanize/go-codec-dageth/rct"
 	"github.com/vulcanize/go-codec-dageth/shared"
-	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
-	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
+	account "github.com/vulcanize/go-codec-dageth/state_account"
+	"github.com/vulcanize/go-codec-dageth/tx"
 )
 
 type NodeKind string
@@ -33,6 +35,7 @@ const (
 	RCT_VALUE     ValueKind = "Receipt"
 	STATE_VALUE   ValueKind = "Account"
 	STORAGE_VALUE ValueKind = "Bytes"
+	LOG_VALUE     ValueKind = "Log"
 )
 
 func (n NodeKind) String() string {
@@ -211,80 +214,21 @@ func packExtensionNode(node ipld.Node) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	childLinkNode, err := childNode.LookupByString("Link")
-	if err == nil {
-		childLink, err := childLinkNode.AsLink()
-		if err != nil {
-			return nil, err
-		}
-		childCIDLink, ok := childLink.(cidlink.Link)
-		if !ok {
-			return nil, fmt.Errorf("extension node child link needs to be a CID")
-		}
-		childMh := childCIDLink.Hash()
-		decodedChildMh, err := multihash.Decode(childMh)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
-		}
-		nodeFields[1] = decodedChildMh.Digest
-		return nodeFields, nil
+	childLink, err := childNode.AsLink()
+	if err != nil {
+		return nil, err
 	}
-	childTrieNodeNode, err := childNode.LookupByString("TrieNode")
-	if err == nil {
-		// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
-		childLeafNode, err := childTrieNodeNode.LookupByString(LEAF_NODE.String())
-		if err != nil {
-			return nil, fmt.Errorf("only leaf nodes can be less than 32 bytes and stored direclty in a parent node")
-		}
-		childLeafNodeFields, err := packLeafNode(childLeafNode)
-		if err != nil {
-			return nil, err
-		}
-		childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
-		if err != nil {
-			return nil, err
-		}
-		nodeFields[1] = childLeafNodeRLP
-		return nodeFields, nil
+	childCIDLink, ok := childLink.(cidlink.Link)
+	if !ok {
+		return nil, fmt.Errorf("extension node child link needs to be a CID")
 	}
-	return nil, fmt.Errorf("extension node child needs to be of kind bytes or link")
-
-	/* Child should be a kinded Union, in which case we could do the below type switch instead of map key checking
-	switch childNode.Kind() {
-	case ipld.Kind_Link:
-		childLink, err := childNode.AsLink()
-		if err != nil {
-			return nil, err
-		}
-		childCIDLink, ok := childLink.(cidlink.Link)
-		if !ok {
-			return nil, fmt.Errorf("extension node child link needs to be a CID")
-		}
-		childMh := childCIDLink.Hash()
-		decodedChildMh, err := multihash.Decode(childMh)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
-		}
-		nodeFields[1] = decodedChildMh.Digest
-	case ipld.Kind_Map: // is this possible? Will an extension node ever link to a leaf? In that case it could just be a leaf itself...?
-		// it must be a leaf node as only RLP encodings of storage leaf nodes can be less than 32 bytes in length and stored direclty in a parent node
-		childLeafNode, err := childNode.LookupByString(LEAF_NODE.String())
-		if err != nil {
-			return nil, fmt.Errorf("only leaf nodes can be less than 32 bytes and stored direclty in a parent node")
-		}
-		childLeafNodeFields, err := packLeafNode(childLeafNode)
-		if err != nil {
-			return nil, err
-		}
-		childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
-		if err != nil {
-			return nil, err
-		}
-		nodeFields[1] = childLeafNodeRLP
-	default:
-		return nil, fmt.Errorf("extension node child needs to be of kind bytes or link")
+	childMh := childCIDLink.Hash()
+	decodedChildMh, err := multihash.Decode(childMh)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode Child multihash: %v", err)
 	}
-	*/
+	nodeFields[1] = decodedChildMh.Digest
+	return nodeFields, nil
 }
 
 func packLeafNode(node ipld.Node) ([]interface{}, error) {
@@ -321,24 +265,30 @@ func packValue(node ipld.Node) ([]byte, error) {
 	switch valKind {
 	case TX_VALUE:
 		buf := new(bytes.Buffer)
-		if err := dageth_tx.Encode(valNode, buf); err != nil {
+		if err := tx.Encode(valNode, buf); err != nil {
 			return nil, err
 		}
 		return buf.Bytes(), nil
 	case RCT_VALUE:
 		buf := new(bytes.Buffer)
-		if err := dageth_rct.Encode(valNode, buf); err != nil {
+		if err := rct.Encode(valNode, buf); err != nil {
 			return nil, err
 		}
 		return buf.Bytes(), nil
 	case STATE_VALUE:
 		buf := new(bytes.Buffer)
-		if err := dageth_account.Encode(valNode, buf); err != nil {
+		if err := account.Encode(valNode, buf); err != nil {
 			return nil, err
 		}
 		return buf.Bytes(), nil
 	case STORAGE_VALUE:
 		return valNode.AsBytes()
+	case LOG_VALUE:
+		buf := new(bytes.Buffer)
+		if err := log.Encode(valNode, buf); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
 	default:
 		return nil, fmt.Errorf("eth trie value of unexpected kind %s", valKind.String())
 	}
@@ -360,6 +310,10 @@ func ValueAndKind(node ipld.Node) (ipld.Node, ValueKind, error) {
 	n, err = node.LookupByString(STORAGE_VALUE.String())
 	if err == nil {
 		return n, STORAGE_VALUE, nil
+	}
+	n, err = node.LookupByString(LOG_VALUE.String())
+	if err == nil {
+		return n, LOG_VALUE, nil
 	}
 	return nil, "", fmt.Errorf("eth trie value IPLD node is missing the expected keyed Union keys")
 }

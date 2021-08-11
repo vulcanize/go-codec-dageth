@@ -205,6 +205,7 @@ type _Receipt struct {
 	CumulativeGasUsed _Uint
 	Bloom             _Bloom
 	Logs              _Logs
+	LogRootCID        _Link
 }
 
 // Receipts matches the IPLD Schema type "Receipts".  It has list kind.
@@ -284,7 +285,7 @@ type _TrieBranchNode struct {
 type TrieExtensionNode = *_TrieExtensionNode
 type _TrieExtensionNode struct {
 	PartialPath _Bytes
-	Child       _Child
+	Child       _Link
 }
 
 // TrieLeafNode matches the IPLD Schema type "TrieLeafNode".  It has Struct type-kind, and may be interrogated like map kind.
@@ -299,8 +300,8 @@ type _TrieLeafNode struct {
 type TrieNode = *_TrieNode
 type _TrieNode struct {
 	tag uint
-	x1  *_TrieBranchNode
-	x2  *_TrieExtensionNode
+	x1  _TrieBranchNode
+	x2  _TrieExtensionNode
 	x3  _TrieLeafNode
 }
 type _TrieNode__iface interface {
@@ -334,6 +335,7 @@ type _Value struct {
 	x2  _Receipt
 	x3  _Account
 	x4  _Bytes
+	x5  _Log
 }
 type _Value__iface interface {
 	_Value__member()
@@ -343,3 +345,4 @@ func (_Transaction) _Value__member() {}
 func (_Receipt) _Value__member()     {}
 func (_Account) _Value__member()     {}
 func (_Bytes) _Value__member()       {}
+func (_Log) _Value__member()         {}

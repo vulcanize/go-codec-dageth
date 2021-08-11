@@ -7,17 +7,20 @@ import (
 	"strconv"
 	"strings"
 
-	dageth "github.com/vulcanize/go-codec-dageth"
-	"github.com/vulcanize/go-codec-dageth/shared"
-
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
-	dageth_rct "github.com/vulcanize/go-codec-dageth/rct"
-	dageth_account "github.com/vulcanize/go-codec-dageth/state_account"
-	dageth_tx "github.com/vulcanize/go-codec-dageth/tx"
+	"github.com/vulcanize/go-codec-dageth/log"
+	"github.com/vulcanize/go-codec-dageth/rct"
+
+	dageth "github.com/vulcanize/go-codec-dageth"
+	"github.com/vulcanize/go-codec-dageth/shared"
+	account "github.com/vulcanize/go-codec-dageth/state_account"
+	"github.com/vulcanize/go-codec-dageth/tx"
 )
+
+const logTrieMulticodec = uint64(0x99) // Proposed
 
 // DecodeTrieNode provides an IPLD codec decode interface for eth merkle patricia trie nodes
 // It's not possible to meet the Decode(na ipld.NodeAssembler, in io.Reader) interface
@@ -118,72 +121,13 @@ func unpackExtensionNode(ma ipld.MapAssembler, nodeFields []interface{}, codec u
 	if err := ma.AssembleKey().AssignString("Child"); err != nil {
 		return err
 	}
-	childNodeBuilder := dageth.Type.Child.NewBuilder()
-	childNodeMA, err := childNodeBuilder.BeginMap(1)
-	if err != nil {
-		return err
-	}
 	childLink, ok := nodeFields[1].([]byte)
-	if ok {
-		// it's a hash referencing the child node
-		// make CID link from the bytes
-		// assign the link value to the MA
-		childCID := shared.Keccak256ToCid(codec, childLink)
-		childCIDLink := cidlink.Link{Cid: childCID}
-		if err := childNodeMA.AssembleKey().AssignString("Link"); err != nil {
-			return err
-		}
-		if err := childNodeMA.AssembleValue().AssignLink(childCIDLink); err != nil {
-			return err
-		}
-		if err := childNodeMA.Finish(); err != nil {
-			return err
-		}
-		return ma.AssembleValue().AssignNode(childNodeBuilder.Build())
-	}
-	// the child node is included directly
-	// it must be a leaf node, branch and extension will never be less than 32 bytes
-	childLeaf, ok := nodeFields[1].([]interface{})
 	if !ok {
-		return fmt.Errorf("unable to decode branch node entry into []byte or []interface{}")
+		return fmt.Errorf("unable to assert second member of extension node to type `[]byte`")
 	}
-	if len(childLeaf) != 2 {
-		return fmt.Errorf("unexpected number of entries for leaf node; got %d want 2", len(childLeaf))
-	}
-	nodeKind, decodedChildLeaf, err := decodeTwoMemberNode(childLeaf)
-	if err != nil {
-		return err
-	}
-	if nodeKind != LEAF_NODE {
-		return fmt.Errorf("child node included directly in branch must be a leaf; got %s", nodeKind.String())
-	}
-	if err := childNodeMA.AssembleKey().AssignString("TrieNode"); err != nil {
-		return err
-	}
-	childTrieNodeMA, err := childNodeMA.AssembleValue().BeginMap(1)
-	if err != nil {
-		return err
-	}
-	if err := childTrieNodeMA.AssembleKey().AssignString(LEAF_NODE.String()); err != nil {
-		return err
-	}
-	leafNodeMA, err := childTrieNodeMA.AssembleValue().BeginMap(2)
-	if err != nil {
-		return err
-	}
-	if err := unpackLeafNode(leafNodeMA, decodedChildLeaf, codec); err != nil {
-		return err
-	}
-	if err := leafNodeMA.Finish(); err != nil {
-		return err
-	}
-	if err := childTrieNodeMA.Finish(); err != nil {
-		return err
-	}
-	if err := childNodeMA.Finish(); err != nil {
-		return err
-	}
-	return ma.AssembleValue().AssignNode(childNodeBuilder.Build())
+	childCID := shared.Keccak256ToCid(codec, childLink)
+	childCIDLink := cidlink.Link{Cid: childCID}
+	return ma.AssembleValue().AssignLink(childCIDLink)
 }
 
 func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint64) error {
@@ -327,22 +271,27 @@ func unpackValue(ma ipld.MapAssembler, val []byte, codec uint64) error {
 		if err := ma.AssembleKey().AssignString(TX_VALUE.String()); err != nil {
 			return err
 		}
-		return dageth_tx.DecodeBytes(ma.AssembleValue(), val)
+		return tx.DecodeBytes(ma.AssembleValue(), val)
 	case cid.EthTxReceiptTrie:
 		if err := ma.AssembleKey().AssignString(RCT_VALUE.String()); err != nil {
 			return err
 		}
-		return dageth_rct.DecodeBytes(ma.AssembleValue(), val)
+		return rct.DecodeBytes(ma.AssembleValue(), val)
 	case cid.EthStateTrie:
 		if err := ma.AssembleKey().AssignString(STATE_VALUE.String()); err != nil {
 			return err
 		}
-		return dageth_account.DecodeBytes(ma.AssembleValue(), val)
+		return account.DecodeBytes(ma.AssembleValue(), val)
 	case cid.EthStorageTrie:
 		if err := ma.AssembleKey().AssignString(STORAGE_VALUE.String()); err != nil {
 			return err
 		}
 		return ma.AssembleValue().AssignBytes(val)
+	case logTrieMulticodec:
+		if err := ma.AssembleKey().AssignString(LOG_VALUE.String()); err != nil {
+			return err
+		}
+		return log.DecodeBytes(ma.AssembleValue(), val)
 	default:
 		return fmt.Errorf("unsupported multicodec type (%d) for eth TrieNode unmarshaller", codec)
 	}

@@ -6,8 +6,17 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
+	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
+	"github.com/multiformats/go-multihash"
+	"github.com/vulcanize/go-codec-dageth/log"
 )
 
 // Decode provides an IPLD codec decode interface for eth receipt IPLDs.
@@ -58,6 +67,7 @@ var requiredUnpackFuncs = []func(ipld.MapAssembler, types.Receipt) error{
 	unpackCumulativeGasUsed,
 	unpackBloom,
 	unpackLogs,
+	unpackLogRootCID,
 }
 
 func unpackTxType(ma ipld.MapAssembler, rct types.Receipt) error {
@@ -163,4 +173,75 @@ func unpackLogs(ma ipld.MapAssembler, rct types.Receipt) error {
 		}
 	}
 	return la.Finish()
+}
+
+func unpackLogRootCID(ma ipld.MapAssembler, rct types.Receipt) error {
+	logTrieRoot, err := processLogs(rct.Logs)
+	if err != nil {
+		return err
+	}
+	logMh, err := multihash.Encode(logTrieRoot, log.MultiHashType)
+	if err != nil {
+		return err
+	}
+	logCID := cid.NewCidV1(log.MultiCodecType, logMh)
+	logLinkCID := cidlink.Link{Cid: logCID}
+	if err := ma.AssembleKey().AssignString("LogRootCID"); err != nil {
+		return err
+	}
+	return ma.AssembleValue().AssignLink(logLinkCID)
+}
+
+// processLogs takes the logs in a receipt and
+// creates a new log trie out of them, returning the root hash
+func processLogs(logs []*types.Log) ([]byte, error) {
+	lTrie := newlocalTrie()
+
+	for idx, l := range logs {
+		logRLP, err := rlp.EncodeToBytes(l)
+		if err != nil {
+			return nil, err
+		}
+		if err := lTrie.add(idx, logRLP); err != nil {
+			return nil, err
+		}
+	}
+	return lTrie.rootHash(), nil
+}
+
+// localTrie wraps a go-ethereum trie and its underlying memory db.
+// It contributes to the creation of the trie node objects.
+type localTrie struct {
+	DB     ethdb.Database
+	trieDB *trie.Database
+	trie   *trie.Trie
+}
+
+// newlocalTrie initializes and returns a localTrie object
+func newlocalTrie() *localTrie {
+	var err error
+	lt := &localTrie{}
+	lt.DB = rawdb.NewMemoryDatabase()
+	lt.trieDB = trie.NewDatabase(lt.DB)
+	lt.trie, err = trie.New(common.Hash{}, lt.trieDB)
+	if err != nil {
+		panic(err)
+	}
+	return lt
+}
+
+// add receives the index of an object and its rawdata value
+// and includes it into the localTrie
+func (lt *localTrie) add(idx int, rawdata []byte) error {
+	key, err := rlp.EncodeToBytes(uint(idx))
+	if err != nil {
+		panic(err)
+	}
+	return lt.trie.TryUpdate(key, rawdata)
+}
+
+// rootHash returns the computed trie root.
+// Useful for sanity checks on parsed data.
+func (lt *localTrie) rootHash() []byte {
+	return lt.trie.Hash().Bytes()
 }

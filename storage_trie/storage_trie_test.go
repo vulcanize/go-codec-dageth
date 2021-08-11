@@ -48,12 +48,6 @@ var (
 		mockLeaf2Val,
 	}
 
-	mockExtensionNodeWithLeafIncludedDirectly = []interface{}{
-		mockExtensionPartialPath,
-		mockLeafNode2,
-	}
-	mockExtensionNodeWithLeafIncludedDirectlyRLP, _ = rlp.EncodeToBytes(mockExtensionNodeWithLeafIncludedDirectly)
-
 	mockChild0     = crypto.Keccak256([]byte{0})
 	mockChild5     = crypto.Keccak256([]byte{5})
 	mockChildE     = crypto.Keccak256([]byte{14})
@@ -99,7 +93,7 @@ var (
 	}
 	mockBranchNodeWithLeafIncludedDirectlyRLP, _ = rlp.EncodeToBytes(mockBranchNodeWithLeafIncludedDirectly)
 
-	leafNode, extensionNode, extensionNodeWithLeafIncludedDirectly, branchNode, branchNodeWithLeafIncludedDirectly ipld.Node
+	leafNode, extensionNode, branchNode, branchNodeWithLeafIncludedDirectly ipld.Node
 )
 
 /* IPLD Schemas
@@ -180,13 +174,6 @@ func testStorageTrieDecode(t *testing.T) {
 	}
 	extensionNode = extensionNodeBuilder.Build()
 
-	extensionNode2Builder := dageth.Type.TrieNode.NewBuilder()
-	extensionNode2Reader := bytes.NewReader(mockExtensionNodeWithLeafIncludedDirectlyRLP)
-	if err := storage_trie.Decode(extensionNode2Builder, extensionNode2Reader); err != nil {
-		t.Fatalf("unable to decode storage trie extension node into an IPLD node: %v", err)
-	}
-	extensionNodeWithLeafIncludedDirectly = extensionNode2Builder.Build()
-
 	leafNodeBuilder := dageth.Type.TrieNode.NewBuilder()
 	leafNodeReader := bytes.NewReader(mockLeafNodeRLP)
 	if err := storage_trie.Decode(leafNodeBuilder, leafNodeReader); err != nil {
@@ -198,7 +185,6 @@ func testStorageTrieDecode(t *testing.T) {
 func testStorageTrieNodeContents(t *testing.T) {
 	verifyBranchNodeContents(t)
 	verifyExtensionNodeContents(t)
-	verifyExtensionNodeWithLeafIncludedDirectlyContents(t)
 	verifyBranchNodeWithLeafIncludedDirectlyContents(t)
 	verifyLeafNodeContents(t)
 }
@@ -486,11 +472,7 @@ func verifyExtensionNodeContents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("storage trie extension node missing Child: %v", err)
 	}
-	childLinkNode, err := childNode.LookupByString("Link")
-	if err != nil {
-		t.Fatalf("storage trie extension node Child should be of kind Link: %v", err)
-	}
-	childLink, err := childLinkNode.AsLink()
+	childLink, err := childNode.AsLink()
 	if err != nil {
 		t.Fatalf("storage trie extension node Child should be of kind Link: %v", err)
 	}
@@ -505,66 +487,6 @@ func verifyExtensionNodeContents(t *testing.T) {
 	}
 	if !bytes.Equal(decodedChildMh.Digest, mockExtensionHash) {
 		t.Errorf("storage trie extension node child hash (%x) does not match expected hash (%x)", decodedChildMh.Digest, mockExtensionHash)
-	}
-}
-
-func verifyExtensionNodeWithLeafIncludedDirectlyContents(t *testing.T) {
-	ext, err := extensionNodeWithLeafIncludedDirectly.LookupByString(trie.EXTENSION_NODE.String())
-	if err != nil {
-		t.Fatalf("storage trie extension node missing enum key: %v", err)
-	}
-
-	extPathNode, err := ext.LookupByString("PartialPath")
-	if err != nil {
-		t.Fatalf("storage trie extension node missing PartialPath: %v", err)
-	}
-	extPathBytes, err := extPathNode.AsBytes()
-	if err != nil {
-		t.Fatalf("storage trie extension node PartialPath should be of type Bytes: %v", err)
-	}
-	if !bytes.Equal(extPathBytes, mockDecodedExtensionPartialPath) {
-		t.Errorf("storage trie extension node partial path (%x) does not match expected partial path (%x)", extPathBytes, mockDecodedExtensionPartialPath)
-	}
-
-	childNode, err := ext.LookupByString("Child")
-	if err != nil {
-		t.Fatalf("storage trie extension node missing Child: %v", err)
-	}
-	trieNodeNode, err := childNode.LookupByString("TrieNode")
-	if err != nil {
-		t.Fatalf("storage trie extension node Child should be of kind TrieNode: %v", err)
-	}
-	leaf, err := trieNodeNode.LookupByString(trie.LEAF_NODE.String())
-	if err != nil {
-		t.Fatalf("unable to resolve TrieNode union to a leaf: %v", err)
-	}
-
-	leafPathNode, err := leaf.LookupByString("PartialPath")
-	if err != nil {
-		t.Fatalf("storage trie leaf node missing PartialPath: %v", err)
-	}
-	leafPathBytes, err := leafPathNode.AsBytes()
-	if err != nil {
-		t.Fatalf("storage trie leaf node PartialPath should be of type Bytes: %v", err)
-	}
-	if !bytes.Equal(leafPathBytes, mockDecodedLeaf2PartialPath) {
-		t.Errorf("storage trie leaf node partial path (%x) does not match expected partial path (%x)", leafPathBytes, mockDecodedLeaf2PartialPath)
-	}
-
-	leafValEnumNode, err := leaf.LookupByString("Value")
-	if err != nil {
-		t.Fatalf("storage trie leaf node missing Value: %v", err)
-	}
-	leafValNode, err := leafValEnumNode.LookupByString(trie.STORAGE_VALUE.String())
-	if err != nil {
-		t.Fatalf("unable to resolve Value union to a storage bytes: %v", err)
-	}
-	leafValBytes, err := leafValNode.AsBytes()
-	if err != nil {
-		t.Fatalf("storage trie leaf node Value should be of type Bytes")
-	}
-	if !bytes.Equal(leafValBytes, mockLeaf2Val) {
-		t.Errorf("storage trie leaf node value (%x) does not match expected value (%x)", leafValBytes, mockLeaf2Val)
 	}
 }
 

@@ -90,6 +90,7 @@ type Receipt struct {
 	CumulativeGasUsed Uint
 	Bloom             Bloom
 	Logs              Logs
+	LogRootCID        &TrieNode
 }
 
 type Receipts [Receipt]
@@ -105,8 +106,13 @@ func TestReceiptCodec(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to marshal access list receipt binary: %v", err)
 	}
+	dfReceiptConsensusEnc, err = dynamicFeeReceipt.MarshalBinary()
+	if err != nil {
+		t.Fatalf("unable to marshal dynamic fee receipt binary: %v", err)
+	}
 	testReceiptDecoding(t)
 	testAccessListReceiptNodeContents(t)
+	testDynamicFeeReceiptNodeContents(t)
 	testLegacyReceiptNodeContents(t)
 	testReceiptEncoding(t)
 }
@@ -125,6 +131,13 @@ func testReceiptDecoding(t *testing.T) {
 		t.Fatalf("unable to decode access list receipt into an IPLD node: %v", err)
 	}
 	accessListReceiptNode = alRctBuilder.Build()
+
+	dfRctBuilder := dageth.Type.Receipt.NewBuilder()
+	dfRctReader := bytes.NewReader(dfReceiptConsensusEnc)
+	if err := rct.Decode(dfRctBuilder, dfRctReader); err != nil {
+		t.Fatalf("unable to decode dynamic fee receipt into an IPLD node: %v", err)
+	}
+	dynamicFeeReceiptNode = dfRctBuilder.Build()
 }
 
 func testAccessListReceiptNodeContents(t *testing.T) {
@@ -303,7 +316,7 @@ func verifySharedContent(t *testing.T, rctNode ipld.Node, rct *types.Receipt) {
 				t.Fatalf("receipt log Topic should be of type Bytes: %v", err)
 			}
 			if !bytes.Equal(topicBy, currentTopic) {
-				t.Errorf("receipt log topic%d bytes (%x) does not match expected bytes (%x)", j, topicBy, currentTopic)
+				t.Errorf("receipt log topic%d (%x) does not match expected topic%d (%x)", j, topicBy, j, currentTopic)
 			}
 		}
 	}
@@ -326,5 +339,14 @@ func testReceiptEncoding(t *testing.T) {
 	alRctBytes := alRctWriter.Bytes()
 	if !bytes.Equal(alRctBytes, alReceiptConsensusEnc) {
 		t.Errorf("access list receipt encoding (%x) does not match the expected consensus encoding (%x)", alRctBytes, alReceiptConsensusEnc)
+	}
+
+	dfRctWriter := new(bytes.Buffer)
+	if err := rct.Encode(dynamicFeeReceiptNode, dfRctWriter); err != nil {
+		t.Fatalf("unable to encode access list receipt into writer: %v", err)
+	}
+	dfRctBytes := dfRctWriter.Bytes()
+	if !bytes.Equal(dfRctBytes, dfReceiptConsensusEnc) {
+		t.Errorf("dynamic fee receipt encoding (%x) does not match the expected consensus encoding (%x)", dfRctBytes, dfReceiptConsensusEnc)
 	}
 }

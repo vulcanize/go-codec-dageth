@@ -55,6 +55,7 @@ func accumulateBasicTypes(ts *schema.TypeSystem) {
 	ts.Accumulate(schema.SpawnBytes("OpCode"))
 	ts.Accumulate(schema.SpawnBytes("Time"))
 	ts.Accumulate(schema.SpawnBytes("TxType"))
+	ts.Accumulate(schema.SpawnBool("Bool"))
 }
 
 func accumulateChainTypes(ts *schema.TypeSystem) {
@@ -373,5 +374,64 @@ func accumulateStateDataStructures(ts *schema.TypeSystem) {
 }
 
 func accumulateConvenienceTypes(ts *schema.TypeSystem) {
-	// TODO: write convenience types
+	/*
+		# TxTrace contains the EVM context, input, and output for each OPCODE in a transaction that was applied to a specific state
+		type TxTrace struct {
+		   TxCIDs TxCIDList
+		   # CID link to the root node of the state trie that the above transaction set was applied on top of to produce this trace
+		   StateRootCID &StateTrieNode
+		   Result Bytes
+		   Frames FrameList
+		   Gas Uint
+		   Failed Bool
+		}
+
+		# TxCIDList
+		# List of CIDs linking to the transactions that were used to generate this trace by applying them onto the state referenced below
+		# If this trace was produced by the first transaction in a block then this list will contain only that one transaction
+		# and this trace was produced by applying it directly to the referenced state
+		# Otherwise, the trace is the output of the last transaction in the list applied to the state produced by
+		# sequentially applying the proceeding txs to the referenced state
+		type TxCIDList [&Transaction]
+
+		# Frame represents the EVM context, input, and output for a specific OPCODE during a transaction trace
+		type Frame struct {
+			Op     OpCode
+			From   Address
+			To     Address
+			Input  Bytes
+			Output Bytes
+			Gas    Uint
+			Cost   Uint
+			Value  BigInt
+		}
+
+		type FrameList [Frame]
+	*/
+	ts.Accumulate(schema.SpawnList("TxCIDList", "Link", false))
+	ts.Accumulate(schema.SpawnStruct("Frame",
+		[]schema.StructField{
+			schema.SpawnStructField("Op", "OpCode", false, false),
+			schema.SpawnStructField("From", "Address", false, false),
+			schema.SpawnStructField("To", "Address", false, false),
+			schema.SpawnStructField("Input", "Bytes", false, false),
+			schema.SpawnStructField("Output", "Bytes", false, false),
+			schema.SpawnStructField("Gas", "Uint", false, false),
+			schema.SpawnStructField("Cost", "Uint", false, false),
+			schema.SpawnStructField("Value", "BigInt", false, false),
+		},
+		schema.SpawnStructRepresentationMap(nil),
+	))
+	ts.Accumulate(schema.SpawnList("FrameList", "Frame", false))
+	ts.Accumulate(schema.SpawnStruct("TxTrace",
+		[]schema.StructField{
+			schema.SpawnStructField("TxCIDs", "TxCIDList", false, false),
+			schema.SpawnStructField("StateRootCID", "Link", false, false),
+			schema.SpawnStructField("Result", "Bytes", false, false),
+			schema.SpawnStructField("Frames", "FrameList", false, false),
+			schema.SpawnStructField("Gas", "Uint", false, false),
+			schema.SpawnStructField("Failed", "Bool", false, false),
+		},
+		schema.SpawnStructRepresentationMap(nil),
+	))
 }

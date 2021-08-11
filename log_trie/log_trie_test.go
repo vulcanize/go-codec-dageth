@@ -106,6 +106,7 @@ type Value union {
 	| Receipt "rct"
 	| Account "state"
 	| Bytes "storage"
+	| Log "log"
 } representation keyed
 
 type Child union {

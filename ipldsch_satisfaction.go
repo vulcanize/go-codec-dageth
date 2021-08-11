@@ -4236,7 +4236,7 @@ type _Child__Assembler struct {
 	cm  schema.Maybe
 	ca1 _Link__Assembler
 
-	ca2 _TrieNode__Assembler
+	ca2 *_TrieNode__Assembler
 	ca  uint
 }
 
@@ -4386,7 +4386,7 @@ func (ma *_Child__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, error)
 		ma.w.tag = 2
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
-		return &ma.ca2, nil
+		return ma.ca2, nil
 	}
 	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Child", Key: &_String{k}}
 }
@@ -4423,14 +4423,17 @@ func (ma *_Child__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
+		if ma.ca2 == nil {
+			ma.ca2 = new(_TrieNode__Assembler)
+		}
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
-		return &ma.ca2
+		return ma.ca2
 	default:
 		panic("unreachable")
 	}
@@ -4656,7 +4659,7 @@ type _Child__ReprAssembler struct {
 	w   *_Child
 	m   *schema.Maybe
 	ca1 _Link__ReprAssembler
-	ca2 _TrieNode__ReprAssembler
+	ca2 *_TrieNode__ReprAssembler
 	ca  uint
 }
 
@@ -22292,15 +22295,15 @@ func (ma *_TrieNode__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 2:
+	case 3:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
@@ -26172,23 +26175,23 @@ func (ma *_Value__Assembler) AssembleValue() ipld.NodeAssembler {
 	}
 	ma.state = maState_midValue
 	switch ma.ca {
-	case 0:
+	case 1:
 		ma.ca1.w = &ma.w.x1
 		ma.ca1.m = &ma.cm
 		return &ma.ca1
-	case 1:
+	case 2:
 		ma.ca2.w = &ma.w.x2
 		ma.ca2.m = &ma.cm
 		return &ma.ca2
-	case 2:
+	case 3:
 		ma.ca3.w = &ma.w.x3
 		ma.ca3.m = &ma.cm
 		return &ma.ca3
-	case 3:
+	case 4:
 		ma.ca4.w = &ma.w.x4
 		ma.ca4.m = &ma.cm
 		return &ma.ca4
-	case 4:
+	case 5:
 		ma.ca5.w = &ma.w.x5
 		ma.ca5.m = &ma.cm
 		return &ma.ca5

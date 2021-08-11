@@ -110,12 +110,26 @@ func unpackResult(ma ipld.MapAssembler, txTrace TxTrace) error {
 }
 
 func unpackFrames(ma ipld.MapAssembler, txTrace TxTrace) error {
+	if err := ma.AssembleKey().AssignString("Frames"); err != nil {
+		return err
+	}
+	framesLA, err := ma.AssembleValue().BeginList(int64(len(txTrace.Frames)))
+	if err != nil {
+		return err
+	}
 	for _, frame := range txTrace.Frames {
-		if err := unpackFrame(ma, frame); err != nil {
+		frameMA, err := framesLA.AssembleValue().BeginMap(8)
+		if err != nil {
+			return err
+		}
+		if err := unpackFrame(frameMA, frame); err != nil {
+			return err
+		}
+		if err := frameMA.Finish(); err != nil {
 			return err
 		}
 	}
-	return nil
+	return framesLA.Finish()
 }
 
 func unpackGas(ma ipld.MapAssembler, txTrace TxTrace) error {

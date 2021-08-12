@@ -7,14 +7,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/vulcanize/go-codec-dageth/log"
-
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/multiformats/go-multihash"
 
 	dageth "github.com/vulcanize/go-codec-dageth"
+	"github.com/vulcanize/go-codec-dageth/log"
 	"github.com/vulcanize/go-codec-dageth/rct"
 	"github.com/vulcanize/go-codec-dageth/shared"
 	account "github.com/vulcanize/go-codec-dageth/state_account"

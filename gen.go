@@ -117,7 +117,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type AccessList [AccessElement]
 
 		type Transaction struct {
-			Type         TxType
+			TxType       TxType
 			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 or EIP-1559 transaction
 			AccountNonce Uint
 			GasPrice     nullable BigInt # null if the transaction is an EIP-1559 transaction
@@ -431,6 +431,169 @@ func accumulateConvenienceTypes(ts *schema.TypeSystem) {
 			schema.SpawnStructField("Frames", "FrameList", false, false),
 			schema.SpawnStructField("Gas", "Uint", false, false),
 			schema.SpawnStructField("Failed", "Bool", false, false),
+		},
+		schema.SpawnStructRepresentationMap(nil),
+	))
+
+	/*
+		# Block represents an entire block in the Ethereum blockchain.
+		type Block struct {
+		   # CID link to the header at this block
+		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded header and the EthHeader codec (0x90)
+		   # Note that the header contains references to the uncles and tx, receipt, and state tries at this height
+		   Header       &Header
+		   # CID link to the list of transactions at this block
+		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of transactions and the EthTxList codec (tbd)
+		   Transactions &Transactions
+		   # CID link to the list of receipts at this block
+		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of receipts and the EthTxReceiptList codec (tbd)
+		   Receipts     &Receipts
+		}
+	*/
+	ts.Accumulate(schema.SpawnStruct("Block",
+		[]schema.StructField{
+			schema.SpawnStructField("Header", "Link", false),
+			schema.SpawnStructField("Transactions", "Link", false),
+			schema.SpawnStructField("Receipts", "Link", false),
+		},
+		schema.SpawnStructRepresentationMap(nil),
+	))
+
+	/*
+		# GenesisInfo specifies the header fields, state of a genesis block, and hard fork switch-over blocks through the chain configuration.
+		# NOTE: we need a new multicodec type for the Genesis object
+		type GenesisInfo struct {
+		   # CID link to the genesis header this genesis info produces
+		   # This CID is composed of the KECCAK_256 multihash of the linked RLP encoded header and the EthHeader codec (0x90)
+		   GensisHeader &Header
+
+		   Config     ChainConfig
+		   Nonce      Uint
+		   Timestamp  Uint
+		   ExtraData  Bytes
+		   GasLimit   Unit
+		   Difficulty BigInt
+		   Mixhash    Hash
+		   Coinbase   Address
+		   Alloc      GenesisAlloc
+
+		   # These fields are used for consensus tests. Please don't use them
+		   # in actual genesis blocks.
+		   Number     Uint
+		   GasUsed    Uint
+		   ParentHash Hash
+		}
+
+		# GenesisAlloc is a map that specifies the initial state that is part of the genesis block.
+		type GenesisAlloc {Address:GenesisAccount}
+
+		# GenesisAccount is an account in the state of the genesis block.
+		type GenesisAccount struct {
+			Code       Bytes
+			Storage    StorageMap
+			Balance    BigInt
+			Nonce      Uint
+			PrivateKey Bytes
+		}
+
+		# StorageMap is a map of storage keys to storage node hashes
+		type StorageMap {Hash:Hash}
+
+		# ChainConfig is the core config which determines the blockchain settings.
+		# ChainConfig is stored in the database on a per block basis.
+		# This means that any network, identified by its genesis block, can have its own set of configuration options.
+		# The ChainConfig referenced in GenesisInfo is used to produce the genesis block but is not necessarily used for later blocks down the chain.
+		type ChainConfig struct {
+			ChainID BigInt
+			HomesteadBlock BigInt
+			DAOForkBlock   BigInt
+			DAOForkSupport Bool
+			EIP150Block BigInt
+			EIP150Hash  Hash
+			EIP155Block BigInt
+			EIP158Block BigInt
+			ByzantiumBlock      BigInt
+			ConstantinopleBlock BigInt
+			PetersburgBlock     BigInt
+			IstanbulBlock       BigInt
+			MuirGlacierBlock    BigInt
+			YoloV2Block BigInt
+			EWASMBlock  BigInt
+
+			# Various consensus engines
+			Ethash EthashConfig
+			Clique CliqueConfig
+		}
+
+		# EthashConfig is the consensus engine config for proof-of-work based sealing.
+		# At this time there are no configuration options for the Ethash engine.
+		type EthashConfig struct {} representation tuple
+
+		# CliqueConfig is the consensus engine config for proof-of-authority based sealing.
+		type CliqueConfig struct {
+			Period Uint
+			Epoch Uint
+		}
+	*/
+
+	ts.Accumulate(schema.SpawnStruct("CliqueConfig",
+		[]schema.StructField{
+			schema.SpawnStructField("Period", "Uint", false),
+			schema.SpawnStructField("Epoch", "Uint", false),
+		},
+		schema.SpawnStructRepresentationMap(nil),
+	))
+	ts.Accumulate(schema.SpawnStruct("EthashConfig",
+		[]schema.StructField{},
+		schema.SpawnStructRepresentationMap(nil),
+	))
+	ts.Accumulate(schema.SpawnStruct("ChainConfig",
+		[]schema.StructField{
+			schema.SpawnStructField("ChainID", "BigInt", false),
+			schema.SpawnStructField("HomesteadBlock", "BigInt", false),
+			schema.SpawnStructField("DAOForkBlock", "BigInt", false),
+			schema.SpawnStructField("DAOForkSupport", "Bool", false),
+			schema.SpawnStructField("EIP150Block", "BigInt", false),
+			schema.SpawnStructField("EIP150Hash", "Hash", false),
+			schema.SpawnStructField("EIP155Block", "BigInt", false),
+			schema.SpawnStructField("EIP158Block", "BigInt", false),
+			schema.SpawnStructField("ByzantiumBlock", "BigInt", false),
+			schema.SpawnStructField("ConstantinopleBlock", "BigInt", false),
+			schema.SpawnStructField("PetersburgBlock", "BigInt", false),
+			schema.SpawnStructField("IstanbulBlock", "BigInt", false),
+			schema.SpawnStructField("MuirGlacierBlock", "BigInt", false),
+			schema.SpawnStructField("BerlinBlock", "BigInt", false),
+			schema.SpawnStructField("LondonBlock", "BigInt", false),
+			schema.SpawnStructField("CatalystBlock", "BigInt", false),
+			schema.SpawnStructField("Ethash", "EthashConfig", false),
+			schema.SpawnStructField("Clique", "CliqueConfig", false),
+		},
+		schema.SpawnStructRepresentationMap(nil),
+	))
+	ts.Accumulate(schema.SpawnMap("StorageMap", "Hash", "Hash", false))
+	ts.Accumulate(schema.SpawnStruct("GenesisAccount",
+		[]schema.StructField{
+			schema.SpawnStructField("Code", "Bytes", false),
+			schema.SpawnStructField("Storage", "StorageMap", false),
+			schema.SpawnStructField("Balance", "BigInt", false),
+			schema.SpawnStructField("Nonce", "Uint", false),
+			schema.SpawnStructField("PrivateKey", "Bytes", false),
+		},
+		schema.SpawnStructRepresentationMap(nil),
+	))
+	ts.Accumulate(schema.SpawnMap("GenesisAlloc", "Address", "GenesisAccount", false))
+	ts.Accumulate(schema.SpawnStruct("GenesisInfo",
+		[]schema.StructField{
+			schema.SpawnStructField("GensisHeader", "Link", false),
+			schema.SpawnStructField("Config", "ChainConfig", false),
+			schema.SpawnStructField("Nonce", "Uint", false),
+			schema.SpawnStructField("Timestamp", "Uint", false),
+			schema.SpawnStructField("ExtraData", "Bytes", false),
+			schema.SpawnStructField("GasLimit", "Uint", false),
+			schema.SpawnStructField("Difficulty", "BigInt", false),
+			schema.SpawnStructField("Mixhash", "Hash", false),
+			schema.SpawnStructField("Coinbase", "Address", false),
+			schema.SpawnStructField("Alloc", "GenesisAlloc", false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))

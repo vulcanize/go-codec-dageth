@@ -77,13 +77,13 @@ type Header struct {
 }
 */
 
-func TestHeaderCodec(t *testing.T) {
-	testHeaderDecode(t)
-	testHeaderNodeContents(t)
-	testHeaderEncode(t)
+func TestUnclesCodec(t *testing.T) {
+	testUnclesDecode(t)
+	testUnclesNodeContents(t)
+	testUnclesEncode(t)
 }
 
-func testHeaderDecode(t *testing.T) {
+func testUnclesDecode(t *testing.T) {
 	unclesBuilder := dageth.Type.Uncles.NewBuilder()
 	unclesReader := bytes.NewReader(unclesRLP)
 	if err := unc.Decode(unclesBuilder, unclesReader); err != nil {
@@ -92,10 +92,13 @@ func testHeaderDecode(t *testing.T) {
 	unclesNode = unclesBuilder.Build()
 }
 
-func testHeaderNodeContents(t *testing.T) {
+func testUnclesNodeContents(t *testing.T) {
 	unclesIT := unclesNode.ListIterator()
 	for !unclesIT.Done() {
 		i, uncleNode, err := unclesIT.Next()
+		if err != nil {
+			t.Fatalf("uncles iterator error: %v", err)
+		}
 		parentNode, err := uncleNode.LookupByString("ParentCID")
 		if err != nil {
 			t.Fatalf("uncles is missing ParentCID: %v", err)
@@ -327,13 +330,13 @@ func testHeaderNodeContents(t *testing.T) {
 	}
 }
 
-func testHeaderEncode(t *testing.T) {
+func testUnclesEncode(t *testing.T) {
 	unclesWriter := new(bytes.Buffer)
 	if err := unc.Encode(unclesNode, unclesWriter); err != nil {
 		t.Fatalf("unable to encode uncles into writer: %v", err)
 	}
-	encodedHeaderBytes := unclesWriter.Bytes()
-	if !bytes.Equal(encodedHeaderBytes, unclesRLP) {
-		t.Errorf("uncles encoding (%x) does not match the expected RLP encoding (%x)", encodedHeaderBytes, unclesRLP)
+	encodedUnclesBytes := unclesWriter.Bytes()
+	if !bytes.Equal(encodedUnclesBytes, unclesRLP) {
+		t.Errorf("uncles encoding (%x) does not match the expected RLP encoding (%x)", encodedUnclesBytes, unclesRLP)
 	}
 }

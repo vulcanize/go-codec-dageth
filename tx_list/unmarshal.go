@@ -1,4 +1,4 @@
-package dageth_txlist
+package tx_list
 
 import (
 	"fmt"

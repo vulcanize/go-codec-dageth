@@ -527,7 +527,7 @@ func accumulateConvenienceTypes(ts *schema.TypeSystem) {
 
 		# EthashConfig is the consensus engine config for proof-of-work based sealing.
 		# At this time there are no configuration options for the Ethash engine.
-		type EthashConfig struct {} representation tuple
+		type EthashConfig struct {}
 
 		# CliqueConfig is the consensus engine config for proof-of-authority based sealing.
 		type CliqueConfig struct {

@@ -3238,6 +3238,1018 @@ var _ ipld.Node = &_BigInt__Repr{}
 type _BigInt__ReprPrototype = _BigInt__Prototype
 type _BigInt__ReprAssembler = _BigInt__Assembler
 
+func (n _Block) FieldHeader() Link {
+	return &n.Header
+}
+func (n _Block) FieldTransactions() Link {
+	return &n.Transactions
+}
+func (n _Block) FieldReceipts() Link {
+	return &n.Receipts
+}
+
+type _Block__Maybe struct {
+	m schema.Maybe
+	v Block
+}
+type MaybeBlock = *_Block__Maybe
+
+func (m MaybeBlock) IsNull() bool {
+	return m.m == schema.Maybe_Null
+}
+func (m MaybeBlock) IsAbsent() bool {
+	return m.m == schema.Maybe_Absent
+}
+func (m MaybeBlock) Exists() bool {
+	return m.m == schema.Maybe_Value
+}
+func (m MaybeBlock) AsNode() ipld.Node {
+	switch m.m {
+	case schema.Maybe_Absent:
+		return ipld.Absent
+	case schema.Maybe_Null:
+		return ipld.Null
+	case schema.Maybe_Value:
+		return m.v
+	default:
+		panic("unreachable")
+	}
+}
+func (m MaybeBlock) Must() Block {
+	if !m.Exists() {
+		panic("unbox of a maybe rejected")
+	}
+	return m.v
+}
+
+var (
+	fieldName__Block_Header       = _String{"Header"}
+	fieldName__Block_Transactions = _String{"Transactions"}
+	fieldName__Block_Receipts     = _String{"Receipts"}
+)
+var _ ipld.Node = (Block)(&_Block{})
+var _ schema.TypedNode = (Block)(&_Block{})
+
+func (Block) Kind() ipld.Kind {
+	return ipld.Kind_Map
+}
+func (n Block) LookupByString(key string) (ipld.Node, error) {
+	switch key {
+	case "Header":
+		return &n.Header, nil
+	case "Transactions":
+		return &n.Transactions, nil
+	case "Receipts":
+		return &n.Receipts, nil
+	default:
+		return nil, schema.ErrNoSuchField{Type: nil /*TODO*/, Field: ipld.PathSegmentOfString(key)}
+	}
+}
+func (n Block) LookupByNode(key ipld.Node) (ipld.Node, error) {
+	ks, err := key.AsString()
+	if err != nil {
+		return nil, err
+	}
+	return n.LookupByString(ks)
+}
+func (Block) LookupByIndex(idx int64) (ipld.Node, error) {
+	return mixins.Map{TypeName: "dageth.Block"}.LookupByIndex(0)
+}
+func (n Block) LookupBySegment(seg ipld.PathSegment) (ipld.Node, error) {
+	return n.LookupByString(seg.String())
+}
+func (n Block) MapIterator() ipld.MapIterator {
+	return &_Block__MapItr{n, 0}
+}
+
+type _Block__MapItr struct {
+	n   Block
+	idx int
+}
+
+func (itr *_Block__MapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
+	if itr.idx >= 3 {
+		return nil, nil, ipld.ErrIteratorOverread{}
+	}
+	switch itr.idx {
+	case 0:
+		k = &fieldName__Block_Header
+		v = &itr.n.Header
+	case 1:
+		k = &fieldName__Block_Transactions
+		v = &itr.n.Transactions
+	case 2:
+		k = &fieldName__Block_Receipts
+		v = &itr.n.Receipts
+	default:
+		panic("unreachable")
+	}
+	itr.idx++
+	return
+}
+func (itr *_Block__MapItr) Done() bool {
+	return itr.idx >= 3
+}
+
+func (Block) ListIterator() ipld.ListIterator {
+	return nil
+}
+func (Block) Length() int64 {
+	return 3
+}
+func (Block) IsAbsent() bool {
+	return false
+}
+func (Block) IsNull() bool {
+	return false
+}
+func (Block) AsBool() (bool, error) {
+	return mixins.Map{TypeName: "dageth.Block"}.AsBool()
+}
+func (Block) AsInt() (int64, error) {
+	return mixins.Map{TypeName: "dageth.Block"}.AsInt()
+}
+func (Block) AsFloat() (float64, error) {
+	return mixins.Map{TypeName: "dageth.Block"}.AsFloat()
+}
+func (Block) AsString() (string, error) {
+	return mixins.Map{TypeName: "dageth.Block"}.AsString()
+}
+func (Block) AsBytes() ([]byte, error) {
+	return mixins.Map{TypeName: "dageth.Block"}.AsBytes()
+}
+func (Block) AsLink() (ipld.Link, error) {
+	return mixins.Map{TypeName: "dageth.Block"}.AsLink()
+}
+func (Block) Prototype() ipld.NodePrototype {
+	return _Block__Prototype{}
+}
+
+type _Block__Prototype struct{}
+
+func (_Block__Prototype) NewBuilder() ipld.NodeBuilder {
+	var nb _Block__Builder
+	nb.Reset()
+	return &nb
+}
+
+type _Block__Builder struct {
+	_Block__Assembler
+}
+
+func (nb *_Block__Builder) Build() ipld.Node {
+	if *nb.m != schema.Maybe_Value {
+		panic("invalid state: cannot call Build on an assembler that's not finished")
+	}
+	return nb.w
+}
+func (nb *_Block__Builder) Reset() {
+	var w _Block
+	var m schema.Maybe
+	*nb = _Block__Builder{_Block__Assembler{w: &w, m: &m}}
+}
+
+type _Block__Assembler struct {
+	w     *_Block
+	m     *schema.Maybe
+	state maState
+	s     int
+	f     int
+
+	cm              schema.Maybe
+	ca_Header       _Link__Assembler
+	ca_Transactions _Link__Assembler
+	ca_Receipts     _Link__Assembler
+}
+
+func (na *_Block__Assembler) reset() {
+	na.state = maState_initial
+	na.s = 0
+	na.ca_Header.reset()
+	na.ca_Transactions.reset()
+	na.ca_Receipts.reset()
+}
+
+var (
+	fieldBit__Block_Header       = 1 << 0
+	fieldBit__Block_Transactions = 1 << 1
+	fieldBit__Block_Receipts     = 1 << 2
+	fieldBits__Block_sufficient  = 0 + 1<<0 + 1<<1 + 1<<2
+)
+
+func (na *_Block__Assembler) BeginMap(int64) (ipld.MapAssembler, error) {
+	switch *na.m {
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: it makes no sense to 'begin' twice on the same assembler!")
+	}
+	*na.m = midvalue
+	if na.w == nil {
+		na.w = &_Block{}
+	}
+	return na, nil
+}
+func (_Block__Assembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	return mixins.MapAssembler{TypeName: "dageth.Block"}.BeginList(0)
+}
+func (na *_Block__Assembler) AssignNull() error {
+	switch *na.m {
+	case allowNull:
+		*na.m = schema.Maybe_Null
+		return nil
+	case schema.Maybe_Absent:
+		return mixins.MapAssembler{TypeName: "dageth.Block"}.AssignNull()
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+	}
+	panic("unreachable")
+}
+func (_Block__Assembler) AssignBool(bool) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block"}.AssignBool(false)
+}
+func (_Block__Assembler) AssignInt(int64) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block"}.AssignInt(0)
+}
+func (_Block__Assembler) AssignFloat(float64) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block"}.AssignFloat(0)
+}
+func (_Block__Assembler) AssignString(string) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block"}.AssignString("")
+}
+func (_Block__Assembler) AssignBytes([]byte) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block"}.AssignBytes(nil)
+}
+func (_Block__Assembler) AssignLink(ipld.Link) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block"}.AssignLink(nil)
+}
+func (na *_Block__Assembler) AssignNode(v ipld.Node) error {
+	if v.IsNull() {
+		return na.AssignNull()
+	}
+	if v2, ok := v.(*_Block); ok {
+		switch *na.m {
+		case schema.Maybe_Value, schema.Maybe_Null:
+			panic("invalid state: cannot assign into assembler that's already finished")
+		case midvalue:
+			panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+		}
+		if na.w == nil {
+			na.w = v2
+			*na.m = schema.Maybe_Value
+			return nil
+		}
+		*na.w = *v2
+		*na.m = schema.Maybe_Value
+		return nil
+	}
+	if v.Kind() != ipld.Kind_Map {
+		return ipld.ErrWrongKind{TypeName: "dageth.Block", MethodName: "AssignNode", AppropriateKind: ipld.KindSet_JustMap, ActualKind: v.Kind()}
+	}
+	itr := v.MapIterator()
+	for !itr.Done() {
+		k, v, err := itr.Next()
+		if err != nil {
+			return err
+		}
+		if err := na.AssembleKey().AssignNode(k); err != nil {
+			return err
+		}
+		if err := na.AssembleValue().AssignNode(v); err != nil {
+			return err
+		}
+	}
+	return na.Finish()
+}
+func (_Block__Assembler) Prototype() ipld.NodePrototype {
+	return _Block__Prototype{}
+}
+func (ma *_Block__Assembler) valueFinishTidy() bool {
+	switch ma.f {
+	case 0:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.ca_Header.w = nil
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
+	case 1:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.ca_Transactions.w = nil
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
+	case 2:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.ca_Receipts.w = nil
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
+	default:
+		panic("unreachable")
+	}
+}
+func (ma *_Block__Assembler) AssembleEntry(k string) (ipld.NodeAssembler, error) {
+	switch ma.state {
+	case maState_initial:
+		// carry on
+	case maState_midKey:
+		panic("invalid state: AssembleEntry cannot be called when in the middle of assembling another key")
+	case maState_expectValue:
+		panic("invalid state: AssembleEntry cannot be called when expecting start of value assembly")
+	case maState_midValue:
+		if !ma.valueFinishTidy() {
+			panic("invalid state: AssembleEntry cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case maState_finished:
+		panic("invalid state: AssembleEntry cannot be called on an assembler that's already finished")
+	}
+	switch k {
+	case "Header":
+		if ma.s&fieldBit__Block_Header != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Header}
+		}
+		ma.s += fieldBit__Block_Header
+		ma.state = maState_midValue
+		ma.f = 0
+		ma.ca_Header.w = &ma.w.Header
+		ma.ca_Header.m = &ma.cm
+		return &ma.ca_Header, nil
+	case "Transactions":
+		if ma.s&fieldBit__Block_Transactions != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Transactions}
+		}
+		ma.s += fieldBit__Block_Transactions
+		ma.state = maState_midValue
+		ma.f = 1
+		ma.ca_Transactions.w = &ma.w.Transactions
+		ma.ca_Transactions.m = &ma.cm
+		return &ma.ca_Transactions, nil
+	case "Receipts":
+		if ma.s&fieldBit__Block_Receipts != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Receipts}
+		}
+		ma.s += fieldBit__Block_Receipts
+		ma.state = maState_midValue
+		ma.f = 2
+		ma.ca_Receipts.w = &ma.w.Receipts
+		ma.ca_Receipts.m = &ma.cm
+		return &ma.ca_Receipts, nil
+	}
+	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Block", Key: &_String{k}}
+}
+func (ma *_Block__Assembler) AssembleKey() ipld.NodeAssembler {
+	switch ma.state {
+	case maState_initial:
+		// carry on
+	case maState_midKey:
+		panic("invalid state: AssembleKey cannot be called when in the middle of assembling another key")
+	case maState_expectValue:
+		panic("invalid state: AssembleKey cannot be called when expecting start of value assembly")
+	case maState_midValue:
+		if !ma.valueFinishTidy() {
+			panic("invalid state: AssembleKey cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case maState_finished:
+		panic("invalid state: AssembleKey cannot be called on an assembler that's already finished")
+	}
+	ma.state = maState_midKey
+	return (*_Block__KeyAssembler)(ma)
+}
+func (ma *_Block__Assembler) AssembleValue() ipld.NodeAssembler {
+	switch ma.state {
+	case maState_initial:
+		panic("invalid state: AssembleValue cannot be called when no key is primed")
+	case maState_midKey:
+		panic("invalid state: AssembleValue cannot be called when in the middle of assembling a key")
+	case maState_expectValue:
+		// carry on
+	case maState_midValue:
+		panic("invalid state: AssembleValue cannot be called when in the middle of assembling another value")
+	case maState_finished:
+		panic("invalid state: AssembleValue cannot be called on an assembler that's already finished")
+	}
+	ma.state = maState_midValue
+	switch ma.f {
+	case 0:
+		ma.ca_Header.w = &ma.w.Header
+		ma.ca_Header.m = &ma.cm
+		return &ma.ca_Header
+	case 1:
+		ma.ca_Transactions.w = &ma.w.Transactions
+		ma.ca_Transactions.m = &ma.cm
+		return &ma.ca_Transactions
+	case 2:
+		ma.ca_Receipts.w = &ma.w.Receipts
+		ma.ca_Receipts.m = &ma.cm
+		return &ma.ca_Receipts
+	default:
+		panic("unreachable")
+	}
+}
+func (ma *_Block__Assembler) Finish() error {
+	switch ma.state {
+	case maState_initial:
+		// carry on
+	case maState_midKey:
+		panic("invalid state: Finish cannot be called when in the middle of assembling a key")
+	case maState_expectValue:
+		panic("invalid state: Finish cannot be called when expecting start of value assembly")
+	case maState_midValue:
+		if !ma.valueFinishTidy() {
+			panic("invalid state: Finish cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case maState_finished:
+		panic("invalid state: Finish cannot be called on an assembler that's already finished")
+	}
+	if ma.s&fieldBits__Block_sufficient != fieldBits__Block_sufficient {
+		err := ipld.ErrMissingRequiredField{Missing: make([]string, 0)}
+		if ma.s&fieldBit__Block_Header == 0 {
+			err.Missing = append(err.Missing, "Header")
+		}
+		if ma.s&fieldBit__Block_Transactions == 0 {
+			err.Missing = append(err.Missing, "Transactions")
+		}
+		if ma.s&fieldBit__Block_Receipts == 0 {
+			err.Missing = append(err.Missing, "Receipts")
+		}
+		return err
+	}
+	ma.state = maState_finished
+	*ma.m = schema.Maybe_Value
+	return nil
+}
+func (ma *_Block__Assembler) KeyPrototype() ipld.NodePrototype {
+	return _String__Prototype{}
+}
+func (ma *_Block__Assembler) ValuePrototype(k string) ipld.NodePrototype {
+	panic("todo structbuilder mapassembler valueprototype")
+}
+
+type _Block__KeyAssembler _Block__Assembler
+
+func (_Block__KeyAssembler) BeginMap(sizeHint int64) (ipld.MapAssembler, error) {
+	return mixins.StringAssembler{TypeName: "dageth.Block.KeyAssembler"}.BeginMap(0)
+}
+func (_Block__KeyAssembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	return mixins.StringAssembler{TypeName: "dageth.Block.KeyAssembler"}.BeginList(0)
+}
+func (na *_Block__KeyAssembler) AssignNull() error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.KeyAssembler"}.AssignNull()
+}
+func (_Block__KeyAssembler) AssignBool(bool) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.KeyAssembler"}.AssignBool(false)
+}
+func (_Block__KeyAssembler) AssignInt(int64) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.KeyAssembler"}.AssignInt(0)
+}
+func (_Block__KeyAssembler) AssignFloat(float64) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.KeyAssembler"}.AssignFloat(0)
+}
+func (ka *_Block__KeyAssembler) AssignString(k string) error {
+	if ka.state != maState_midKey {
+		panic("misuse: KeyAssembler held beyond its valid lifetime")
+	}
+	switch k {
+	case "Header":
+		if ka.s&fieldBit__Block_Header != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Header}
+		}
+		ka.s += fieldBit__Block_Header
+		ka.state = maState_expectValue
+		ka.f = 0
+	case "Transactions":
+		if ka.s&fieldBit__Block_Transactions != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Transactions}
+		}
+		ka.s += fieldBit__Block_Transactions
+		ka.state = maState_expectValue
+		ka.f = 1
+	case "Receipts":
+		if ka.s&fieldBit__Block_Receipts != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Receipts}
+		}
+		ka.s += fieldBit__Block_Receipts
+		ka.state = maState_expectValue
+		ka.f = 2
+	default:
+		return ipld.ErrInvalidKey{TypeName: "dageth.Block", Key: &_String{k}}
+	}
+	return nil
+}
+func (_Block__KeyAssembler) AssignBytes([]byte) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.KeyAssembler"}.AssignBytes(nil)
+}
+func (_Block__KeyAssembler) AssignLink(ipld.Link) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.KeyAssembler"}.AssignLink(nil)
+}
+func (ka *_Block__KeyAssembler) AssignNode(v ipld.Node) error {
+	if v2, err := v.AsString(); err != nil {
+		return err
+	} else {
+		return ka.AssignString(v2)
+	}
+}
+func (_Block__KeyAssembler) Prototype() ipld.NodePrototype {
+	return _String__Prototype{}
+}
+func (Block) Type() schema.Type {
+	return nil /*TODO:typelit*/
+}
+func (n Block) Representation() ipld.Node {
+	return (*_Block__Repr)(n)
+}
+
+type _Block__Repr _Block
+
+var (
+	fieldName__Block_Header_serial       = _String{"Header"}
+	fieldName__Block_Transactions_serial = _String{"Transactions"}
+	fieldName__Block_Receipts_serial     = _String{"Receipts"}
+)
+var _ ipld.Node = &_Block__Repr{}
+
+func (_Block__Repr) Kind() ipld.Kind {
+	return ipld.Kind_Map
+}
+func (n *_Block__Repr) LookupByString(key string) (ipld.Node, error) {
+	switch key {
+	case "Header":
+		return n.Header.Representation(), nil
+	case "Transactions":
+		return n.Transactions.Representation(), nil
+	case "Receipts":
+		return n.Receipts.Representation(), nil
+	default:
+		return nil, schema.ErrNoSuchField{Type: nil /*TODO*/, Field: ipld.PathSegmentOfString(key)}
+	}
+}
+func (n *_Block__Repr) LookupByNode(key ipld.Node) (ipld.Node, error) {
+	ks, err := key.AsString()
+	if err != nil {
+		return nil, err
+	}
+	return n.LookupByString(ks)
+}
+func (_Block__Repr) LookupByIndex(idx int64) (ipld.Node, error) {
+	return mixins.Map{TypeName: "dageth.Block.Repr"}.LookupByIndex(0)
+}
+func (n _Block__Repr) LookupBySegment(seg ipld.PathSegment) (ipld.Node, error) {
+	return n.LookupByString(seg.String())
+}
+func (n *_Block__Repr) MapIterator() ipld.MapIterator {
+	return &_Block__ReprMapItr{n, 0}
+}
+
+type _Block__ReprMapItr struct {
+	n   *_Block__Repr
+	idx int
+}
+
+func (itr *_Block__ReprMapItr) Next() (k ipld.Node, v ipld.Node, _ error) {
+	if itr.idx >= 3 {
+		return nil, nil, ipld.ErrIteratorOverread{}
+	}
+	switch itr.idx {
+	case 0:
+		k = &fieldName__Block_Header_serial
+		v = itr.n.Header.Representation()
+	case 1:
+		k = &fieldName__Block_Transactions_serial
+		v = itr.n.Transactions.Representation()
+	case 2:
+		k = &fieldName__Block_Receipts_serial
+		v = itr.n.Receipts.Representation()
+	default:
+		panic("unreachable")
+	}
+	itr.idx++
+	return
+}
+func (itr *_Block__ReprMapItr) Done() bool {
+	return itr.idx >= 3
+}
+func (_Block__Repr) ListIterator() ipld.ListIterator {
+	return nil
+}
+func (rn *_Block__Repr) Length() int64 {
+	l := 3
+	return int64(l)
+}
+func (_Block__Repr) IsAbsent() bool {
+	return false
+}
+func (_Block__Repr) IsNull() bool {
+	return false
+}
+func (_Block__Repr) AsBool() (bool, error) {
+	return mixins.Map{TypeName: "dageth.Block.Repr"}.AsBool()
+}
+func (_Block__Repr) AsInt() (int64, error) {
+	return mixins.Map{TypeName: "dageth.Block.Repr"}.AsInt()
+}
+func (_Block__Repr) AsFloat() (float64, error) {
+	return mixins.Map{TypeName: "dageth.Block.Repr"}.AsFloat()
+}
+func (_Block__Repr) AsString() (string, error) {
+	return mixins.Map{TypeName: "dageth.Block.Repr"}.AsString()
+}
+func (_Block__Repr) AsBytes() ([]byte, error) {
+	return mixins.Map{TypeName: "dageth.Block.Repr"}.AsBytes()
+}
+func (_Block__Repr) AsLink() (ipld.Link, error) {
+	return mixins.Map{TypeName: "dageth.Block.Repr"}.AsLink()
+}
+func (_Block__Repr) Prototype() ipld.NodePrototype {
+	return _Block__ReprPrototype{}
+}
+
+type _Block__ReprPrototype struct{}
+
+func (_Block__ReprPrototype) NewBuilder() ipld.NodeBuilder {
+	var nb _Block__ReprBuilder
+	nb.Reset()
+	return &nb
+}
+
+type _Block__ReprBuilder struct {
+	_Block__ReprAssembler
+}
+
+func (nb *_Block__ReprBuilder) Build() ipld.Node {
+	if *nb.m != schema.Maybe_Value {
+		panic("invalid state: cannot call Build on an assembler that's not finished")
+	}
+	return nb.w
+}
+func (nb *_Block__ReprBuilder) Reset() {
+	var w _Block
+	var m schema.Maybe
+	*nb = _Block__ReprBuilder{_Block__ReprAssembler{w: &w, m: &m}}
+}
+
+type _Block__ReprAssembler struct {
+	w     *_Block
+	m     *schema.Maybe
+	state maState
+	s     int
+	f     int
+
+	cm              schema.Maybe
+	ca_Header       _Link__ReprAssembler
+	ca_Transactions _Link__ReprAssembler
+	ca_Receipts     _Link__ReprAssembler
+}
+
+func (na *_Block__ReprAssembler) reset() {
+	na.state = maState_initial
+	na.s = 0
+	na.ca_Header.reset()
+	na.ca_Transactions.reset()
+	na.ca_Receipts.reset()
+}
+func (na *_Block__ReprAssembler) BeginMap(int64) (ipld.MapAssembler, error) {
+	switch *na.m {
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: it makes no sense to 'begin' twice on the same assembler!")
+	}
+	*na.m = midvalue
+	if na.w == nil {
+		na.w = &_Block{}
+	}
+	return na, nil
+}
+func (_Block__ReprAssembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	return mixins.MapAssembler{TypeName: "dageth.Block.Repr"}.BeginList(0)
+}
+func (na *_Block__ReprAssembler) AssignNull() error {
+	switch *na.m {
+	case allowNull:
+		*na.m = schema.Maybe_Null
+		return nil
+	case schema.Maybe_Absent:
+		return mixins.MapAssembler{TypeName: "dageth.Block.Repr.Repr"}.AssignNull()
+	case schema.Maybe_Value, schema.Maybe_Null:
+		panic("invalid state: cannot assign into assembler that's already finished")
+	case midvalue:
+		panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+	}
+	panic("unreachable")
+}
+func (_Block__ReprAssembler) AssignBool(bool) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block.Repr"}.AssignBool(false)
+}
+func (_Block__ReprAssembler) AssignInt(int64) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block.Repr"}.AssignInt(0)
+}
+func (_Block__ReprAssembler) AssignFloat(float64) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block.Repr"}.AssignFloat(0)
+}
+func (_Block__ReprAssembler) AssignString(string) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block.Repr"}.AssignString("")
+}
+func (_Block__ReprAssembler) AssignBytes([]byte) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block.Repr"}.AssignBytes(nil)
+}
+func (_Block__ReprAssembler) AssignLink(ipld.Link) error {
+	return mixins.MapAssembler{TypeName: "dageth.Block.Repr"}.AssignLink(nil)
+}
+func (na *_Block__ReprAssembler) AssignNode(v ipld.Node) error {
+	if v.IsNull() {
+		return na.AssignNull()
+	}
+	if v2, ok := v.(*_Block); ok {
+		switch *na.m {
+		case schema.Maybe_Value, schema.Maybe_Null:
+			panic("invalid state: cannot assign into assembler that's already finished")
+		case midvalue:
+			panic("invalid state: cannot assign null into an assembler that's already begun working on recursive structures!")
+		}
+		if na.w == nil {
+			na.w = v2
+			*na.m = schema.Maybe_Value
+			return nil
+		}
+		*na.w = *v2
+		*na.m = schema.Maybe_Value
+		return nil
+	}
+	if v.Kind() != ipld.Kind_Map {
+		return ipld.ErrWrongKind{TypeName: "dageth.Block.Repr", MethodName: "AssignNode", AppropriateKind: ipld.KindSet_JustMap, ActualKind: v.Kind()}
+	}
+	itr := v.MapIterator()
+	for !itr.Done() {
+		k, v, err := itr.Next()
+		if err != nil {
+			return err
+		}
+		if err := na.AssembleKey().AssignNode(k); err != nil {
+			return err
+		}
+		if err := na.AssembleValue().AssignNode(v); err != nil {
+			return err
+		}
+	}
+	return na.Finish()
+}
+func (_Block__ReprAssembler) Prototype() ipld.NodePrototype {
+	return _Block__ReprPrototype{}
+}
+func (ma *_Block__ReprAssembler) valueFinishTidy() bool {
+	switch ma.f {
+	case 0:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
+	case 1:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
+	case 2:
+		switch ma.cm {
+		case schema.Maybe_Value:
+			ma.cm = schema.Maybe_Absent
+			ma.state = maState_initial
+			return true
+		default:
+			return false
+		}
+	default:
+		panic("unreachable")
+	}
+}
+func (ma *_Block__ReprAssembler) AssembleEntry(k string) (ipld.NodeAssembler, error) {
+	switch ma.state {
+	case maState_initial:
+		// carry on
+	case maState_midKey:
+		panic("invalid state: AssembleEntry cannot be called when in the middle of assembling another key")
+	case maState_expectValue:
+		panic("invalid state: AssembleEntry cannot be called when expecting start of value assembly")
+	case maState_midValue:
+		if !ma.valueFinishTidy() {
+			panic("invalid state: AssembleEntry cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case maState_finished:
+		panic("invalid state: AssembleEntry cannot be called on an assembler that's already finished")
+	}
+	switch k {
+	case "Header":
+		if ma.s&fieldBit__Block_Header != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Header_serial}
+		}
+		ma.s += fieldBit__Block_Header
+		ma.state = maState_midValue
+		ma.f = 0
+		ma.ca_Header.w = &ma.w.Header
+		ma.ca_Header.m = &ma.cm
+		return &ma.ca_Header, nil
+	case "Transactions":
+		if ma.s&fieldBit__Block_Transactions != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Transactions_serial}
+		}
+		ma.s += fieldBit__Block_Transactions
+		ma.state = maState_midValue
+		ma.f = 1
+		ma.ca_Transactions.w = &ma.w.Transactions
+		ma.ca_Transactions.m = &ma.cm
+		return &ma.ca_Transactions, nil
+	case "Receipts":
+		if ma.s&fieldBit__Block_Receipts != 0 {
+			return nil, ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Receipts_serial}
+		}
+		ma.s += fieldBit__Block_Receipts
+		ma.state = maState_midValue
+		ma.f = 2
+		ma.ca_Receipts.w = &ma.w.Receipts
+		ma.ca_Receipts.m = &ma.cm
+		return &ma.ca_Receipts, nil
+	default:
+	}
+	return nil, ipld.ErrInvalidKey{TypeName: "dageth.Block.Repr", Key: &_String{k}}
+}
+func (ma *_Block__ReprAssembler) AssembleKey() ipld.NodeAssembler {
+	switch ma.state {
+	case maState_initial:
+		// carry on
+	case maState_midKey:
+		panic("invalid state: AssembleKey cannot be called when in the middle of assembling another key")
+	case maState_expectValue:
+		panic("invalid state: AssembleKey cannot be called when expecting start of value assembly")
+	case maState_midValue:
+		if !ma.valueFinishTidy() {
+			panic("invalid state: AssembleKey cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case maState_finished:
+		panic("invalid state: AssembleKey cannot be called on an assembler that's already finished")
+	}
+	ma.state = maState_midKey
+	return (*_Block__ReprKeyAssembler)(ma)
+}
+func (ma *_Block__ReprAssembler) AssembleValue() ipld.NodeAssembler {
+	switch ma.state {
+	case maState_initial:
+		panic("invalid state: AssembleValue cannot be called when no key is primed")
+	case maState_midKey:
+		panic("invalid state: AssembleValue cannot be called when in the middle of assembling a key")
+	case maState_expectValue:
+		// carry on
+	case maState_midValue:
+		panic("invalid state: AssembleValue cannot be called when in the middle of assembling another value")
+	case maState_finished:
+		panic("invalid state: AssembleValue cannot be called on an assembler that's already finished")
+	}
+	ma.state = maState_midValue
+	switch ma.f {
+	case 0:
+		ma.ca_Header.w = &ma.w.Header
+		ma.ca_Header.m = &ma.cm
+		return &ma.ca_Header
+	case 1:
+		ma.ca_Transactions.w = &ma.w.Transactions
+		ma.ca_Transactions.m = &ma.cm
+		return &ma.ca_Transactions
+	case 2:
+		ma.ca_Receipts.w = &ma.w.Receipts
+		ma.ca_Receipts.m = &ma.cm
+		return &ma.ca_Receipts
+	default:
+		panic("unreachable")
+	}
+}
+func (ma *_Block__ReprAssembler) Finish() error {
+	switch ma.state {
+	case maState_initial:
+		// carry on
+	case maState_midKey:
+		panic("invalid state: Finish cannot be called when in the middle of assembling a key")
+	case maState_expectValue:
+		panic("invalid state: Finish cannot be called when expecting start of value assembly")
+	case maState_midValue:
+		if !ma.valueFinishTidy() {
+			panic("invalid state: Finish cannot be called when in the middle of assembling a value")
+		} // if tidy success: carry on
+	case maState_finished:
+		panic("invalid state: Finish cannot be called on an assembler that's already finished")
+	}
+	if ma.s&fieldBits__Block_sufficient != fieldBits__Block_sufficient {
+		err := ipld.ErrMissingRequiredField{Missing: make([]string, 0)}
+		if ma.s&fieldBit__Block_Header == 0 {
+			err.Missing = append(err.Missing, "Header")
+		}
+		if ma.s&fieldBit__Block_Transactions == 0 {
+			err.Missing = append(err.Missing, "Transactions")
+		}
+		if ma.s&fieldBit__Block_Receipts == 0 {
+			err.Missing = append(err.Missing, "Receipts")
+		}
+		return err
+	}
+	ma.state = maState_finished
+	*ma.m = schema.Maybe_Value
+	return nil
+}
+func (ma *_Block__ReprAssembler) KeyPrototype() ipld.NodePrototype {
+	return _String__Prototype{}
+}
+func (ma *_Block__ReprAssembler) ValuePrototype(k string) ipld.NodePrototype {
+	panic("todo structbuilder mapassembler repr valueprototype")
+}
+
+type _Block__ReprKeyAssembler _Block__ReprAssembler
+
+func (_Block__ReprKeyAssembler) BeginMap(sizeHint int64) (ipld.MapAssembler, error) {
+	return mixins.StringAssembler{TypeName: "dageth.Block.Repr.KeyAssembler"}.BeginMap(0)
+}
+func (_Block__ReprKeyAssembler) BeginList(sizeHint int64) (ipld.ListAssembler, error) {
+	return mixins.StringAssembler{TypeName: "dageth.Block.Repr.KeyAssembler"}.BeginList(0)
+}
+func (na *_Block__ReprKeyAssembler) AssignNull() error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.Repr.KeyAssembler"}.AssignNull()
+}
+func (_Block__ReprKeyAssembler) AssignBool(bool) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.Repr.KeyAssembler"}.AssignBool(false)
+}
+func (_Block__ReprKeyAssembler) AssignInt(int64) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.Repr.KeyAssembler"}.AssignInt(0)
+}
+func (_Block__ReprKeyAssembler) AssignFloat(float64) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.Repr.KeyAssembler"}.AssignFloat(0)
+}
+func (ka *_Block__ReprKeyAssembler) AssignString(k string) error {
+	if ka.state != maState_midKey {
+		panic("misuse: KeyAssembler held beyond its valid lifetime")
+	}
+	switch k {
+	case "Header":
+		if ka.s&fieldBit__Block_Header != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Header_serial}
+		}
+		ka.s += fieldBit__Block_Header
+		ka.state = maState_expectValue
+		ka.f = 0
+		return nil
+	case "Transactions":
+		if ka.s&fieldBit__Block_Transactions != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Transactions_serial}
+		}
+		ka.s += fieldBit__Block_Transactions
+		ka.state = maState_expectValue
+		ka.f = 1
+		return nil
+	case "Receipts":
+		if ka.s&fieldBit__Block_Receipts != 0 {
+			return ipld.ErrRepeatedMapKey{Key: &fieldName__Block_Receipts_serial}
+		}
+		ka.s += fieldBit__Block_Receipts
+		ka.state = maState_expectValue
+		ka.f = 2
+		return nil
+	}
+	return ipld.ErrInvalidKey{TypeName: "dageth.Block.Repr", Key: &_String{k}}
+}
+func (_Block__ReprKeyAssembler) AssignBytes([]byte) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.Repr.KeyAssembler"}.AssignBytes(nil)
+}
+func (_Block__ReprKeyAssembler) AssignLink(ipld.Link) error {
+	return mixins.StringAssembler{TypeName: "dageth.Block.Repr.KeyAssembler"}.AssignLink(nil)
+}
+func (ka *_Block__ReprKeyAssembler) AssignNode(v ipld.Node) error {
+	if v2, err := v.AsString(); err != nil {
+		return err
+	} else {
+		return ka.AssignString(v2)
+	}
+}
+func (_Block__ReprKeyAssembler) Prototype() ipld.NodePrototype {
+	return _String__Prototype{}
+}
+
 func (n Bloom) Bytes() []byte {
 	return n.x
 }

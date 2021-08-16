@@ -32,6 +32,8 @@ type typeSlab struct {
 	Balance__Repr           _Balance__ReprPrototype
 	BigInt                  _BigInt__Prototype
 	BigInt__Repr            _BigInt__ReprPrototype
+	Block                   _Block__Prototype
+	Block__Repr             _Block__ReprPrototype
 	Bloom                   _Bloom__Prototype
 	Bloom__Repr             _Bloom__ReprPrototype
 	Bool                    _Bool__Prototype
@@ -131,6 +133,14 @@ type _Balance struct{ x []byte }
 // BigInt matches the IPLD Schema type "BigInt".  It has bytes kind.
 type BigInt = *_BigInt
 type _BigInt struct{ x []byte }
+
+// Block matches the IPLD Schema type "Block".  It has Struct type-kind, and may be interrogated like map kind.
+type Block = *_Block
+type _Block struct {
+	Header       _Link
+	Transactions _Link
+	Receipts     _Link
+}
 
 // Bloom matches the IPLD Schema type "Bloom".  It has bytes kind.
 type Bloom = *_Bloom

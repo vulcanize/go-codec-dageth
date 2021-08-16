@@ -443,10 +443,10 @@ func accumulateConvenienceTypes(ts *schema.TypeSystem) {
 		   # Note that the header contains references to the uncles and tx, receipt, and state tries at this height
 		   Header       &Header
 		   # CID link to the list of transactions at this block
-		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of transactions and the EthTxList codec (tbd)
+		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of transactions and the EthTxList codec (0x9c)
 		   Transactions &Transactions
 		   # CID link to the list of receipts at this block
-		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of receipts and the EthTxReceiptList codec (tbd)
+		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of receipts and the EthTxReceiptList codec (0x9d)
 		   Receipts     &Receipts
 		}
 	*/

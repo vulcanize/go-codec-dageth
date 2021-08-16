@@ -117,7 +117,7 @@ func accumulateChainTypes(ts *schema.TypeSystem) {
 		type AccessList [AccessElement]
 
 		type Transaction struct {
-			Type         TxType
+			TxType       TxType
 			ChainID      nullable BigInt # null unless the transaction is an EIP-2930 or EIP-1559 transaction
 			AccountNonce Uint
 			GasPrice     nullable BigInt # null if the transaction is an EIP-1559 transaction
@@ -431,6 +431,30 @@ func accumulateConvenienceTypes(ts *schema.TypeSystem) {
 			schema.SpawnStructField("Frames", "FrameList", false, false),
 			schema.SpawnStructField("Gas", "Uint", false, false),
 			schema.SpawnStructField("Failed", "Bool", false, false),
+		},
+		schema.SpawnStructRepresentationMap(nil),
+	))
+
+	/*
+		# Block represents an entire block in the Ethereum blockchain.
+		type Block struct {
+		   # CID link to the header at this block
+		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded header and the EthHeader codec (0x90)
+		   # Note that the header contains references to the uncles and tx, receipt, and state tries at this height
+		   Header       &Header
+		   # CID link to the list of transactions at this block
+		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of transactions and the EthTxList codec (0x9c)
+		   Transactions &Transactions
+		   # CID link to the list of receipts at this block
+		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of receipts and the EthTxReceiptList codec (0x9d)
+		   Receipts     &Receipts
+		}
+	*/
+	ts.Accumulate(schema.SpawnStruct("Block",
+		[]schema.StructField{
+			schema.SpawnStructField("Header", "Link", false, false),
+			schema.SpawnStructField("Transactions", "Link", false, false),
+			schema.SpawnStructField("Receipts", "Link", false, false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))

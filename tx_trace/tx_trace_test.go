@@ -231,19 +231,6 @@ func testTxTraceNodeContents(t *testing.T) {
 	}
 }
 
-/*
-type Frame struct {
-	Op     OpCode
-	From   Address
-	To     Address
-	Input  Bytes
-	Output Bytes
-	Gas    Uint
-	Cost   Uint
-	Value  BigInt
-}
-*/
-
 func testFrameNodeContents(frameNode ipld.Node, frame tx_trace.Frame, t *testing.T) {
 	opNode, err := frameNode.LookupByString("Op")
 	if err != nil {

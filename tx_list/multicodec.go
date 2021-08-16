@@ -1,9 +1,8 @@
-package dageth_txlist
+package tx_list
 
 import (
 	"io"
 
-	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/ipld/go-ipld-prime/multicodec"
@@ -17,7 +16,7 @@ var (
 	_ ipld.Decoder = Decode
 	_ ipld.Encoder = Encode
 
-	MultiCodecType = uint64(cid.EthTx) // TODO: TBD
+	MultiCodecType = uint64(0x9c) // proposed
 	MultiHashType  = uint64(multihash.KECCAK_256)
 )
 

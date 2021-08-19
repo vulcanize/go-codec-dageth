@@ -441,20 +441,20 @@ func accumulateConvenienceTypes(ts *schema.TypeSystem) {
 		   # CID link to the header at this block
 		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded header and the EthHeader codec (0x90)
 		   # Note that the header contains references to the uncles and tx, receipt, and state tries at this height
-		   Header       &Header
+		   HeaderCID       &Header
 		   # CID link to the list of transactions at this block
 		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of transactions and the EthTxList codec (0x9c)
-		   Transactions &Transactions
+		   TransactionsCID &Transactions
 		   # CID link to the list of receipts at this block
 		   # This CID is composed of the KECCAK_256 multihash of the RLP encoded list of receipts and the EthTxReceiptList codec (0x9d)
-		   Receipts     &Receipts
+		   ReceiptsCID     &Receipts
 		}
 	*/
 	ts.Accumulate(schema.SpawnStruct("Block",
 		[]schema.StructField{
-			schema.SpawnStructField("Header", "Link", false, false),
-			schema.SpawnStructField("Transactions", "Link", false, false),
-			schema.SpawnStructField("Receipts", "Link", false, false),
+			schema.SpawnStructField("HeaderCID", "Link", false, false),
+			schema.SpawnStructField("TransactionsCID", "Link", false, false),
+			schema.SpawnStructField("ReceiptsCID", "Link", false, false),
 		},
 		schema.SpawnStructRepresentationMap(nil),
 	))

@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
@@ -21,7 +21,7 @@ var (
 	emptyStateRootNodeRLP, _ = rlp.EncodeToBytes([]byte{})
 	mockStateRoot            = crypto.Keccak256Hash(emptyStateRootNodeRLP)
 	emptyCodeHash            = crypto.Keccak256Hash([]byte{}).Bytes()
-	mockAccount              = &state.Account{
+	mockAccount              = &types.StateAccount{
 		Root:     mockStateRoot,
 		Balance:  big.NewInt(1000000000),
 		CodeHash: emptyCodeHash,

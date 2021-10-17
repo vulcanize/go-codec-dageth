@@ -6,7 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipfs/go-cid"
 	"github.com/ipld/go-ipld-prime"
@@ -35,7 +35,7 @@ func Decode(na ipld.NodeAssembler, in io.Reader) error {
 // Decode will grab or read all the bytes from an io.Reader anyway, so this can
 // save having to copy the bytes or create a bytes.Buffer.
 func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
-	var account state.Account
+	var account types.StateAccount
 	if err := rlp.DecodeBytes(src, &account); err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func DecodeBytes(na ipld.NodeAssembler, src []byte) error {
 }
 
 // DecodeAccount unpacks a go-ethereum Account into a NodeAssembler
-func DecodeAccount(na ipld.NodeAssembler, header state.Account) error {
+func DecodeAccount(na ipld.NodeAssembler, header types.StateAccount) error {
 	ma, err := na.BeginMap(15)
 	if err != nil {
 		return err
@@ -56,14 +56,14 @@ func DecodeAccount(na ipld.NodeAssembler, header state.Account) error {
 	return ma.Finish()
 }
 
-var requiredUnpackFuncs = []func(ipld.MapAssembler, state.Account) error{
+var requiredUnpackFuncs = []func(ipld.MapAssembler, types.StateAccount) error{
 	unpackNonce,
 	unpackBalance,
 	unpackStorageRootCID,
 	unpackCodeCID,
 }
 
-func unpackNonce(ma ipld.MapAssembler, account state.Account) error {
+func unpackNonce(ma ipld.MapAssembler, account types.StateAccount) error {
 	if err := ma.AssembleKey().AssignString("Nonce"); err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func unpackNonce(ma ipld.MapAssembler, account state.Account) error {
 	return nil
 }
 
-func unpackBalance(ma ipld.MapAssembler, account state.Account) error {
+func unpackBalance(ma ipld.MapAssembler, account types.StateAccount) error {
 	if account.Balance == nil {
 		return fmt.Errorf("account balance cannot be null")
 	}
@@ -88,7 +88,7 @@ func unpackBalance(ma ipld.MapAssembler, account state.Account) error {
 	return nil
 }
 
-func unpackStorageRootCID(ma ipld.MapAssembler, account state.Account) error {
+func unpackStorageRootCID(ma ipld.MapAssembler, account types.StateAccount) error {
 	srMh, err := multihash.Encode(account.Root.Bytes(), MultiHashType)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func unpackStorageRootCID(ma ipld.MapAssembler, account state.Account) error {
 	return ma.AssembleValue().AssignLink(srLinkCID)
 }
 
-func unpackCodeCID(ma ipld.MapAssembler, account state.Account) error {
+func unpackCodeCID(ma ipld.MapAssembler, account types.StateAccount) error {
 	cMh, err := multihash.Encode(account.CodeHash, MultiHashType)
 	if err != nil {
 		return err

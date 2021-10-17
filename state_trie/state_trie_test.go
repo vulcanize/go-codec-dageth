@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	mockAccount = state.Account{
+	mockAccount = types.StateAccount{
 		Nonce:    2,
 		Balance:  big.NewInt(1337),
 		CodeHash: crypto.Keccak256([]byte{}),

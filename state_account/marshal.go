@@ -7,7 +7,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ipld/go-ipld-prime"
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
@@ -36,7 +36,7 @@ func Encode(node ipld.Node, w io.Writer) error {
 // This means less copying of bytes, and if the destination has enough capacity,
 // fewer allocations.
 func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
-	account := new(state.Account)
+	account := new(types.StateAccount)
 	if err := EncodeAccount(account, inNode); err != nil {
 		return enc, err
 	}
@@ -48,7 +48,7 @@ func AppendEncode(enc []byte, inNode ipld.Node) ([]byte, error) {
 }
 
 // EncodeAccount packs the node into the provided go-ethereum Account
-func EncodeAccount(header *state.Account, inNode ipld.Node) error {
+func EncodeAccount(header *types.StateAccount, inNode ipld.Node) error {
 	// Wrap in a typed node for some basic schema form checking
 	builder := dageth.Type.Account.NewBuilder()
 	if err := builder.AssignNode(inNode); err != nil {
@@ -63,14 +63,14 @@ func EncodeAccount(header *state.Account, inNode ipld.Node) error {
 	return nil
 }
 
-var requiredPackFuncs = []func(*state.Account, ipld.Node) error{
+var requiredPackFuncs = []func(*types.StateAccount, ipld.Node) error{
 	packNonce,
 	packBalance,
 	packStorageRootCID,
 	packCodeCID,
 }
 
-func packNonce(account *state.Account, node ipld.Node) error {
+func packNonce(account *types.StateAccount, node ipld.Node) error {
 	n, err := node.LookupByString("Nonce")
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func packNonce(account *state.Account, node ipld.Node) error {
 	return nil
 }
 
-func packBalance(account *state.Account, node ipld.Node) error {
+func packBalance(account *types.StateAccount, node ipld.Node) error {
 	b, err := node.LookupByString("Balance")
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func packBalance(account *state.Account, node ipld.Node) error {
 	return nil
 }
 
-func packStorageRootCID(account *state.Account, node ipld.Node) error {
+func packStorageRootCID(account *types.StateAccount, node ipld.Node) error {
 	srCID, err := node.LookupByString("StorageRootCID")
 	if err != nil {
 		return err
@@ -118,7 +118,7 @@ func packStorageRootCID(account *state.Account, node ipld.Node) error {
 	return nil
 }
 
-func packCodeCID(account *state.Account, node ipld.Node) error {
+func packCodeCID(account *types.StateAccount, node ipld.Node) error {
 	cCID, err := node.LookupByString("CodeCID")
 	if err != nil {
 		return err

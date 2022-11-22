@@ -167,7 +167,7 @@ func unpackBranchNode(ma ipld.MapAssembler, nodeFields []interface{}, codec uint
 					return err
 				}
 			default:
-				return fmt.Errorf("branch node child of unexpected length %d", len(childLink))
+				return fmt.Errorf("branch node child (%d) of unexpected length %d", i, len(childLink))
 			}
 			continue
 		}

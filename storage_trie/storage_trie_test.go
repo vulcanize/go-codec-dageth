@@ -410,11 +410,11 @@ func verifyBranchNodeWithLeafIncludedDirectlyContents(t *testing.T) {
 
 	child6Node, err := branch.LookupByString("Child6")
 	if err != nil {
-		t.Fatalf("storage trie branch node missing Child5: %v", err)
+		t.Fatalf("storage trie branch node missing Child6: %v", err)
 	}
 	trieNodeNode, err := child6Node.LookupByString("TrieNode")
 	if err != nil {
-		t.Fatalf("storage trie extension node Child should be of kind TrieNode: %v", err)
+		t.Fatalf("storage trie internalized leaf node Child should be of kind TrieNode: %v", err)
 	}
 	leaf, err := trieNodeNode.LookupByString(trie.LEAF_NODE.String())
 	if err != nil {
@@ -533,6 +533,15 @@ func testStorageTrieEncode(t *testing.T) {
 	encodedBranchBytes := branchWriter.Bytes()
 	if !bytes.Equal(encodedBranchBytes, mockBranchNodeRLP) {
 		t.Errorf("storage trie branch node encoding (%x) does not match the expected RLP encoding (%x)", encodedBranchBytes, mockBranchNodeRLP)
+	}
+
+	branch2Writer := new(bytes.Buffer)
+	if err := storage_trie.Encode(branchNodeWithLeafIncludedDirectly, branch2Writer); err != nil {
+		t.Fatalf("unable to encode storage trie branch node into writer: %v", err)
+	}
+	encodedBranch2Bytes := branch2Writer.Bytes()
+	if !bytes.Equal(encodedBranch2Bytes, mockBranchNodeWithLeafIncludedDirectlyRLP) {
+		t.Errorf("storage trie branch node encoding (%x) does not match the expected RLP encoding (%x)", encodedBranch2Bytes, mockBranchNodeWithLeafIncludedDirectlyRLP)
 	}
 
 	extensionWriter := new(bytes.Buffer)

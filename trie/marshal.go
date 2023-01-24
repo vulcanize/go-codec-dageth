@@ -143,11 +143,7 @@ func packBranchNode(node ipld.Node) ([]interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			childLeafNodeRLP, err := rlp.EncodeToBytes(childLeafNodeFields)
-			if err != nil {
-				return nil, err
-			}
-			nodeFields[i] = childLeafNodeRLP
+			nodeFields[i] = childLeafNodeFields
 			continue
 		}
 		return nil, fmt.Errorf("branch node child needs to be of kind bytes, link, or null: %v", err)

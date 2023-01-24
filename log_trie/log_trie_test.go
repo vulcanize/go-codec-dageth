@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/vulcanize/go-codec-dageth/log"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -29,14 +31,27 @@ var (
 			0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x02,
 			0x03, 0x02, 0x01, 0x03, 0x02, 0x01, 0x03, 0x02, 0x01, 0x03, 0x02, 0x01, 0x03, 0x02, 0x01, 0x03},
 	}
+	emptyLog = &types.Log{
+		Address: common.BytesToAddress([]byte{0x11}),
+		Topics:  []common.Hash{},
+		Data:    []byte{},
+	}
 	mockLogVal, _              = rlp.EncodeToBytes(mockLog)
-	mockLeafParitalPath        = common.Hex2Bytes("3114658a74d9cc9f7acf2c5cd696c3494d7c344d78bfec3add0d91ec4e8d1c45")
-	mockDecodedLeafPartialPath = shared.CompactToHex(mockLeafParitalPath)
+	emptyLogVal, _             = rlp.EncodeToBytes(emptyLog)
+	mockLeafPartialPath        = common.Hex2Bytes("3114658a74d9cc9f7acf2c5cd696c3494d7c344d78bfec3add0d91ec4e8d1c45")
+	mockDecodedLeafPartialPath = shared.CompactToHex(mockLeafPartialPath)
 	mockLeafNode               = []interface{}{
-		mockLeafParitalPath,
+		mockLeafPartialPath,
 		mockLogVal,
 	}
 	mockLeafNodeRLP, _ = rlp.EncodeToBytes(mockLeafNode)
+
+	shortPartialPath        = common.Hex2Bytes("311")
+	decodedShortPartialPath = shared.CompactToHex(shortPartialPath)
+	internalizedLeafNode    = []interface{}{
+		shortPartialPath,
+		emptyLogVal,
+	}
 
 	mockExtensionPartialPath        = common.Hex2Bytes("1114658a74d9cc9f7acf2c5cd696c3494d7c344d78bfec3add0d91ec4e8d1c45")
 	mockDecodedExtensionPartialPath = shared.CompactToHex(mockExtensionPartialPath)
@@ -59,7 +74,7 @@ var (
 		mockChild5,
 		[]byte{},
 		[]byte{},
-		[]byte{},
+		internalizedLeafNode,
 		[]byte{},
 		[]byte{},
 		[]byte{},
@@ -173,7 +188,7 @@ func verifyBranchNodeContents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("log trie branch node missing enum key: %v", err)
 	}
-	nullChildren := []int{1, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 15}
+	nullChildren := []int{1, 3, 4, 6, 7, 9, 10, 11, 12, 13, 15}
 	for _, i := range nullChildren {
 		key := fmt.Sprintf("Child%s", strings.ToUpper(strconv.FormatInt(int64(i), 16)))
 		childNode, err := branch.LookupByString(key)
@@ -235,6 +250,49 @@ func verifyBranchNodeContents(t *testing.T) {
 	if !bytes.Equal(decodedChild5Mh.Digest, mockChild5) {
 		t.Errorf("log trie branch node child5 hash (%x) does not match expected hash (%d)", decodedChild5Mh.Digest, mockChild0)
 	}
+	//*
+
+	child8Node, err := branch.LookupByString("Child8")
+	if err != nil {
+		t.Fatalf("storage trie branch node missing Child8: %v", err)
+	}
+	trieNodeNode, err := child8Node.LookupByString("TrieNode")
+	if err != nil {
+		t.Fatalf("log trie internalzied leaf node Child should be of kind TrieNode: %v", err)
+	}
+	leaf, err := trieNodeNode.LookupByString(trie.LEAF_NODE.String())
+	if err != nil {
+		t.Fatalf("unable to resolve TrieNode union to a leaf: %v", err)
+	}
+
+	leafPathNode, err := leaf.LookupByString("PartialPath")
+	if err != nil {
+		t.Fatalf("storage trie leaf node missing PartialPath: %v", err)
+	}
+	leafPathBytes, err := leafPathNode.AsBytes()
+	if err != nil {
+		t.Fatalf("storage trie leaf node PartialPath should be of type Bytes: %v", err)
+	}
+	if !bytes.Equal(leafPathBytes, decodedShortPartialPath) {
+		t.Errorf("log trie leaf node partial path (%x) does not match expected partial path (%x)", leafPathBytes, decodedShortPartialPath)
+	}
+
+	leafValEnumNode, err := leaf.LookupByString("Value")
+	if err != nil {
+		t.Fatalf("log trie leaf node missing Value: %v", err)
+	}
+	leafValNode, err := leafValEnumNode.LookupByString(trie.LOG_VALUE.String())
+	if err != nil {
+		t.Fatalf("unable to resolve Value union to a log: %v", err)
+	}
+	buf := new(bytes.Buffer)
+	if err := log.Encode(leafValNode, buf); err != nil {
+		t.Fatalf("unable to resolve Value union to a log: %v", err)
+	}
+	if !bytes.Equal(buf.Bytes(), emptyLogVal) {
+		t.Errorf("log trie leaf node value (%x) does not match expected value (%x)", buf, emptyLogVal)
+	}
+	//*
 
 	childENode, err := branch.LookupByString("ChildE")
 	if err != nil {

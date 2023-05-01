@@ -223,7 +223,7 @@ func newlocalTrie() *localTrie {
 	lt := &localTrie{}
 	lt.DB = rawdb.NewMemoryDatabase()
 	lt.trieDB = trie.NewDatabase(lt.DB)
-	lt.trie, err = trie.New(common.Hash{}, lt.trieDB)
+	lt.trie, err = trie.New(trie.TrieID(common.Hash{}), lt.trieDB)
 	if err != nil {
 		panic(err)
 	}
@@ -237,7 +237,7 @@ func (lt *localTrie) add(idx int, rawdata []byte) error {
 	if err != nil {
 		panic(err)
 	}
-	return lt.trie.TryUpdate(key, rawdata)
+	return lt.trie.Update(key, rawdata)
 }
 
 // rootHash returns the computed trie root.

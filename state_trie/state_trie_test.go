@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	mockAccount = types.StateAccount{
+	mockAccount = &types.StateAccount{
 		Nonce:    2,
 		Balance:  big.NewInt(1337),
 		CodeHash: crypto.Keccak256([]byte{}),
